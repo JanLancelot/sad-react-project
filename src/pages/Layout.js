@@ -22,8 +22,8 @@ import { ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 const navigation = [
     { name: 'Dashboard', href: '/', icon: HomeIcon, current: window.location.pathname === '/'},
     { name: 'Students', href: '/students', icon: UsersIcon, current: window.location.pathname === '/students' },
-    { name: 'Calendar', href: '/calendar', icon: CalendarIcon, current: false },
-    { name: 'Reports', href: '/reports', icon: ChartPieIcon, current: false },
+    { name: 'Calendar', href: '/calendar', icon: CalendarIcon, current: window.location.pathname === '/calendar' },
+    { name: 'Reports', href: '/reports', icon: ChartPieIcon, current: window.location.pathname === '/reports' },
 ]
   const teams = [
     { id: 1, name: 'Heroicons', href: '#', initial: 'H', current: false },

@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import Students from './pages/Students';
 import Calendar from './pages/Calendar';
 import Layout from './pages/Layout';
+import NewEvent from './pages/NewEvent';
 
 import logo from './logo.svg';
 import './App.css';
@@ -15,6 +16,7 @@ function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/students" element={<Students />} />
         <Route path="/calendar" element={<Calendar />} />
+        <Route path="/new-event" element={<NewEvent />} />
       </Routes>
     </BrowserRouter>
   );
