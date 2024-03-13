@@ -1,14 +1,14 @@
-import Layout from "./Layout"
+import Layout from "./Layout";
 
 const secondaryNavigation = [
-  { name: 'Computer Studies', href: '/computer-studies', current: true },
-  { name: 'Education', href: '/education', current: false },
-  { name: 'Accountancy', href: '/accountancy', current: false },
-  { name: 'Business Administration', href: '/business-administration', current: false },
-  { name: 'Arts and Sciences', href: '/arts-and-sciences', current: false },
-  { name: 'Maritime', href: '/maritime', current: false },
-  { name: 'Health Sciences', href: '/health-sciences', current: false },
-  { name: 'Hospitality Management and Tourism', href: '/hospitality', current: false },
+    { name: 'Computer Studies', href: '/computer-studies', current: false },
+    { name: 'Education', href: '/education', current: false },
+    { name: 'Accountancy', href: '/accountancy', current: true },
+    { name: 'Business Administration', href: '/business-administration', current: false },
+    { name: 'Arts and Sciences', href: '/arts-and-sciences', current: false },
+    { name: 'Maritime', href: '/maritime', current: false },
+    { name: 'Health Sciences', href: '/health-sciences', current: false },
+    { name: 'Hospitality Management and Tourism', href: '/hospitality', current: false },
 ]
 const stats = [
   { name: 'Total number of students', value: '600' },
@@ -39,7 +39,7 @@ function classNames(...classes) {
 }
 
 
-export default function Students() {
+export default function Accounting() {
   return (
     <Layout>
           <main>

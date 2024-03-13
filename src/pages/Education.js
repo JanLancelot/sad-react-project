@@ -1,8 +1,8 @@
-import Layout from "./Layout"
+import Layout from "./Layout";
 
 const secondaryNavigation = [
-  { name: 'Computer Studies', href: '/computer-studies', current: true },
-  { name: 'Education', href: '/education', current: false },
+  { name: 'Computer Studies', href: '/computer-studies', current: false },
+  { name: 'Education', href: '/education', current: true },
   { name: 'Accountancy', href: '/accountancy', current: false },
   { name: 'Business Administration', href: '/business-administration', current: false },
   { name: 'Arts and Sciences', href: '/arts-and-sciences', current: false },
@@ -39,7 +39,7 @@ function classNames(...classes) {
 }
 
 
-export default function Students() {
+export default function Education() {
   return (
     <Layout>
           <main>
