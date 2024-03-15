@@ -19,7 +19,7 @@ import {
   ChevronUpDownIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import React, { useEffect } from "react";
 import { db } from "../firebaseConfig";
 
@@ -61,21 +61,6 @@ const deployments = [
   },
   // More deployments...
 ];
-const activityItems = [
-  {
-    user: {
-      name: "Jan Lancelot P. Mailig",
-      imageUrl:
-        "https://scontent.fmnl33-2.fna.fbcdn.net/v/t39.30808-6/256642337_111854787976909_5883138854520283023_n.jpg?_nc_cat=103&cb=99be929b-b574a898&ccb=1-7&_nc_sid=9c7eae&_nc_eui2=AeFE1v3djmBZvmrKjOnJG5iy12hMaUykuo7XaExpTKS6jlfFx3haAEQdA6CU62LdI9bat4c3n7H6JVcFZI57j-mj&_nc_ohc=LsNbglx625cAX-AyJIf&_nc_zt=23&_nc_ht=scontent.fmnl33-2.fna&oh=00_AfAu3l31Kf1M-B2OuXQhY8kQ3gsQPUh6XItGRaeCbcDGYA&oe=65E9BC75",
-    },
-    projectName: "event",
-    commit: "",
-    branch: "CS Department",
-    date: "1h",
-    dateTime: "2023-01-23T11:00",
-  },
-  // More items...
-];
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -83,6 +68,22 @@ function classNames(...classes) {
 
 export default function Dashboard() {
   const [retrievedMeetings, setRetrievedMeetings] = useState([]);
+  const [activityItems, setActivityItems] = useState([]);
+
+
+  const fetchActivityFeed = async () => {
+    const activityFeedRef = collection(db, "activityFeed");
+    const q = query(activityFeedRef, orderBy("timestamp", "desc")); // Order by newest
+    // Limit the number of entries fetched (soon)
+
+    const data = await getDocs(q);
+    const activityItems = data.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    }));
+    console.log(activityItems);
+    setActivityItems(activityItems); 
+  };
 
   useEffect(() => {
     const meetingsCollectionRef = collection(db, "meetings");
@@ -114,6 +115,7 @@ export default function Dashboard() {
       meetings = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
     };
 
+    fetchActivityFeed();
     fetchMeetings().then(() => {
       setRetrievedMeetings(meetings);
     });
@@ -320,29 +322,31 @@ export default function Dashboard() {
         </header>
         <ul role="list" className="divide-y divide-gray-300">
           {activityItems.map((item) => (
-            <li key={item.commit} className="px-4 py-4 sm:px-6 lg:px-8">
+            <li key={item.id} className="px-4 py-4 sm:px-6 lg:px-8">
               <div className="flex items-center gap-x-3">
                 <img
-                  src={item.user.imageUrl}
+                  src={item.userImageUrl || "/default-profile.png"} // Default if no image
                   alt=""
                   className="h-6 w-6 flex-none rounded-full bg-gray-800"
                 />
                 <h3 className="flex-auto truncate text-sm font-semibold leading-6 text-gray-800">
-                  {item.user.name}
+                  {item.username}
                 </h3>
                 <time
-                  dateTime={item.dateTime}
+                  dateTime={new Date(item.timestamp).toISOString()} // Format from timestamp
                   className="flex-none text-xs text-gray-600"
                 >
-                  {item.date}
+                  {new Date(item.timestamp).toLocaleDateString()}
                 </time>
               </div>
               <p className="mt-3 truncate text-sm text-gray-500">
-                Created new{" "}
-                <span className="text-gray-400">{item.projectName}</span> (
-                <span className="font-mono text-gray-400">{item.commit}</span>
-                {""}
-                <span className="text-gray-400">{item.branch}</span>)
+                {item.eventType === "event_created" && ( // Check event type
+                  <>
+                    Created a new event:{" "}
+                    <span className="font-medium">{item.eventName}</span>
+                  </>
+                )}
+                {/* Add logic for other event types as needed */}
               </p>
             </li>
           ))}

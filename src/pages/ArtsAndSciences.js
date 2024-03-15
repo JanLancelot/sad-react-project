@@ -7,9 +7,9 @@ import { getFirestore } from "firebase/firestore";
 const secondaryNavigation = [
     { name: 'Computer Studies', href: '/computer-studies', current: false },
     { name: 'Education', href: '/education', current: false },
-    { name: 'Accountancy', href: '/accountancy', current: true },
+    { name: 'Accountancy', href: '/accountancy', current: false },
     { name: 'Business Administration', href: '/business-administration', current: false },
-    { name: 'Arts and Sciences', href: '/arts-and-sciences', current: false },
+    { name: 'Arts and Sciences', href: '/arts-and-sciences', current: true },
     { name: 'Maritime', href: '/maritime', current: false },
     { name: 'Health Sciences', href: '/health-sciences', current: false },
     { name: 'Hospitality Management and Tourism', href: '/hospitality', current: false },
@@ -20,7 +20,7 @@ function classNames(...classes) {
 }
 
 
-export default function Accounting() {
+export default function ArtsAndSciences() {
   const [students, setStudents] = useState([]);
   const [meetingCount, setMeetingCount] = useState(0); // Initialize state for meeting count
   const db = getFirestore();
@@ -84,7 +84,7 @@ export default function Accounting() {
                       <div className="h-2 w-2 rounded-full bg-current" />
                     </div>
                     <h1 className="flex gap-x-3 text-base leading-7">
-                      <span className="font-semibold text-gray-900">Accounting</span>
+                      <span className="font-semibold text-gray-900">Arts and Sciences</span>
                       <span className="text-gray-600">/</span>
                       <span className="font-semibold text-gray-900">CSS</span>
                     </h1>
@@ -150,6 +150,7 @@ export default function Accounting() {
                   </tr>
                 </thead>
                 <StudentTableBody students={students} meetingCount={meetingCount} />
+
               </table>
             </div>
           </main>

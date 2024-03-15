@@ -6,12 +6,12 @@ import { getFirestore } from "firebase/firestore";
 
 const secondaryNavigation = [
   { name: "Computer Studies", href: "/computer-studies", current: false },
-  { name: "Education", href: "/education", current: true },
+  { name: "Education", href: "/education", current: false },
   { name: "Accountancy", href: "/accountancy", current: false },
   {
     name: "Business Administration",
     href: "/business-administration",
-    current: false,
+    current: true,
   },
   { name: "Arts and Sciences", href: "/arts-and-sciences", current: false },
   { name: "Maritime", href: "/maritime", current: false },
@@ -27,7 +27,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Education() {
+export default function Business() {
   const [students, setStudents] = useState([]);
   const [meetingCount, setMeetingCount] = useState(0); // Initialize state for meeting count
   const db = getFirestore();
@@ -95,7 +95,9 @@ export default function Education() {
                   <div className="h-2 w-2 rounded-full bg-current" />
                 </div>
                 <h1 className="flex gap-x-3 text-base leading-7">
-                  <span className="font-semibold text-gray-900">Education</span>
+                  <span className="font-semibold text-gray-900">
+                    Business Administration
+                  </span>
                   <span className="text-gray-600">/</span>
                   <span className="font-semibold text-gray-900">CSS</span>
                 </h1>

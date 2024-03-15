@@ -63,6 +63,17 @@ export default function NewEvent({}) {
 
       // Add to Firestore
       const docRef = await addDoc(collection(db, "meetings"), newMeeting);
+
+      // Add to Activity Feed
+      const newActivityEntry = {
+        eventType: "event_created",
+        eventId: docRef.id,
+        timestamp: Date.now(),
+        username: "Admin",
+        eventName: eventName,
+      };
+      await addDoc(collection(db, "activityFeed"), newActivityEntry);
+
       console.log("Meeting added with ID:", docRef.id);
       window.location.href = "/calendar";
     } catch (error) {
@@ -173,9 +184,21 @@ export default function NewEvent({}) {
                               className="block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                             >
                               <option value="">Select a Location</option>
-                              <option value="Sapientia Building" key="Sapientia Building">Sapientia Building</option>
-                              <option value="Elementary Court" key="Elementary Court">Elementary Court</option>
-                              <option value="Main Court" key="Main Court">Main Court</option>
+                              <option
+                                value="Sapientia Building"
+                                key="Sapientia Building"
+                              >
+                                Sapientia Building
+                              </option>
+                              <option
+                                value="Elementary Court"
+                                key="Elementary Court"
+                              >
+                                Elementary Court
+                              </option>
+                              <option value="Main Court" key="Main Court">
+                                Main Court
+                              </option>
                               {/* Add more venue options as needed */}
                             </select>
                           ) : (
