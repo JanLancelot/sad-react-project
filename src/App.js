@@ -12,7 +12,7 @@ import ArtsAndSciences from "./pages/ArtsAndSciences";
 import Maritime from "./pages/Maritime";
 import HealthSciences from "./pages/HealthSciences";
 import Hospitality from "./pages/Hospitality";
-
+import DepartmentSettings from "./pages/DepartmentSettings";
 import logo from "./logo.svg";
 import "./App.css";
 
@@ -31,6 +31,7 @@ function App() {
         <Route path="/maritime" element={<Maritime />} />
         <Route path="/health-sciences" element={<HealthSciences />} />
         <Route path="/hospitality" element={<Hospitality />} />
+        <Route path="/department-settings" element={<DepartmentSettings />} />
       </Routes>
     </BrowserRouter>
   );

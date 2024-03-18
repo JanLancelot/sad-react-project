@@ -23,13 +23,13 @@ const secondaryNavigation = [
   },
 ];
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
+const classNames = (...classes) => classes.filter(Boolean).join(" ");
 
 export default function Students() {
   const [students, setStudents] = useState([]);
-  const [meetingCount, setMeetingCount] = useState(0); // Initialize state for meeting count
+  const [meetingCount, setMeetingCount] = useState(0);
+  const [pCompleteRequirements, setPCompleteRequirements] = useState(0);
+  const [attendanceRate, setAttendanceRate] = useState(0);
   const db = getFirestore();
 
   useEffect(() => {
@@ -37,32 +37,55 @@ export default function Students() {
       db,
       "students",
       "y1VlAwCIfawwp5tQRueD",
-      "computer-science"
+      "ccs-department"
     );
 
-    const getStudents = async () => {
-      const data = await getDocs(departmentRef);
-      setStudents(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+    const fetchData = async () => {
+      // Fetch students and meetings
+      const [studentSnapshot, meetingSnapshot] = await Promise.all([
+        getDocs(departmentRef),
+        getDocs(collection(db, "meetings")),
+      ]);
+
+      const fetchedStudents = studentSnapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+
+      // Calculate students with complete requirements
+      const completeRequirementsCount = fetchedStudents.filter(
+        (student) => student.requirements === "Complete" // Assuming "requirements" field indicates completion
+      ).length;
+      const pComplete = (completeRequirementsCount / fetchedStudents.length) * 100;
+
+      // Calculate attendance rate (assuming "eventsAttended" field tracks attendance)
+      const totalAttendance = fetchedStudents.reduce(
+        (sum, student) => sum + student.eventsAttended,
+        0
+      );
+      const attendanceRate = (totalAttendance / (fetchedStudents.length * meetingSnapshot.size)) * 100;
+
+      setStudents(fetchedStudents);
+      setMeetingCount(meetingSnapshot.size);
+      setPCompleteRequirements(pComplete);
+      setAttendanceRate(attendanceRate);
     };
 
-    // Additional code to fetch meetings
-    const meetingRef = collection(db, "meetings");
-    const getMeetings = async () => {
-      const meetingSnapshot = await getDocs(meetingRef);
-      setMeetingCount(meetingSnapshot.size); // Set meeting count to the number of documents
-    };
-
-    getStudents();
-    getMeetings(); // Call the new function to get meetings
-    console.log("Students: " + students);
+    fetchData();
   }, []);
 
+  const studentCount = students.length;
+
   let stats = [
-    { name: "Total number of students", value: "600" },
+    { name: "Total number of students", value: studentCount },
     { name: "Total number of events", value: meetingCount, unit: "" },
-    { name: "Percentage of students with complete requirements", value: "75%" },
-    { name: "Attendance rate", value: "75%" },
+    {
+      name: "Percentage of students with complete requirements",
+      value: `${pCompleteRequirements.toFixed(2)}%`,
+    },
+    { name: "Attendance rate", value: `${attendanceRate.toFixed(2)}%` },
   ];
+
 
   return (
     <Layout>
