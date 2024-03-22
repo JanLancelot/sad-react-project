@@ -17,10 +17,8 @@ import { collection, getDocs } from 'firebase/firestore';
 
 
 let meetings = [
-
     // More meetings...
 ]
-// New code to fetch the meetings from Firestore
 
 const days = [
   { date: '2021-12-27' },

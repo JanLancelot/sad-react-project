@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, Link, NavLink } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Students from "./pages/Students";
 import Calendar from "./pages/Calendar";
-import Layout from "./pages/Layout";
 import NewEvent from "./pages/NewEvent";
 import Education from "./pages/Education";
 import Accounting from "./pages/Accounting";
@@ -13,7 +12,7 @@ import Maritime from "./pages/Maritime";
 import HealthSciences from "./pages/HealthSciences";
 import Hospitality from "./pages/Hospitality";
 import DepartmentSettings from "./pages/DepartmentSettings";
-import logo from "./logo.svg";
+import AddStudentPage from "./pages/InsertMockData";
 import "./App.css";
 
 function App() {
@@ -32,6 +31,7 @@ function App() {
         <Route path="/health-sciences" element={<HealthSciences />} />
         <Route path="/hospitality" element={<Hospitality />} />
         <Route path="/department-settings" element={<DepartmentSettings />} />
+        <Route path="/insert" element={<AddStudentPage />} />
       </Routes>
     </BrowserRouter>
   );
