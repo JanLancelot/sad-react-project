@@ -36,31 +36,32 @@ export default function ArtsAndSciences() {
   const db = getFirestore();
 
   useEffect(() => {
-    const departmentRef = collection(
-      db,
-      "students",
-      "y1VlAwCIfawwp5tQRueD",
-      "arts-and-sciences-department"
-    );
-
     const fetchData = async () => {
-      // Fetch students and meetings
+      const departmentRef = collection(
+        db,
+        "students",
+        "y1VlAwCIfawwp5tQRueD",
+        "arts-and-sciences-department"
+      );
+      const meetingsRef = collection(db, "meetings");
+
+      // Fetch students and meetings in a single batch
       const [studentSnapshot, meetingSnapshot] = await Promise.all([
         getDocs(departmentRef),
-        getDocs(collection(db, "meetings")),
+        getDocs(meetingsRef),
       ]);
 
       const fetchedStudents = studentSnapshot.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
       }));
+      const fetchedMeetings = meetingSnapshot.docs;
 
       // Calculate students with complete requirements
       const completeRequirementsCount = fetchedStudents.filter(
         (student) => student.requirements === "Complete"
       ).length;
-      const pComplete =
-        (completeRequirementsCount / fetchedStudents.length) * 100;
+      const pComplete = (completeRequirementsCount / fetchedStudents.length) * 100;
 
       // Calculate attendance rate
       const totalAttendance = fetchedStudents.reduce(
@@ -68,11 +69,10 @@ export default function ArtsAndSciences() {
         0
       );
       const attendanceRate =
-        (totalAttendance / (fetchedStudents.length * meetingSnapshot.size)) *
-        100;
+        (totalAttendance / (fetchedStudents.length * fetchedMeetings.length)) * 100;
 
       setStudents(fetchedStudents);
-      setMeetingCount(meetingSnapshot.size);
+      setMeetingCount(fetchedMeetings.length);
       setPCompleteRequirements(pComplete);
       setAttendanceRate(attendanceRate);
     };
