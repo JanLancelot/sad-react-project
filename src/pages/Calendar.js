@@ -23,49 +23,19 @@ let meetings = [
   // More meetings...
 ];
 
-const days = [
-  { date: "2021-12-27" },
-  { date: "2021-12-28" },
-  { date: "2021-12-29" },
-  { date: "2021-12-30" },
-  { date: "2021-12-31" },
-  { date: "2022-01-01", isCurrentMonth: true },
-  { date: "2022-01-02", isCurrentMonth: true },
-  { date: "2022-01-03", isCurrentMonth: true },
-  { date: "2022-01-04", isCurrentMonth: true },
-  { date: "2022-01-05", isCurrentMonth: true },
-  { date: "2022-01-06", isCurrentMonth: true },
-  { date: "2022-01-07", isCurrentMonth: true },
-  { date: "2022-01-08", isCurrentMonth: true },
-  { date: "2022-01-09", isCurrentMonth: true },
-  { date: "2022-01-10", isCurrentMonth: true },
-  { date: "2022-01-11", isCurrentMonth: true },
-  { date: "2022-01-12", isCurrentMonth: true, isToday: true },
-  { date: "2022-01-13", isCurrentMonth: true },
-  { date: "2022-01-14", isCurrentMonth: true },
-  { date: "2022-01-15", isCurrentMonth: true },
-  { date: "2022-01-16", isCurrentMonth: true },
-  { date: "2022-01-17", isCurrentMonth: true },
-  { date: "2022-01-18", isCurrentMonth: true },
-  { date: "2022-01-19", isCurrentMonth: true },
-  { date: "2022-01-20", isCurrentMonth: true },
-  { date: "2022-01-21", isCurrentMonth: true },
-  { date: "2022-01-22", isCurrentMonth: true, isSelected: true },
-  { date: "2022-01-23", isCurrentMonth: true },
-  { date: "2022-01-24", isCurrentMonth: true },
-  { date: "2022-01-25", isCurrentMonth: true },
-  { date: "2022-01-26", isCurrentMonth: true },
-  { date: "2022-01-27", isCurrentMonth: true },
-  { date: "2022-01-28", isCurrentMonth: true },
-  { date: "2022-01-29", isCurrentMonth: true },
-  { date: "2022-01-30", isCurrentMonth: true },
-  { date: "2022-01-31", isCurrentMonth: true },
-  { date: "2022-02-01" },
-  { date: "2022-02-02" },
-  { date: "2022-02-03" },
-  { date: "2022-02-04" },
-  { date: "2022-02-05" },
-  { date: "2022-02-06" },
+const months = [
+  { name: "January", days: 31 },
+  { name: "February", days: 28 }, // Update for leap years
+  { name: "March", days: 31 },
+  { name: "April", days: 30 },
+  { name: "May", days: 31 },
+  { name: "June", days: 30 },
+  { name: "July", days: 31 },
+  { name: "August", days: 31 },
+  { name: "September", days: 30 },
+  { name: "October", days: 31 },
+  { name: "November", days: 30 },
+  { name: "December", days: 31 },
 ];
 
 function classNames(...classes) {
@@ -75,6 +45,8 @@ function classNames(...classes) {
 export default function Calendar() {
   const [retrievedMeetings, setRetrievedMeetings] = useState([]);
   const [open, setOpen] = useState(true);
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
     const meetingsCollectionRef = collection(db, "meetings");
@@ -92,6 +64,67 @@ export default function Calendar() {
     });
   }, []); // Empty dependency array triggers the effect only once
 
+  const getDaysInMonth = (month, year) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const generateDays = () => {
+    const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+    const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+    const lastDayOfMonth = new Date(
+      currentYear,
+      currentMonth,
+      daysInMonth
+    ).getDay();
+    const days = [];
+
+    // Add days from the previous month
+    for (let i = 0; i < firstDayOfMonth; i++) {
+      days.push({ date: null });
+    }
+
+    // Add days for the current month
+    for (let i = 1; i <= daysInMonth; i++) {
+      const date = new Date(currentYear, currentMonth, i);
+      const isToday =
+        date.getFullYear() === new Date().getFullYear() &&
+        date.getMonth() === new Date().getMonth() &&
+        date.getDate() === new Date().getDate();
+      const isSelected = false; // Add logic for selected date if needed
+      const eventsOnDay = meetings.filter(
+        (meeting) =>
+          new Date(meeting.datetime).getDate() === date.getDate() &&
+          new Date(meeting.datetime).getMonth() === currentMonth &&
+          new Date(meeting.datetime).getFullYear() === currentYear
+      );
+
+      days.push({ date, isToday, isSelected, eventsOnDay });
+    }
+
+    // Add days for the next month
+    for (let i = 1; i <= 6 - lastDayOfMonth; i++) {
+      days.push({ date: null });
+    }
+
+    return days;
+  };
+
+  const handlePrevMonth = () => {
+    setCurrentMonth((prevMonth) => (prevMonth === 0 ? 11 : prevMonth - 1));
+    setCurrentYear((prevYear) =>
+      currentMonth === 0 ? prevYear - 1 : prevYear
+    );
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonth((prevMonth) => (prevMonth === 11 ? 0 : prevMonth + 1));
+    setCurrentYear((prevYear) =>
+      currentMonth === 11 ? prevYear + 1 : prevYear
+    );
+  };
+
+  const days = generateDays();
+
   return (
     <Layout>
       <div>
@@ -104,14 +137,18 @@ export default function Calendar() {
               <button
                 type="button"
                 className="-m-1.5 flex flex-none items-center justify-center p-1.5 text-gray-400 hover:text-gray-500"
+                onClick={handlePrevMonth}
               >
                 <span className="sr-only">Previous month</span>
                 <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
               </button>
-              <div className="flex-auto text-sm font-semibold">January</div>
+              <div className="flex-auto text-sm font-semibold">
+                {months[currentMonth].name} {currentYear}
+              </div>
               <button
                 type="button"
                 className="-m-1.5 flex flex-none items-center justify-center p-1.5 text-gray-400 hover:text-gray-500"
+                onClick={handleNextMonth}
               >
                 <span className="sr-only">Next month</span>
                 <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
@@ -129,19 +166,19 @@ export default function Calendar() {
             <div className="isolate mt-2 grid grid-cols-7 gap-px rounded-lg bg-gray-200 text-sm shadow ring-1 ring-gray-200">
               {days.map((day, dayIdx) => (
                 <button
-                  key={day.date}
+                  key={dayIdx}
                   type="button"
                   className={classNames(
                     "py-1.5 hover:bg-gray-100 focus:z-10",
-                    day.isCurrentMonth ? "bg-white" : "bg-gray-50",
+                    day.date ? "bg-white" : "bg-gray-50",
                     (day.isSelected || day.isToday) && "font-semibold",
                     day.isSelected && "text-white",
                     !day.isSelected &&
-                      day.isCurrentMonth &&
+                      day.date &&
                       !day.isToday &&
                       "text-gray-900",
                     !day.isSelected &&
-                      !day.isCurrentMonth &&
+                      !day.date &&
                       !day.isToday &&
                       "text-gray-400",
                     day.isToday && !day.isSelected && "text-indigo-600",
@@ -152,14 +189,14 @@ export default function Calendar() {
                   )}
                 >
                   <time
-                    dateTime={day.date}
+                    dateTime={day.date ? day.date.toISOString() : null}
                     className={classNames(
                       "mx-auto flex h-7 w-7 items-center justify-center rounded-full",
                       day.isSelected && day.isToday && "bg-indigo-600",
                       day.isSelected && !day.isToday && "bg-gray-900"
                     )}
                   >
-                    {day.date.split("-").pop().replace(/^0/, "")}
+                    {day.date ? day.date.getDate() : ""}
                   </time>
                 </button>
               ))}
