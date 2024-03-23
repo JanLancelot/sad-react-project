@@ -359,6 +359,74 @@ export default function EventDetailsPage() {
                     </div>
                   </div>
 
+                  <div className="sm:col-span-6">
+                      <div>
+                        <label
+                          htmlFor="location"
+                          className="block text-sm font-medium leading-6 text-gray-900"
+                        >
+                          Department
+                        </label>
+                        <div className="relative mt-2 rounded-md shadow-sm">
+                          <select
+                            id="location"
+                            name="location"
+                            value={department}
+                            onChange={(e) => setDepartment(e.target.value)}
+                            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          >
+                            <option value="">Select department</option>
+                            <option value="CS department" key="CS department">
+                              Computer Science department
+                            </option>
+                            <option
+                              value="Education Department"
+                              key="Education Department"
+                            >
+                              Education Department
+                            </option>
+                            <option
+                              value="Accountancy Department"
+                              key="Accountancy Department"
+                            >
+                              Accountancy Department
+                            </option>
+                            <option
+                              value="Business Administration Department"
+                              key="Business Administration Department"
+                            >
+                              Business Administration Department
+                            </option>
+                            <option
+                              value="Arts and Sciences Department"
+                              key="Arts and Sciences Department"
+                            >
+                              Arts and Sciences Department
+                            </option>
+                            <option
+                              value="Maritime Department"
+                              key="Maritime Department"
+                            >
+                              Maritime Department
+                            </option>
+                            <option
+                              value="Health Sciences Department"
+                              key="Health Sciences Department"
+                            >
+                              Health Sciences Department
+                            </option>
+                            <option
+                              value="Hospitality Management and Tourism Department"
+                              key="Hospitality Management and Tourism Department"
+                            >
+                              Hospitality Management and Tourism Department
+                            </option>
+                            {/* Add more venue options as needed */}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
                   {/* <div className="col-span-full">
                     <label
                       htmlFor="photo"

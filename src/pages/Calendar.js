@@ -71,18 +71,14 @@ export default function Calendar() {
   const generateDays = () => {
     const daysInMonth = getDaysInMonth(currentMonth, currentYear);
     const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
-    const lastDayOfMonth = new Date(
-      currentYear,
-      currentMonth,
-      daysInMonth
-    ).getDay();
+    const lastDayOfMonth = new Date(currentYear, currentMonth, daysInMonth).getDay();
     const days = [];
-
+  
     // Add days from the previous month
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push({ date: null });
     }
-
+  
     // Add days for the current month
     for (let i = 1; i <= daysInMonth; i++) {
       const date = new Date(currentYear, currentMonth, i);
@@ -91,21 +87,21 @@ export default function Calendar() {
         date.getMonth() === new Date().getMonth() &&
         date.getDate() === new Date().getDate();
       const isSelected = false; // Add logic for selected date if needed
-      const eventsOnDay = meetings.filter(
+      let eventsOnDay = meetings.filter(
         (meeting) =>
           new Date(meeting.datetime).getDate() === date.getDate() &&
           new Date(meeting.datetime).getMonth() === currentMonth &&
           new Date(meeting.datetime).getFullYear() === currentYear
-      );
-
+      ) || []; // Initialize eventsOnDay as an empty array if no events
+  
       days.push({ date, isToday, isSelected, eventsOnDay });
     }
-
+  
     // Add days for the next month
     for (let i = 1; i <= 6 - lastDayOfMonth; i++) {
       days.push({ date: null });
     }
-
+  
     return days;
   };
 
@@ -185,7 +181,7 @@ export default function Calendar() {
                     dayIdx === 0 && "rounded-tl-lg",
                     dayIdx === 6 && "rounded-tr-lg",
                     dayIdx === days.length - 7 && "rounded-bl-lg",
-                    dayIdx === days.length - 1 && "rounded-br-lg"
+                    dayIdx === days.length - 1 && "rounded-br-lg",
                   )}
                 >
                   <time
