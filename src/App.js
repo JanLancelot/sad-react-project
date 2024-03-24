@@ -14,6 +14,7 @@ import Hospitality from "./pages/Hospitality";
 import DepartmentSettings from "./pages/DepartmentSettings";
 import AddStudentPage from "./pages/InsertMockData";
 import EventDetailsPage from "./pages/EventDetailsPage";
+import Reports from "./pages/Reports"
 import "./App.css";
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
         <Route path="/department-settings" element={<DepartmentSettings />} />
         <Route path="/insert" element={<AddStudentPage />} />
         <Route path="/events/:eventId" element={<EventDetailsPage />} />
+        <Route path="/reports" element={<Reports />} />
       </Routes>
     </BrowserRouter>
   );
