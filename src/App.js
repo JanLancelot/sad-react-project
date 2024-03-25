@@ -15,13 +15,14 @@ import DepartmentSettings from "./pages/DepartmentSettings";
 import AddStudentPage from "./pages/InsertMockData";
 import EventDetailsPage from "./pages/EventDetailsPage";
 import Reports from "./pages/Reports"
+import Signin from "./pages/Signin";
 import "./App.css";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/computer-studies" element={<Students />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/new-event" element={<NewEvent />} />
@@ -36,6 +37,7 @@ function App() {
         <Route path="/insert" element={<AddStudentPage />} />
         <Route path="/events/:eventId" element={<EventDetailsPage />} />
         <Route path="/reports" element={<Reports />} />
+        <Route path="/" element={<Signin />} />
       </Routes>
     </BrowserRouter>
   );

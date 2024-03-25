@@ -20,7 +20,6 @@ import { db } from "../firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 
 let meetings = [
-  // More meetings...
 ];
 
 const months = [

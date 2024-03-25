@@ -10,9 +10,7 @@ import {
  Legend,
 } from "recharts";
 
-// **Assume these components are defined elsewhere in your project**
 import Layout from "./Layout";
-import DepartmentHeader from "./components/DepartmentHeader";
 
 const secondaryNavigation = [
  { name: "Computer Studies", href: "/computer-studies", current: true },
@@ -45,14 +43,12 @@ const EventChart = () => {
        fetchedMeetings.push({ id: doc.id, ...doc.data() });
      });
 
-     // Filter for past week's meetings
      const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); 
      const filteredMeetings = fetchedMeetings.filter(event => {
-       // Assuming your date string format like "YYYY-MM-DD"
        const [year, month, day] = event.date.split('-').map(Number); 
        const meetingDate = new Date(year, month - 1, day); // Month is zero-indexed
 
-       return meetingDate >= oneWeekAgo; 
+       return meetingDate <= oneWeekAgo; 
      });
 
      setEvents(filteredMeetings); 

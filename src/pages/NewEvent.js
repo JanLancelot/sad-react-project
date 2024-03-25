@@ -18,7 +18,6 @@ export default function NewEvent({}) {
   const [organizer, setOrganizer] = useState("");
   const [category, setCategory] = useState("");
   const [department, setDepartment] = useState("");
-  // const [targetAudience, setTargetAudience] = useState("");
   const [rsvpLink, setRsvpLink] = useState("");
   const [cost, setCost] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
@@ -50,7 +49,6 @@ export default function NewEvent({}) {
       department: department,
       rsvpLink: rsvpLink,
       cost: cost,
-      // ... other fields
     };
 
     try {
@@ -131,7 +129,6 @@ export default function NewEvent({}) {
 
                     <div className="sm:col-span-2">
                       {" "}
-                      {/* Adjusted for better layout */}
                       <label
                         htmlFor="eventtime"
                         className="block text-sm font-medium leading-6 text-gray-900"
@@ -199,7 +196,6 @@ export default function NewEvent({}) {
                               <option value="Main Court" key="Main Court">
                                 Main Court
                               </option>
-                              {/* Add more venue options as needed */}
                             </select>
                           ) : (
                             <input
@@ -301,7 +297,7 @@ export default function NewEvent({}) {
                       </label>
                       <div className="mt-2">
                         <input
-                          type="url" // Enforce URL format
+                          type="url"
                           name="rsvpLink"
                           id="rsvpLink"
                           value={rsvpLink}
@@ -320,7 +316,7 @@ export default function NewEvent({}) {
                       </label>
                       <div className="mt-2">
                         <input
-                          type="text" // Or 'number' for strict numeric input
+                          type="text"
                           name="cost"
                           id="cost"
                           value={cost}
@@ -391,7 +387,6 @@ export default function NewEvent({}) {
                             >
                               Hospitality Management and Tourism Department
                             </option>
-                            {/* Add more venue options as needed */}
                           </select>
                         </div>
                       </div>

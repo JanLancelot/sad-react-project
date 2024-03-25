@@ -24,7 +24,7 @@ import {
 const navigation = [
   {
     name: "Dashboard",
-    href: "/",
+    href: "/dashboard",
     icon: HomeIcon,
     current: window.location.pathname === "/",
   },
@@ -74,14 +74,11 @@ export default function Layout({ children }) {
     && window.location.pathname !== "/health-sciences"
     && window.location.pathname !== "/hospitality"
     && window.location.pathname !== "/reports"
+    && window.location.pathname !== "/dashboard" 
     ;
 
   return (
     <>
-      {/*
-          <html class="h-full bg-white">
-          <body class="h-full">
-        */}
       <div>
         <Transition.Root show={sidebarOpen} as={Fragment}>
           <Dialog

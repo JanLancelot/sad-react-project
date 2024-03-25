@@ -36,7 +36,6 @@ const DepartmentHeader = ({ departmentName, course, dean, stats, secondaryNaviga
             </h1>
           </div>
           <p className="mt-2 text-xs leading-6 text-gray-600">
-            {/* Replace with your department description */}
             Lorem ipsum dolor sit amet, consectetur adipiscing elit...
           </p>
         </div>

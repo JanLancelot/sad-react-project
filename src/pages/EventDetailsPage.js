@@ -24,11 +24,10 @@ export default function EventDetailsPage() {
   const [organizer, setOrganizer] = useState("");
   const [category, setCategory] = useState("");
   const [department, setDepartment] = useState("");
-  // const [targetAudience, setTargetAudience] = useState("");
   const [rsvpLink, setRsvpLink] = useState("");
   const [cost, setCost] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
-  const fileInputRef = useRef(null); // Create a ref for file input
+  const fileInputRef = useRef(null); // ref for file input
 
   const [open, setOpen] = useState(true);
   const cancelButtonRef = useRef(null);
@@ -41,7 +40,6 @@ export default function EventDetailsPage() {
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         setEventData(docSnap.data());
-        // Update state variables with initial data
         setEventName(docSnap.data().name);
         setEventDate(docSnap.data().date);
         setEventTime(docSnap.data().time);
@@ -91,7 +89,6 @@ export default function EventDetailsPage() {
     // Handle success or error
     console.log("Event updated successfully!");
     navigate("/calendar");
-    // You might want to redirect or show a success message here
   };
 
   const handleDelete = async () => {
@@ -106,7 +103,7 @@ export default function EventDetailsPage() {
   };
 
   const handleCancel = () => {
-    navigate("/calendar"); // Replace "/calendar" with the actual path to your calendar page
+    navigate("/calendar");
   };
 
   if (!eventData) return <div>Loading...</div>;
@@ -228,7 +225,6 @@ export default function EventDetailsPage() {
                             <option value="Main Court" key="Main Court">
                               Main Court
                             </option>
-                            {/* Add more venue options as needed */}
                           </select>
                         ) : (
                           <input
@@ -330,7 +326,7 @@ export default function EventDetailsPage() {
                     </label>
                     <div className="mt-2">
                       <input
-                        type="url" // Enforce URL format
+                        type="url"
                         name="rsvpLink"
                         id="rsvpLink"
                         value={rsvpLink}
@@ -349,7 +345,7 @@ export default function EventDetailsPage() {
                     </label>
                     <div className="mt-2">
                       <input
-                        type="text" // Or 'number' for strict numeric input
+                        type="text"
                         name="cost"
                         id="cost"
                         value={cost}
@@ -421,7 +417,6 @@ export default function EventDetailsPage() {
                             >
                               Hospitality Management and Tourism Department
                             </option>
-                            {/* Add more venue options as needed */}
                           </select>
                         </div>
                       </div>
@@ -471,11 +466,10 @@ export default function EventDetailsPage() {
                   onClick={handleDelete}
                 >
                   <TrashIcon className="h-5 w-5" aria-hidden="true" />{" "}
-                  {/* Icon on the left */}
                   Delete
                 </button>
                 <button
-                  type="submit" // Make sure it's a submit button to trigger handleSubmit
+                  type="submit"
                   className="inline-flex items-center gap-x-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
                   <PencilSquareIcon className="h-5 w-5" aria-hidden="true" />

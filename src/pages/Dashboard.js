@@ -46,7 +46,6 @@ const environments = {
   Production: "text-indigo-400 bg-indigo-400/10 ring-indigo-400/30",
 };
 let meetings = [
-  // More meetings...
 ];
 const deployments = [
   {
@@ -59,7 +58,6 @@ const deployments = [
     description: "Deploys from GitHub",
     environment: "Preview",
   },
-  // More deployments...
 ];
 
 function classNames(...classes) {
@@ -104,7 +102,6 @@ export default function Dashboard() {
     const fetchMeetings = async () => {
       const { startOfWeek, endOfWeek } = calculateNextWeekRange();
 
-      // Query Firestore for meetings within the range
       const q = query(
         meetingsCollectionRef,
         where("date", ">=", startOfWeek.toISOString()),
@@ -346,7 +343,7 @@ export default function Dashboard() {
                     <span className="font-medium">{item.eventName}</span>
                   </>
                 )}
-                {/* Add logic for other event types as needed */}
+                {/* Add logic for other event types*/}
               </p>
             </li>
           ))}

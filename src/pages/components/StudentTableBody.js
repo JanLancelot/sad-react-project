@@ -14,16 +14,15 @@ export default function StudentTableBody({ students, meetingCount }) {
     <tbody>
       {students.map(
         (
-          student // Assuming 'student' has the data
+          student
         ) => (
           <tr key={student.id}>
             {" "}
             <td className="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
               <div className="flex items-center gap-x-4">
-                {/* Assuming you don't have student images */}
                 <div className="h-8 w-8 rounded-full bg-gray-800"></div>
                 <div className="truncate text-sm font-medium leading-6 text-gray-900">
-                  {student.fullName} {/* Use your actual field name */}
+                  {student.fullName}
                 </div>
               </div>
             </td>
