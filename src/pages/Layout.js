@@ -1,7 +1,8 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-
+import { signOut, getAuth } from "firebase/auth";
 import { Fragment, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   Bars3Icon,
@@ -52,10 +53,6 @@ const teams = [
   { id: 2, name: "Tailwind Labs", href: "#", initial: "T", current: false },
   { id: 3, name: "Workcation", href: "#", initial: "W", current: false },
 ];
-const userNavigation = [
-  { name: "Your profile", href: "#" },
-  { name: "Sign out", href: "#" },
-];
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -64,18 +61,33 @@ function classNames(...classes) {
 export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isNotStudentsPage =
-    window.location.pathname !== "/computer-studies" 
-    && window.location.pathname !== "/" 
-    && window.location.pathname !== "/education"
-    && window.location.pathname !== "/accountancy"
-    && window.location.pathname !== "/business-administration"
-    && window.location.pathname !== "/arts-and-sciences"
-    && window.location.pathname !== "/maritime"
-    && window.location.pathname !== "/health-sciences"
-    && window.location.pathname !== "/hospitality"
-    && window.location.pathname !== "/reports"
-    && window.location.pathname !== "/dashboard" 
-    ;
+    window.location.pathname !== "/computer-studies" &&
+    window.location.pathname !== "/" &&
+    window.location.pathname !== "/education" &&
+    window.location.pathname !== "/accountancy" &&
+    window.location.pathname !== "/business-administration" &&
+    window.location.pathname !== "/arts-and-sciences" &&
+    window.location.pathname !== "/maritime" &&
+    window.location.pathname !== "/health-sciences" &&
+    window.location.pathname !== "/hospitality" &&
+    window.location.pathname !== "/reports" &&
+    window.location.pathname !== "/dashboard";
+
+  const auth = getAuth();
+  const navigate = useNavigate();
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      navigate("/"); // Navigate to the '/' route after signing out
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const userNavigation = [
+    { name: "Your profile", href: "#" },
+    { name: "Sign out", href: "#", onClick: handleSignOut },
+  ];
 
   return (
     <>
@@ -376,6 +388,7 @@ export default function Layout({ children }) {
                                 active ? "bg-gray-50" : "",
                                 "block px-3 py-1 text-sm leading-6 text-gray-900"
                               )}
+                              onClick={item.onClick}
                             >
                               {item.name}
                             </a>

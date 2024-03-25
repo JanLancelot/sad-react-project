@@ -1,29 +1,43 @@
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
-import { useNavigate } from 'react-router-dom';
-
+import { useNavigate } from "react-router-dom";
 
 export default function Signin() {
+  // const [email, setEmail] = useState("");
+  // const [password, setPassword] = useState("");
+  // const navigate = useNavigate();
+
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+
+  //   const auth = getAuth();
+  //   try {
+  //     const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  //     const user = userCredential.user;
+  //     console.log('User signed in:', user);
+  //     navigate("/dashboard");
+  //   } catch (error) {
+  //     const errorCode = error.code;
+  //     const errorMessage = error.message;
+  //     console.error('Error:', errorCode, errorMessage);
+  //   }
+  // };
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const auth = getAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (event) => { 
+  async function handleSubmit(event){
     event.preventDefault();
-
-    const auth = getAuth(); 
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      console.log('User signed in:', user);
-      navigate("/dashboard");
-    } catch (error) {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.error('Error:', errorCode, errorMessage);
-    }
-  };
-
+    signInWithEmailAndPassword(auth, email, password)
+    .then((user) => {
+      console.log(user);
+      navigate('dashboard');
+    })
+    .catch((error) => {
+      console.log(error);
+    })
+  }
   return (
     <>
       <div className="h-screen flex items-center justify-center">
@@ -41,7 +55,12 @@ export default function Signin() {
 
           <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
             <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
-              <form className="space-y-6" action="#" method="POST" onSubmit={handleSubmit}>
+              <form
+                className="space-y-6"
+                action="#"
+                method="POST"
+                onSubmit={handleSubmit}
+              >
                 <div>
                   <label
                     htmlFor="email"

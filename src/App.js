@@ -1,5 +1,4 @@
-import { BrowserRouter, Routes, Route, Link, NavLink } from "react-router-dom";
-
+import { createBrowserRouter, RouterProvider, Link, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Students from "./pages/Students";
 import Calendar from "./pages/Calendar";
@@ -16,30 +15,83 @@ import AddStudentPage from "./pages/InsertMockData";
 import EventDetailsPage from "./pages/EventDetailsPage";
 import Reports from "./pages/Reports"
 import Signin from "./pages/Signin";
+import { ProtectedRoute } from "./pages/components/ProtectedRoute";
+import { Protected } from "./pages/components/Protected";
+import { AuthContext } from "./pages/components/AuthContext";
 import "./App.css";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Signin />,
+  },
+  {
+    path: "/dashboard",
+    element: <Protected><Dashboard /></Protected>,
+  },
+  {
+    path: "/computer-studies",
+    element: <Protected><Students /></Protected>,
+  },
+  {
+    path: "/calendar",
+    element: <Protected><Calendar /></Protected>,
+  },
+  {
+    path: "/new-event",
+    element: <Protected><NewEvent /></Protected>,
+  },
+  {
+    path: "/education",
+    element: <Protected><Education /></Protected>,
+  },
+  {
+    path: "/accountancy",
+    element: <Protected><Accounting /></Protected>,
+  },
+  {
+    path: "/business-administration",
+    element: <Protected><Business /></Protected>,
+  },
+  {
+    path: "/arts-and-sciences",
+    element: <Protected><ArtsAndSciences /></Protected>,
+  },
+  {
+    path: "/maritime",
+    element: <Protected><Maritime /></Protected>,
+  },
+  {
+    path: "/health-sciences",
+    element: <Protected><HealthSciences /></Protected>,
+  },
+  {
+    path: "/hospitality",
+    element: <Protected><Hospitality /></Protected>,
+  },
+  {
+    path: "/department-settings",
+    element: <Protected><DepartmentSettings /></Protected>,
+  },
+  {
+    path: "/insert",
+    element: <Protected><AddStudentPage /></Protected>,
+  },
+  {
+    path: "/events/:eventId",
+    element: <Protected><EventDetailsPage /></Protected>,
+  },
+  {
+    path: "/reports",
+    element: <Protected><Reports /></Protected>,
+  },
+]);
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/computer-studies" element={<Students />} />
-        <Route path="/calendar" element={<Calendar />} />
-        <Route path="/new-event" element={<NewEvent />} />
-        <Route path="/education" element={<Education />} />
-        <Route path="/accountancy" element={<Accounting />} />
-        <Route path="/business-administration" element={<Business />} />
-        <Route path="/arts-and-sciences" element={<ArtsAndSciences />} />
-        <Route path="/maritime" element={<Maritime />} />
-        <Route path="/health-sciences" element={<HealthSciences />} />
-        <Route path="/hospitality" element={<Hospitality />} />
-        <Route path="/department-settings" element={<DepartmentSettings />} />
-        <Route path="/insert" element={<AddStudentPage />} />
-        <Route path="/events/:eventId" element={<EventDetailsPage />} />
-        <Route path="/reports" element={<Reports />} />
-        <Route path="/" element={<Signin />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthContext>
+      <RouterProvider router={router} />
+    </AuthContext>
   );
 }
 

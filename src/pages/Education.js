@@ -43,7 +43,7 @@ export default function Education() {
         "y1VlAwCIfawwp5tQRueD",
         "education-department"
       );
-      const meetingsRef = collection(db, "meetings");
+      const meetingsRef = query(collection(db, "meetings"), where("department", "==", "Education Department"));
 
       // Fetch students and meetings in a single batch
       const [studentSnapshot, meetingSnapshot] = await Promise.all([

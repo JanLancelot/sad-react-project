@@ -43,7 +43,7 @@ export default function ArtsAndSciences() {
         "y1VlAwCIfawwp5tQRueD",
         "arts-and-sciences-department"
       );
-      const meetingsRef = collection(db, "meetings");
+      const meetingsRef = query(collection(db, "meetings"), where("department", "==", "Arts and Sciences Department"));
 
       // Fetch students and meetings in a single batch
       const [studentSnapshot, meetingSnapshot] = await Promise.all([

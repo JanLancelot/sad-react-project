@@ -43,7 +43,7 @@ export default function HealthSciences() {
         "y1VlAwCIfawwp5tQRueD",
         "health-sciences-department"
       );
-      const meetingsRef = collection(db, "meetings");
+      const meetingsRef = query(collection(db, "meetings"), where("department", "==", "Health Sciences Department"));
 
       // Fetch students and meetings in a single batch
       const [studentSnapshot, meetingSnapshot] = await Promise.all([

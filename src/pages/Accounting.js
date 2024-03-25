@@ -35,7 +35,7 @@ export default function Accounting() {
         "y1VlAwCIfawwp5tQRueD",
         "accounting-department"
       );
-      const meetingsRef = collection(db, "meetings");
+      const meetingsRef = query(collection(db, "meetings"), where("department", "==", "Accountancy Department"));
 
       // Fetch students and meetings in a single batch
       const [studentSnapshot, meetingSnapshot] = await Promise.all([

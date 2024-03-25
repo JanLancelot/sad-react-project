@@ -43,7 +43,7 @@ export default function Business() {
         "y1VlAwCIfawwp5tQRueD",
         "business-department"
       );
-      const meetingsRef = collection(db, "meetings");
+      const meetingsRef = query(collection(db, "meetings"), where("department", "==", "Business Administration Department"));
 
       // Fetch students and meetings in a single batch
       const [studentSnapshot, meetingSnapshot] = await Promise.all([

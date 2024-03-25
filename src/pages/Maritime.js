@@ -43,7 +43,7 @@ export default function Maritime() {
         "y1VlAwCIfawwp5tQRueD",
         "maritime-department"
       );
-      const meetingsRef = collection(db, "meetings");
+      const meetingsRef = query(collection(db, "meetings"), where("department", "==", "Maritime department"));
 
       // Fetch students and meetings in a single batch
       const [studentSnapshot, meetingSnapshot] = await Promise.all([

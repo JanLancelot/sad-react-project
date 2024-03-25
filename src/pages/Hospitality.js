@@ -43,7 +43,7 @@ export default function Hospitality() {
         "y1VlAwCIfawwp5tQRueD",
         "hospitality-department"
       );
-      const meetingsRef = collection(db, "meetings");
+      const meetingsRef = query(collection(db, "meetings"), where("department", "==", "Hospitality Management and Tourism Department"));
 
       // Fetch students and meetings in a single batch
       const [studentSnapshot, meetingSnapshot] = await Promise.all([
