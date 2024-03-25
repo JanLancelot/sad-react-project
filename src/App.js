@@ -27,7 +27,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/dashboard",
-    element: <Protected><Dashboard /></Protected>,
+    element: <ProtectedRoute><Dashboard /></ProtectedRoute>,
   },
   {
     path: "/computer-studies",

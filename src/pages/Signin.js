@@ -2,42 +2,31 @@ import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const signInUser = async (email, password, navigate) => {
+  const auth = getAuth();
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    console.log('User signed in:', user);
+    navigate("/dashboard");
+  } catch (error) {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    console.error('Error:', errorCode, errorMessage);
+  }
+};
+
+
 export default function Signin() {
-  // const [email, setEmail] = useState("");
-  // const [password, setPassword] = useState("");
-  // const navigate = useNavigate();
-
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-
-  //   const auth = getAuth();
-  //   try {
-  //     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-  //     const user = userCredential.user;
-  //     console.log('User signed in:', user);
-  //     navigate("/dashboard");
-  //   } catch (error) {
-  //     const errorCode = error.code;
-  //     const errorMessage = error.message;
-  //     console.error('Error:', errorCode, errorMessage);
-  //   }
-  // };
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const auth = getAuth();
   const navigate = useNavigate();
 
-  async function handleSubmit(event){
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    signInWithEmailAndPassword(auth, email, password)
-    .then((user) => {
-      console.log(user);
-      navigate('dashboard');
-    })
-    .catch((error) => {
-      console.log(error);
-    })
-  }
+    console.log('Submitting form');
+    await signInUser(email, password, navigate);
+  };
   return (
     <>
       <div className="h-screen flex items-center justify-center">

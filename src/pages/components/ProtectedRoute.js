@@ -16,7 +16,7 @@ export const ProtectedRoute = ({ children }) => {
       } else {
         setIsAuthenticated(false);
         setIsLoading(false);
-        navigate('/signin');
+        navigate('/');
       }
     });
 
