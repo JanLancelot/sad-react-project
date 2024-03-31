@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { db } from "../firebaseConfig";
 import { doc, getDoc, collection, getDocs } from "firebase/firestore";
@@ -14,27 +14,55 @@ function EventAttendees() {
     const fetchEventData = async () => {
       const docRef = doc(db, "meetings", eventId);
       const docSnap = await getDoc(docRef);
+
       if (docSnap.exists()) {
         setEventData(docSnap.data());
-        // Fetch attendee data
-        const attendeeIds = docSnap.data().attendees;
-        const usersCollectionRef = collection(db, "users");
-        const attendeeDocs = await Promise.all(
-          attendeeIds.map((id) => getDoc(doc(usersCollectionRef, id)))
-        );
-        const attendees = attendeeDocs.map((doc) => doc.data().fullName);
-        // Extract only fullName
-        setAttendeesData(attendees);
+
+        // Only fetch attendees if the attendees array exists and is not empty
+        if (docSnap.data().attendees && docSnap.data().attendees.length > 0) { 
+          const attendeeIds = docSnap.data().attendees;
+          const usersCollectionRef = collection(db, "users");
+          const attendeeDocs = await Promise.all(
+            attendeeIds.map((id) => getDoc(doc(usersCollectionRef, id)))
+          );
+          const attendees = attendeeDocs.map((doc) => doc.data().fullName);
+          setAttendeesData(attendees);
+       } else {
+         // If no attendees, clear the state
+         setAttendeesData([]); 
+       }
       } else {
         // Handle error: event not found
       }
     };
+
     fetchEventData();
   }, [eventId]);
 
   if (!eventData) {
     return <div>Loading...</div>;
   }
+
+  const onImageCownload = () => {
+    const svg = document.getElementById("QRCode");
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      const pngFile = canvas.toDataURL("image/png");
+      const downloadLink = document.createElement("a");
+      downloadLink.download = `${eventData.name}-qrcode`;
+      downloadLink.href = `${pngFile}`;
+      downloadLink.click();
+    };
+    img.src = `data:image/svg+xml;base64,${btoa(svgData)}`;
+  };
+
+
 
   return (
     <Layout>
@@ -62,11 +90,18 @@ function EventAttendees() {
         <div class="bg-gray-100 rounded-lg shadow-md p-6 border-2 border-blue-500">
           <QRCode
             size={256}
+            id="QRCode"
             style={{ height: "auto", maxWidth: "100%", width: "100%" }}
             value={eventId}
             viewBox={`0 0 256 256`}
           />
         </div>
+        <button
+            class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            onClick={onImageCownload}
+          >
+            Download QR Code
+          </button>
       </div>
     </Layout>
   );
