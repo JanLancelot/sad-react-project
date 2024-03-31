@@ -7,21 +7,16 @@ import {
   ChevronRightIcon,
   EllipsisHorizontalIcon,
   MapPinIcon,
+  PencilIcon, // Import PencilIcon for edit button
 } from "@heroicons/react/20/solid";
 import { Menu, Transition, Dialog } from "@headlessui/react";
 import React, { useEffect } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import {
-  LinkIcon,
-  PlusIcon,
-  QuestionMarkCircleIcon,
-} from "@heroicons/react/20/solid";
+import { LinkIcon, PlusIcon, QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
 import { db } from "../firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 
-let meetings = [
-];
-
+let meetings = [];
 const months = [
   { name: "January", days: 31 },
   { name: "February", days: 28 }, // Update for leap years
@@ -49,7 +44,6 @@ export default function Calendar() {
 
   useEffect(() => {
     const meetingsCollectionRef = collection(db, "meetings");
-
     const fetchMeetings = async () => {
       const data = await getDocs(meetingsCollectionRef);
       meetings = data.docs.map((doc) => ({
@@ -57,7 +51,6 @@ export default function Calendar() {
         id: doc.id,
       }));
     };
-
     fetchMeetings().then(() => {
       setRetrievedMeetings(meetings); // Trigger re-render
     });
@@ -72,12 +65,12 @@ export default function Calendar() {
     const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
     const lastDayOfMonth = new Date(currentYear, currentMonth, daysInMonth).getDay();
     const days = [];
-  
+
     // Add days from the previous month
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push({ date: null });
     }
-  
+
     // Add days for the current month
     for (let i = 1; i <= daysInMonth; i++) {
       const date = new Date(currentYear, currentMonth, i);
@@ -86,21 +79,22 @@ export default function Calendar() {
         date.getMonth() === new Date().getMonth() &&
         date.getDate() === new Date().getDate();
       const isSelected = false; // Add logic for selected date if needed
-      let eventsOnDay = meetings.filter(
-        (meeting) =>
-          new Date(meeting.datetime).getDate() === date.getDate() &&
-          new Date(meeting.datetime).getMonth() === currentMonth &&
-          new Date(meeting.datetime).getFullYear() === currentYear
-      ) || []; // Initialize eventsOnDay as an empty array if no events
-  
+      let eventsOnDay =
+        meetings.filter(
+          (meeting) =>
+            new Date(meeting.datetime).getDate() === date.getDate() &&
+            new Date(meeting.datetime).getMonth() === currentMonth &&
+            new Date(meeting.datetime).getFullYear() === currentYear
+        ) || []; // Initialize eventsOnDay as an empty array if no events
+
       days.push({ date, isToday, isSelected, eventsOnDay });
     }
-  
+
     // Add days for the next month
     for (let i = 1; i <= 6 - lastDayOfMonth; i++) {
       days.push({ date: null });
     }
-  
+
     return days;
   };
 
@@ -180,7 +174,7 @@ export default function Calendar() {
                     dayIdx === 0 && "rounded-tl-lg",
                     dayIdx === 6 && "rounded-tr-lg",
                     dayIdx === days.length - 7 && "rounded-bl-lg",
-                    dayIdx === days.length - 1 && "rounded-br-lg",
+                    dayIdx === days.length - 1 && "rounded-br-lg"
                   )}
                 >
                   <time
@@ -217,7 +211,7 @@ export default function Calendar() {
                   className="h-14 w-14 flex-none rounded-full"
                 />
                 <div className="flex-auto">
-                  <Link to={`/events/${meeting.id}`}>
+                  <Link to={`/events/${meeting.id}/attendees`}>
                     <h3 className="pr-10 font-semibold text-gray-900 xl:pr-0">
                       {meeting.name}
                     </h3>
@@ -248,7 +242,7 @@ export default function Calendar() {
                       <dd>{meeting.location}</dd>
                     </div>
                   </dl>
-                </div>
+                </div>             
                 <Menu
                   as="div"
                   className="absolute right-0 top-6 xl:relative xl:right-auto xl:top-auto xl:self-center"
@@ -262,7 +256,6 @@ export default function Calendar() {
                       />
                     </Menu.Button>
                   </div>
-
                   <Transition
                     as={Fragment}
                     enter="transition ease-out duration-100"
@@ -277,7 +270,7 @@ export default function Calendar() {
                         <Menu.Item>
                           {({ active }) => (
                             <a
-                              href="#"
+                              href={`/events/${meeting.id}/edit`}
                               className={classNames(
                                 active
                                   ? "bg-gray-100 text-gray-900"

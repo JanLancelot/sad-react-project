@@ -21,23 +21,19 @@ export default function NewEvent({}) {
   const [rsvpLink, setRsvpLink] = useState("");
   const [cost, setCost] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
-  const fileInputRef = useRef(null); // Create a ref for file input
-
+  const fileInputRef = useRef(null);
   const [open, setOpen] = useState(true);
   const cancelButtonRef = useRef(null);
+  const [locationType, setLocationType] = useState("in-campus");
 
-  // Image Change Handler
   const handleImageChange = (event) => {
     if (event.target.files && event.target.files[0]) {
       setSelectedImage(event.target.files[0]);
     }
   };
 
-  const [locationType, setLocationType] = useState("in-campus");
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     const newMeeting = {
       name: eventName,
       date: eventDate,
@@ -78,7 +74,7 @@ export default function NewEvent({}) {
       console.error("Error adding meeting:", error);
     }
   };
-
+  
   return (
     <>
       <Layout>

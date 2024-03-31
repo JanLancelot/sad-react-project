@@ -15,6 +15,7 @@ import AddStudentPage from "./pages/InsertMockData";
 import EventDetailsPage from "./pages/EventDetailsPage";
 import Reports from "./pages/Reports"
 import Signin from "./pages/Signin";
+import EventAttendees from "./pages/EventAttendees";
 import { ProtectedRoute } from "./pages/components/ProtectedRoute";
 import { Protected } from "./pages/components/Protected";
 import { AuthContext } from "./pages/components/AuthContext";
@@ -78,8 +79,12 @@ const router = createBrowserRouter([
     element: <Protected><AddStudentPage /></Protected>,
   },
   {
-    path: "/events/:eventId",
+    path: "/events/:eventId/edit",
     element: <Protected><EventDetailsPage /></Protected>,
+  },
+  {
+    path: "/events/:eventId/attendees",
+    element: <Protected><EventAttendees /></Protected>,
   },
   {
     path: "/reports",
