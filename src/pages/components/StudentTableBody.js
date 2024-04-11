@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
 const statuses = {
   Complete: "text-green-400 bg-green-400/10",
@@ -14,6 +15,7 @@ function classNames(...classes) {
 export default function StudentTableBody({ students, meetingCount, department }) {
   const [departmentSettings, setDepartmentSettings] = useState(null);
   const db = getFirestore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -28,10 +30,7 @@ export default function StudentTableBody({ students, meetingCount, department })
 
       // Fetch department settings
       const departmentSettingsRef = collection(db, "department-settings");
-      const departmentSettingsQuery = query(
-        departmentSettingsRef,
-        where("department", "==", department)
-      );
+      const departmentSettingsQuery = query(departmentSettingsRef, where("department", "==", department));
       const departmentSettingsSnapshot = await getDocs(departmentSettingsQuery);
       if (!departmentSettingsSnapshot.empty) {
         const departmentSettingsData = departmentSettingsSnapshot.docs.map((doc) => ({
@@ -43,9 +42,12 @@ export default function StudentTableBody({ students, meetingCount, department })
         setDepartmentSettings(null);
       }
     };
-
     fetchData();
   }, [db, department]);
+
+  const handleStudentClick = (student) => {
+    navigate(`/student/${student.id}`);
+  };
 
   return (
     <tbody>
@@ -54,7 +56,10 @@ export default function StudentTableBody({ students, meetingCount, department })
           <td className="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
             <div className="flex items-center gap-x-4">
               <div className="h-8 w-8 rounded-full bg-gray-800"></div>
-              <div className="truncate text-sm font-medium leading-6 text-gray-900">
+              <div
+                className="truncate text-sm font-medium leading-6 text-gray-900 cursor-pointer"
+                onClick={() => handleStudentClick(student)}
+              >
                 {student.fullName}
               </div>
             </div>

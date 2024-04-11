@@ -60,18 +60,20 @@ function classNames(...classes) {
 
 export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const isNotStudentsPage =
-    window.location.pathname !== "/computer-studies" &&
-    window.location.pathname !== "/" &&
-    window.location.pathname !== "/education" &&
-    window.location.pathname !== "/accountancy" &&
-    window.location.pathname !== "/business-administration" &&
-    window.location.pathname !== "/arts-and-sciences" &&
-    window.location.pathname !== "/maritime" &&
-    window.location.pathname !== "/health-sciences" &&
-    window.location.pathname !== "/hospitality" &&
-    window.location.pathname !== "/reports" &&
-    window.location.pathname !== "/dashboard";
+  const isNotStudentsPage = !(
+    window.location.pathname === "/computer-studies" ||
+    window.location.pathname === "/" ||
+    window.location.pathname === "/education" ||
+    window.location.pathname === "/accountancy" ||
+    window.location.pathname === "/business-administration" ||
+    window.location.pathname === "/arts-and-sciences" ||
+    window.location.pathname === "/maritime" ||
+    window.location.pathname === "/health-sciences" ||
+    window.location.pathname === "/hospitality" ||
+    window.location.pathname === "/reports" ||
+    window.location.pathname === "/dashboard" ||
+    window.location.pathname.startsWith("/student/")
+  );
 
   const auth = getAuth();
   const navigate = useNavigate();
