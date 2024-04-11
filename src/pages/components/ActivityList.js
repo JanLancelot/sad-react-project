@@ -1,7 +1,7 @@
 import React from "react";
 import StudentTableBody from "./StudentTableBody";
 
-export default function ActivityList({students, meetingCount}){
+export default function ActivityList({students, meetingCount, department}){
     return(
         <div className="border-t border-gray-200 pt-11">
           <h2 className="px-4 text-base font-semibold leading-7 text-gray-900 sm:px-6 lg:px-8">
@@ -49,7 +49,7 @@ export default function ActivityList({students, meetingCount}){
                 </th>
               </tr>
             </thead>
-            <StudentTableBody students={students} meetingCount={meetingCount} />
+            <StudentTableBody students={students} meetingCount={meetingCount} department={department}/>
           </table>
         </div>
     )

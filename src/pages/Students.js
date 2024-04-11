@@ -22,37 +22,69 @@ const deanName = "Ann Lim";
 export default function Students() {
   const [students, setStudents] = useState([]);
   const [meetingCount, setMeetingCount] = useState(0);
+  const [departmentSettings, setDepartmentSettings] = useState(null);
+
+  const department = "CS Department";
 
   const db = getFirestore();
 
   useEffect(() => {
     const fetchData = async () => {
-      const departmentRef = collection(db, "students", "y1VlAwCIfawwp5tQRueD", "ccs-department");
-      const meetingsRef = query(collection(db, "meetings"), where("department", "==", "CS department"));
-
-      const [studentSnapshot, meetingSnapshot] = await Promise.all([getDocs(departmentRef), getDocs(meetingsRef)]);
-
-      const fetchedStudents = studentSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-      const fetchedMeetings = meetingSnapshot.docs;
-
+      const usersRef = collection(db, "users");
+      const ccsDepartmentQuery = query(usersRef, where("department", "==", "ccs-department"));
+      const usersSnapshot = await getDocs(ccsDepartmentQuery);
+      const fetchedStudents = usersSnapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
       setStudents(fetchedStudents);
-      setMeetingCount(fetchedMeetings.length);
-    };
+  
+      const meetingsRef = query(collection(db, "meetings"), where("department", "==", "CS department"));
+      const meetingSnapshot = await getDocs(meetingsRef);
+      setMeetingCount(meetingSnapshot.docs.length);
 
+      // Fetch department settings
+      const departmentSettingsRef = collection(db, "department-settings");
+      const departmentSettingsQuery = query(
+        departmentSettingsRef,
+        where("department", "==", department)
+      );
+      const departmentSettingsSnapshot = await getDocs(departmentSettingsQuery);
+      if (!departmentSettingsSnapshot.empty) {
+        const departmentSettingsData = departmentSettingsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setDepartmentSettings(departmentSettingsData[0]);
+      } else {
+        setDepartmentSettings(null);
+      }
+    };
+  
     fetchData();
   }, []);
 
   const studentCount = students.length;
 
   const pCompleteRequirements = useMemo(() => {
-    const completeRequirementsCount = students.filter((student) => student.requirements === "Complete").length;
+    const completeRequirementsCount = students.filter(
+      (student) =>
+        student.eventsAttended?.length >=
+        (departmentSettings?.requiredEvents || 0)
+    ).length;
     return (completeRequirementsCount / studentCount) * 100;
-  }, [students]);
-
+  }, [students, departmentSettings]);
+  
   const attendanceRate = useMemo(() => {
-    const totalAttendance = students.reduce((sum, student) => sum + student.eventsAttended, 0);
+    const totalAttendance = students.reduce((sum, student) => sum + student.eventsAttended?.length || 0, 0);
     return (totalAttendance / (studentCount * meetingCount)) * 100;
   }, [students, meetingCount]);
+
+  // Alternative code
+  // const attendanceRate = useMemo(() => {
+  //   const totalAttendance = students.reduce((sum, student) => sum + student.eventsAttended?.length || 0, 0);
+  //   return (totalAttendance / ((departmentSettings?.requiredEvents || 0) * studentCount)) * 100;
+  // }, [students, departmentSettings, meetingCount]);
 
   const stats = useMemo(
     () => [
@@ -76,7 +108,7 @@ export default function Students() {
             dean={deanName}
           />
         </header>
-        <ActivityList students={students} meetingCount={meetingCount} />
+        <ActivityList students={students} meetingCount={meetingCount} department={department}/>
       </main>
     </Layout>
   );

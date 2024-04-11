@@ -1,9 +1,46 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { db } from "../firebaseConfig";
-import { doc, getDoc, collection, getDocs } from "firebase/firestore";
+import { doc, getDoc, collection } from "firebase/firestore";
 import Layout from "./Layout";
 import QRCode from "react-qr-code";
+import { PieChart, Pie, Tooltip, Legend, Cell } from 'recharts';
+
+function AttendanceChart({ attendeesData }) {
+  const data = Object.values(attendeesData.reduce((acc, { department, fullName }) => {
+    acc[department] = (acc[department] || 0) + 1;
+    return acc;
+  }, {})).map((count, index) => ({
+    name: Object.keys(attendeesData.reduce((acc, { department, fullName }) => {
+      acc[department] = (acc[department] || 0) + 1;
+      return acc;
+    }, {}))[index],
+    value: count
+  }));
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+
+  return (
+    <PieChart width={400} height={400}>
+      <Pie
+        data={data}
+        color="#000000"
+        dataKey="value"
+        nameKey="name"
+        cx="50%"
+        cy="50%"
+        outerRadius={120}
+        fill="#8884d8"
+      >
+        {data.map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+        ))}
+      </Pie>
+      <Tooltip />
+      <Legend />
+    </PieChart>
+  );
+}
 
 function EventAttendees() {
   const { eventId } = useParams();
@@ -14,28 +51,30 @@ function EventAttendees() {
     const fetchEventData = async () => {
       const docRef = doc(db, "meetings", eventId);
       const docSnap = await getDoc(docRef);
-
       if (docSnap.exists()) {
         setEventData(docSnap.data());
-
         // Only fetch attendees if the attendees array exists and is not empty
-        if (docSnap.data().attendees && docSnap.data().attendees.length > 0) { 
+        if (docSnap.data().attendees && docSnap.data().attendees.length > 0) {
           const attendeeIds = docSnap.data().attendees;
           const usersCollectionRef = collection(db, "users");
           const attendeeDocs = await Promise.all(
             attendeeIds.map((id) => getDoc(doc(usersCollectionRef, id)))
           );
-          const attendees = attendeeDocs.map((doc) => doc.data().fullName);
+          const attendees = await Promise.all(
+            attendeeDocs.map(async (doc) => ({
+              fullName: doc.data().fullName,
+              department: doc.data().department,
+            }))
+          );
           setAttendeesData(attendees);
-       } else {
-         // If no attendees, clear the state
-         setAttendeesData([]); 
-       }
+        } else {
+          // If no attendees, clear the state
+          setAttendeesData([]);
+        }
       } else {
         // Handle error: event not found
       }
     };
-
     fetchEventData();
   }, [eventId]);
 
@@ -62,23 +101,21 @@ function EventAttendees() {
     img.src = `data:image/svg+xml;base64,${btoa(svgData)}`;
   };
 
-
-
   return (
     <Layout>
-      <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-4">{eventData.name}</h1>
-        <h2 class="text-xl font-semibold text-gray-700 mb-6">Attendees</h2>
-
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">{eventData.name}</h1>
+        <h2 className="text-xl font-semibold text-gray-700 mb-6">Attendees</h2>
         {attendeesData.length > 0 ? (
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {attendeesData.map((fullName, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {attendeesData.map(({ fullName, department }, index) => (
               <div
                 key={index}
-                class="bg-gray-100 rounded-lg shadow-md p-4 flex items-center justify-between"
+                className="bg-gray-100 rounded-lg shadow-md p-4 flex items-center justify-between"
               >
-                <div class="text-lg font-medium text-gray-900">{fullName}</div>
-                {/* Optionally display additional attendee information here */}
+                <div className="text-lg font-medium text-gray-900">
+                  {fullName} - {department}
+                </div>
               </div>
             ))}
           </div>
@@ -86,8 +123,8 @@ function EventAttendees() {
           <p className="text-gray-600">No attendees yet.</p>
         )}
       </div>
-      <div class="container mx-auto px-4 py-8 flex flex-col items-center justify-center">
-        <div class="bg-gray-100 rounded-lg shadow-md p-6 border-2 border-blue-500">
+      <div className="container mx-auto px-4 py-8 flex flex-col items-center justify-center">
+        <div className="bg-gray-100 rounded-lg shadow-md p-6 border-2 border-blue-500">
           <QRCode
             size={256}
             id="QRCode"
@@ -97,11 +134,12 @@ function EventAttendees() {
           />
         </div>
         <button
-            class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            onClick={onImageCownload}
-          >
-            Download QR Code
-          </button>
+          className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          onClick={onImageCownload}
+        >
+          Download QR Code
+        </button>
+        <AttendanceChart attendeesData={attendeesData} />
       </div>
     </Layout>
   );
