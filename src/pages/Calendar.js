@@ -7,7 +7,6 @@ import {
   ChevronRightIcon,
   EllipsisHorizontalIcon,
   MapPinIcon,
-  PencilIcon, // Import PencilIcon for edit button
 } from "@heroicons/react/20/solid";
 import { Menu, Transition, Dialog } from "@headlessui/react";
 import React, { useEffect } from "react";

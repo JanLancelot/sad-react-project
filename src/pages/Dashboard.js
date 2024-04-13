@@ -31,11 +31,6 @@ const navigation = [
   { name: "Usage", href: "#", icon: ChartBarSquareIcon, current: false },
   { name: "Settings", href: "#", icon: Cog6ToothIcon, current: false },
 ];
-// const teams = [
-//   { id: 1, name: 'Planetaria', href: '#', initial: 'P', current: false },
-//   { id: 2, name: 'Protocol', href: '#', initial: 'P', current: false },
-//   { id: 3, name: 'Tailwind Labs', href: '#', initial: 'T', current: false },
-// ]
 const statuses = {
   offline: "text-gray-500 bg-gray-100/10",
   online: "text-green-400 bg-green-400/10",
@@ -168,19 +163,6 @@ export default function Dashboard() {
                       )}
                     >
                       Date updated
-                    </a>
-                  )}
-                </Menu.Item>
-                <Menu.Item>
-                  {({ active }) => (
-                    <a
-                      href="#"
-                      className={classNames(
-                        active ? "bg-gray-50" : "",
-                        "block px-3 py-1 text-sm leading-6 text-gray-900"
-                      )}
-                    >
-                      Environment
                     </a>
                   )}
                 </Menu.Item>
@@ -330,20 +312,19 @@ export default function Dashboard() {
                   {item.username}
                 </h3>
                 <time
-                  dateTime={new Date(item.timestamp).toISOString()} // Format from timestamp
+                  dateTime={new Date(item.timestamp).toISOString()}
                   className="flex-none text-xs text-gray-600"
                 >
                   {new Date(item.timestamp).toLocaleDateString()}
                 </time>
               </div>
               <p className="mt-3 truncate text-sm text-gray-500">
-                {item.eventType === "event_created" && ( // Check event type
+                {item.eventType === "event_created" && (
                   <>
                     Created a new event:{" "}
                     <span className="font-medium">{item.eventName}</span>
                   </>
                 )}
-                {/* Add logic for other event types*/}
               </p>
             </li>
           ))}
