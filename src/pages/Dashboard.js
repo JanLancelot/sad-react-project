@@ -40,8 +40,7 @@ const environments = {
   Preview: "text-gray-400 bg-gray-400/10 ring-gray-400/20",
   Production: "text-indigo-400 bg-indigo-400/10 ring-indigo-400/30",
 };
-let meetings = [
-];
+let meetings = [];
 const deployments = [
   {
     id: 1,
@@ -63,11 +62,9 @@ export default function Dashboard() {
   const [retrievedMeetings, setRetrievedMeetings] = useState([]);
   const [activityItems, setActivityItems] = useState([]);
 
-
   const fetchActivityFeed = async () => {
     const activityFeedRef = collection(db, "activityFeed");
-    const q = query(activityFeedRef, orderBy("timestamp", "desc")); // Order by newest
-    // Limit the number of entries fetched (soon)
+    const q = query(activityFeedRef, orderBy("timestamp", "desc"));
 
     const data = await getDocs(q);
     const activityItems = data.docs.map((doc) => ({
@@ -75,7 +72,7 @@ export default function Dashboard() {
       id: doc.id,
     }));
     console.log(activityItems);
-    setActivityItems(activityItems); 
+    setActivityItems(activityItems);
   };
 
   useEffect(() => {
@@ -84,12 +81,12 @@ export default function Dashboard() {
     const calculateNextWeekRange = () => {
       const now = new Date();
       const startOfWeek = new Date(now);
-      startOfWeek.setDate(startOfWeek.getDate() + 1); // Start on the next day
-      startOfWeek.setHours(0, 0, 0, 0); // Set time to midnight
+      startOfWeek.setDate(startOfWeek.getDate() + 1);
+      startOfWeek.setHours(0, 0, 0, 0);
 
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(endOfWeek.getDate() + 7);
-      endOfWeek.setHours(23, 59, 59, 999); // End of the last day
+      endOfWeek.setHours(23, 59, 59, 999);
 
       return { startOfWeek, endOfWeek };
     };
@@ -322,6 +319,18 @@ export default function Dashboard() {
                 {item.eventType === "event_created" && (
                   <>
                     Created a new event:{" "}
+                    <span className="font-medium">{item.eventName}</span>
+                  </>
+                )}
+                {item.eventType === "event_updated" && (
+                  <>
+                    Updated the event:{" "}
+                    <span className="font-medium">{item.eventName}</span>
+                  </>
+                )}
+                {item.eventType === "event_deleted" && (
+                  <>
+                    Deleted the event:{" "}
                     <span className="font-medium">{item.eventName}</span>
                   </>
                 )}

@@ -11,7 +11,11 @@ import {
 import { Menu, Transition, Dialog } from "@headlessui/react";
 import React, { useEffect } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { LinkIcon, PlusIcon, QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
+import {
+  LinkIcon,
+  PlusIcon,
+  QuestionMarkCircleIcon,
+} from "@heroicons/react/20/solid";
 import { db } from "../firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 
@@ -51,9 +55,9 @@ export default function Calendar() {
       }));
     };
     fetchMeetings().then(() => {
-      setRetrievedMeetings(meetings); // Trigger re-render
+      setRetrievedMeetings(meetings);
     });
-  }, []); // Empty dependency array triggers the effect only once
+  }, []);
 
   const getDaysInMonth = (month, year) => {
     return new Date(year, month + 1, 0).getDate();
@@ -62,34 +66,35 @@ export default function Calendar() {
   const generateDays = () => {
     const daysInMonth = getDaysInMonth(currentMonth, currentYear);
     const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
-    const lastDayOfMonth = new Date(currentYear, currentMonth, daysInMonth).getDay();
+    const lastDayOfMonth = new Date(
+      currentYear,
+      currentMonth,
+      daysInMonth
+    ).getDay();
     const days = [];
 
-    // Add days from the previous month
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push({ date: null });
     }
 
-    // Add days for the current month
     for (let i = 1; i <= daysInMonth; i++) {
       const date = new Date(currentYear, currentMonth, i);
       const isToday =
         date.getFullYear() === new Date().getFullYear() &&
         date.getMonth() === new Date().getMonth() &&
         date.getDate() === new Date().getDate();
-      const isSelected = false; // Add logic for selected date if needed
+      const isSelected = false;
       let eventsOnDay =
         meetings.filter(
           (meeting) =>
             new Date(meeting.datetime).getDate() === date.getDate() &&
             new Date(meeting.datetime).getMonth() === currentMonth &&
             new Date(meeting.datetime).getFullYear() === currentYear
-        ) || []; // Initialize eventsOnDay as an empty array if no events
+        ) || [];
 
       days.push({ date, isToday, isSelected, eventsOnDay });
     }
 
-    // Add days for the next month
     for (let i = 1; i <= 6 - lastDayOfMonth; i++) {
       days.push({ date: null });
     }
@@ -113,6 +118,24 @@ export default function Calendar() {
 
   const days = generateDays();
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortByDate, setSortByDate] = useState("asc"); // "asc" or "desc"
+
+  // Filter events based on search and sort
+  const filteredEvents = retrievedMeetings
+    .filter((meeting) =>
+      meeting.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      const dateA = new Date(a.datetime);
+      const dateB = new Date(b.datetime);
+      if (sortByDate === "asc") {
+        return dateA - dateB;
+      } else {
+        return dateB - dateA;
+      }
+    });
+
   return (
     <Layout>
       <div>
@@ -120,6 +143,8 @@ export default function Calendar() {
           List of events
         </h2>
         <div className="lg:grid lg:grid-cols-12 lg:gap-x-16">
+          {/* Search Input */}
+
           <div className="mt-10 text-center lg:col-start-8 lg:col-end-13 lg:row-start-1 lg:mt-9 xl:col-start-9">
             <div className="flex items-center text-gray-900">
               <button
@@ -199,7 +224,16 @@ export default function Calendar() {
             </Link>
           </div>
           <ol className="mt-4 divide-y divide-gray-100 text-sm leading-6 lg:col-span-7 xl:col-span-8">
-            {meetings.map((meeting) => (
+          <div className="mb-4 lg:col-span-7 xl:col-span-8">
+  <input
+    type="text"
+    placeholder="Search events..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className="border rounded-md px-3 py-2 w-full"
+  />
+</div>
+            {filteredEvents.map((meeting) => (
               <li
                 key={meeting.id}
                 className="relative flex space-x-6 py-6 xl:static"
@@ -241,7 +275,7 @@ export default function Calendar() {
                       <dd>{meeting.location}</dd>
                     </div>
                   </dl>
-                </div>             
+                </div>
                 <Menu
                   as="div"
                   className="absolute right-0 top-6 xl:relative xl:right-auto xl:top-auto xl:self-center"

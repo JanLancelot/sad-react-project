@@ -1,6 +1,6 @@
 import Layout from "./Layout";
 import DepartmentHeader from "./components/DepartmentHeader";
-import ActivityList from "./components/ActivityList";
+import StudentTableBody from "./components/StudentTableBody";
 import { useEffect, useState, useMemo } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
@@ -31,7 +31,7 @@ export default function Hospitality() {
   useEffect(() => {
     const fetchData = async () => {
       const usersRef = collection(db, "users");
-      const hospitalityDepartmentQuery = query(usersRef, where("department", "==", "hospitality-department"));
+      const hospitalityDepartmentQuery = query(usersRef, where("department", "==", "Hospitality Management and Tourism Department"));
       const usersSnapshot = await getDocs(hospitalityDepartmentQuery);
       const fetchedStudents = usersSnapshot.docs.map((doc) => ({
         ...doc.data(),
@@ -102,7 +102,7 @@ export default function Hospitality() {
             dean={deanName}
           />
         </header>
-        <ActivityList students={students} meetingCount={meetingCount} department={department} />
+        <StudentTableBody students={students} meetingCount={meetingCount} department={department} />
       </main>
     </Layout>
   );

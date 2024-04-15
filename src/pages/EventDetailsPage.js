@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import { db } from "../firebaseConfig";
+import { db, auth } from "../firebaseConfig";
 import {
   collection,
   doc,
   getDoc,
   updateDoc,
   deleteDoc,
+  addDoc,
+  serverTimestamp
 } from "firebase/firestore";
 
 import Layout from "./Layout";
@@ -62,7 +64,7 @@ export default function EventDetailsPage() {
             : "off-campus"
         );
       } else {
-        console.log("Event not found"); // Handle not found
+        console.log("Event not found");
       }
     };
     fetchEvent();
@@ -70,8 +72,6 @@ export default function EventDetailsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Update event data in Firestore
     const docRef = doc(db, "meetings", eventId);
     await updateDoc(docRef, {
       name: eventName,
@@ -85,19 +85,48 @@ export default function EventDetailsPage() {
       rsvpLink: rsvpLink,
       cost: cost,
     });
-
-    // Handle success or error
+  
+    // Fetch the current user's name from the "users" collection
+    const currentUser = auth.currentUser;
+    const userDocRef = doc(db, "users", currentUser.uid);
+    const userDocSnapshot = await getDoc(userDocRef);
+    const username = userDocSnapshot.data().fullName;
+  
+    // Add a new activity record
+    await addDoc(collection(db, "activityFeed"), {
+      eventId: eventId,
+      eventName: eventName,
+      username: username,
+      userImageUrl: "https://www.ledr.com/colours/black.jpg", // Replace with the actual user's profile image
+      eventType: "event_updated",
+      timestamp: Date.now(),
+    });
+  
     console.log("Event updated successfully!");
     navigate("/calendar");
   };
-
+  
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this event?")) {
-      // Delete event data from Firestore
       const docRef = doc(db, "meetings", eventId);
       await deleteDoc(docRef);
-
-      // Redirect to calendar page after successful deletion
+  
+      // Fetch the current user's name from the "users" collection
+      const currentUser = auth.currentUser;
+      const userDocRef = doc(db, "users", currentUser.uid);
+      const userDocSnapshot = await getDoc(userDocRef);
+      const username = userDocSnapshot.data().fullName;
+  
+      // Add a new activity record
+      await addDoc(collection(db, "activityFeed"), {
+        eventId: eventId,
+        eventName: eventName,
+        username: username,
+        userImageUrl: "https://www.ledr.com/colours/black.jpg", // Replace with the actual user's profile image
+        eventType: "event_deleted",
+        timestamp: Date.now(),
+      });
+  
       navigate("/calendar");
     }
   };

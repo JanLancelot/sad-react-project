@@ -25,6 +25,7 @@ export default function NewEvent({}) {
   const [open, setOpen] = useState(true);
   const cancelButtonRef = useRef(null);
   const [locationType, setLocationType] = useState("in-campus");
+  const [errors, setErrors] = useState({});
 
   const handleImageChange = (event) => {
     if (event.target.files && event.target.files[0]) {
@@ -34,6 +35,47 @@ export default function NewEvent({}) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // Validation
+    const errors = {};
+    if (!eventName.trim()) {
+      errors.eventName = "Event name is required";
+    }
+    if (!eventDate.trim()) {
+      errors.eventDate = "Event date is required";
+    } else if (new Date(eventDate) < new Date()) {
+      errors.eventDate = "Event date must be in the future";
+    }
+    if (!eventTime.trim()) {
+      errors.eventTime = "Event time is required";
+    }
+    if (!location.trim()) {
+      errors.location = "Location is required";
+    }
+    if (!description.trim()) {
+      errors.description = "Description is required";
+    }
+    if (!organizer.trim()) {
+      errors.organizer = "Organizer/Contact is required";
+    }
+    if (!category) {
+      errors.category = "Category is required";
+    }
+    if (!department) {
+      errors.department = "Department is required";
+    }
+    if (!rsvpLink.trim()) {
+      errors.rsvpLink = "RSVP/Registration Link is required";
+    }
+    if (!cost.trim()) {
+      errors.cost = "Cost is required";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setErrors(errors);
+      return;
+    }
+
     const newMeeting = {
       name: eventName,
       date: eventDate,
@@ -65,6 +107,7 @@ export default function NewEvent({}) {
         timestamp: Date.now(),
         username: "Admin",
         eventName: eventName,
+        department: department,
       };
       await addDoc(collection(db, "activityFeed"), newActivityEntry);
 
@@ -75,282 +118,353 @@ export default function NewEvent({}) {
     }
   };
   
-  return (
-    <>
-      <Layout>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl">
-            <form onSubmit={handleSubmit}>
-              <div className="space-y-12">
-                <div className="border-b border-gray-900/10 pb-12">
-                  <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                    <div className="sm:col-span-6">
-                      <label
-                        htmlFor="eventname"
-                        className="block text-sm font-medium leading-6 text-gray-900"
-                      >
-                        Event Name
-                      </label>
-                      <div className="mt-2">
-                        <input
-                          type="text"
-                          name="eventname"
-                          id="eventname"
-                          value={eventName}
-                          onChange={(e) => setEventName(e.target.value)}
-                          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="sm:col-span-4">
-                      {" "}
-                      <label
-                        htmlFor="eventdate"
-                        className="block text-sm font-medium leading-6 text-gray-900"
-                      >
-                        Event Date
-                      </label>
-                      <div className="mt-2">
-                        <input
-                          type="date"
-                          name="eventdate"
-                          id="eventdate"
-                          value={eventDate}
-                          onChange={(e) => setEventDate(e.target.value)}
-                          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="sm:col-span-2">
-                      {" "}
-                      <label
-                        htmlFor="eventtime"
-                        className="block text-sm font-medium leading-6 text-gray-900"
-                      >
-                        Event Time
-                      </label>
-                      <div className="mt-2">
-                        <input
-                          type="time"
-                          name="eventtime"
-                          id="eventtime"
-                          value={eventTime}
-                          onChange={(e) => setEventTime(e.target.value)}
-                          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="sm:col-span-6">
-                      {/* <label
-                        htmlFor="location"
-                        className="block text-sm font-medium leading-6 text-gray-900"
-                      >
-                        Location
-                      </label>
-                      <div className="mt-2">
-                        <input
-                          type="text"
-                          name="location"
-                          id="location"
-                          value={location}
-                          onChange={(e) => setLocation(e.target.value)}
-                          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        />
-                      </div> */}
-                      <div>
+    return (
+      <>
+        <Layout>
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-3xl">
+              <form onSubmit={handleSubmit}>
+                <div className="space-y-12">
+                  <div className="border-b border-gray-900/10 pb-12">
+                    <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                      <div className="sm:col-span-6">
                         <label
-                          htmlFor="location"
+                          htmlFor="eventname"
                           className="block text-sm font-medium leading-6 text-gray-900"
                         >
-                          {locationType === "in-campus" ? "Venue" : "Location"}
+                          Event Name
                         </label>
-                        <div className="relative mt-2 rounded-md shadow-sm">
-                          {locationType === "in-campus" ? (
-                            <select
-                              id="location"
-                              name="location"
-                              value={location}
-                              onChange={(e) => setLocation(e.target.value)}
-                              className="block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                            >
-                              <option value="">Select a Location</option>
-                              <option
-                                value="Sapientia Building"
-                                key="Sapientia Building"
-                              >
-                                Sapientia Building
-                              </option>
-                              <option
-                                value="Elementary Court"
-                                key="Elementary Court"
-                              >
-                                Elementary Court
-                              </option>
-                              <option value="Main Court" key="Main Court">
-                                Main Court
-                              </option>
-                            </select>
-                          ) : (
-                            <input
-                              type="text"
-                              name="location"
-                              id="location"
-                              className="block w-full rounded-md border-0 py-1.5 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                              placeholder="Enter a location"
-                              value={location}
-                              onChange={(e) => setLocation(e.target.value)}
-                            />
+                        <div className="mt-2">
+                          <input
+                            type="text"
+                            name="eventname"
+                            id="eventname"
+                            value={eventName}
+                            onChange={(e) => setEventName(e.target.value)}
+                            className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
+                              errors.eventName
+                                ? "ring-red-300 focus:ring-red-500"
+                                : "ring-gray-300 focus:ring-indigo-600"
+                            } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
+                          />
+                          {errors.eventName && (
+                            <div className="mt-2 text-sm text-red-600">
+                              {errors.eventName}
+                            </div>
                           )}
-                          <div className="absolute inset-y-0 right-0 flex items-center">
-                            <label htmlFor="locationType" className="sr-only">
-                              Location Type
-                            </label>
-                            <select
-                              id="locationType"
-                              name="locationType"
-                              value={locationType}
-                              onChange={(e) => setLocationType(e.target.value)}
-                              className="h-full rounded-md border-0 bg-transparent py-0 pl-2 pr-7 text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
-                            >
-                              <option value="in-campus">in-campus</option>
-                              <option value="off-campus">off-campus</option>
-                            </select>
+                        </div>
+                      </div>
+    
+                      <div className="sm:col-span-4">
+                        <label
+                          htmlFor="eventdate"
+                          className="block text-sm font-medium leading-6 text-gray-900"
+                        >
+                          Event Date
+                        </label>
+                        <div className="mt-2">
+                          <input
+                            type="date"
+                            name="eventdate"
+                            id="eventdate"
+                            value={eventDate}
+                            onChange={(e) => setEventDate(e.target.value)}
+                            className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
+                              errors.eventDate
+                                ? "ring-red-300 focus:ring-red-500"
+                                : "ring-gray-300 focus:ring-indigo-600"
+                            } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
+                          />
+                          {errors.eventDate && (
+                            <div className="mt-2 text-sm text-red-600">
+                              {errors.eventDate}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+    
+                      <div className="sm:col-span-2">
+                        <label
+                          htmlFor="eventtime"
+                          className="block text-sm font-medium leading-6 text-gray-900"
+                        >
+                          Event Time
+                        </label>
+                        <div className="mt-2">
+                          <input
+                            type="time"
+                            name="eventtime"
+                            id="eventtime"
+                            value={eventTime}
+                            onChange={(e) => setEventTime(e.target.value)}
+                            className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
+                              errors.eventTime
+                                ? "ring-red-300 focus:ring-red-500"
+                                : "ring-gray-300 focus:ring-indigo-600"
+                            } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
+                          />
+                          {errors.eventTime && (
+                            <div className="mt-2 text-sm text-red-600">
+                              {errors.eventTime}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+    
+                      <div className="sm:col-span-6">
+                        <div>
+                          <label
+                            htmlFor="location"
+                            className="block text-sm font-medium leading-6 text-gray-900"
+                          >
+                            {locationType === "in-campus" ? "Venue" : "Location"}
+                          </label>
+                          <div className="relative mt-2 rounded-md shadow-sm">
+                            {locationType === "in-campus" ? (
+                              <select
+                                id="location"
+                                name="location"
+                                value={location}
+                                onChange={(e) => setLocation(e.target.value)}
+                                className={`block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ${
+                                  errors.location
+                                    ? "ring-red-300 focus:ring-red-500"
+                                    : "ring-gray-300 focus:ring-indigo-600"
+                                } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
+                              >
+                                <option value="">Select a Location</option>
+                                <option
+                                  value="Sapientia Building"
+                                  key="Sapientia Building"
+                                >
+                                  Sapientia Building
+                                </option>
+                                <option
+                                  value="Elementary Court"
+                                  key="Elementary Court"
+                                >
+                                  Elementary Court
+                                </option>
+                                <option value="Main Court" key="Main Court">
+                                  Main Court
+                                </option>
+                              </select>
+                            ) : (
+                              <input
+                                type="text"
+                                name="location"
+                                id="location"
+                                className={`block w-full rounded-md border-0 py-1.5 pr-20 text-gray-900 ring-1 ring-inset ${
+                                  errors.location
+                                    ? "ring-red-300 focus:ring-red-500"
+                                    : "ring-gray-300 focus:ring-indigo-600"
+                                } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
+                                placeholder="Enter a location"
+                                value={location}
+                                onChange={(e) => setLocation(e.target.value)}
+                              />
+                            )}
+                            {errors.location && (
+                              <div className="mt-2 text-sm text-red-600">
+                                {errors.location}
+                              </div>
+                            )}
+                            <div className="absolute inset-y-0 right-0 flex items-center">
+                              <label htmlFor="locationType" className="sr-only">
+                                Location Type
+                              </label>
+                              <select
+                                id="locationType"
+                                name="locationType"
+                                value={locationType}
+                                onChange={(e) => setLocationType(e.target.value)}
+                                className="h-full rounded-md border-0 bg-transparent py-0 pl-2 pr-7 text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
+                              >
+                                <option value="in-campus">in-campus</option>
+                                <option value="off-campus">off-campus</option>
+                              </select>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-
-                    <div className="sm:col-span-6">
-                      <label
-                        htmlFor="description"
-                        className="block text-sm font-medium leading-6 text-gray-900"
-                      >
-                        Description
-                      </label>
-                      <div className="mt-2">
-                        <textarea
-                          id="description"
-                          name="description"
-                          rows={3}
-                          value={description}
-                          onChange={(e) => setDescription(e.target.value)}
-                          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="sm:col-span-3">
-                      <label
-                        htmlFor="organizer"
-                        className="block text-sm font-medium leading-6 text-gray-900"
-                      >
-                        Organizer/Contact
-                      </label>
-                      <div className="mt-2">
-                        <input
-                          type="text"
-                          name="organizer"
-                          id="organizer"
-                          value={organizer}
-                          onChange={(e) => setOrganizer(e.target.value)}
-                          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="sm:col-span-3">
-                      <label
-                        htmlFor="category"
-                        className="block text-sm font-medium leading-6 text-gray-900"
-                      >
-                        Category
-                      </label>
-                      <div className="mt-2">
-                        <select
-                          id="category"
-                          name="category"
-                          value={category}
-                          onChange={(e) => setCategory(e.target.value)}
-                          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300  focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        >
-                          <option value="">Select a Category</option>
-                          <option value="lecture">Lecture</option>
-                          <option value="workshop">Workshop</option>
-                          <option value="social">Social</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="sm:col-span-3">
-                      <label
-                        htmlFor="rsvpLink"
-                        className="block text-sm font-medium leading-6 text-gray-900"
-                      >
-                        RSVP/Registration Link
-                      </label>
-                      <div className="mt-2">
-                        <input
-                          type="url"
-                          name="rsvpLink"
-                          id="rsvpLink"
-                          value={rsvpLink}
-                          onChange={(e) => setRsvpLink(e.target.value)}
-                          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="sm:col-span-3">
-                      <label
-                        htmlFor="cost"
-                        className="block text-sm font-medium leading-6 text-gray-900"
-                      >
-                        Cost
-                      </label>
-                      <div className="mt-2">
-                        <input
-                          type="text"
-                          name="cost"
-                          id="cost"
-                          value={cost}
-                          onChange={(e) => setCost(e.target.value)}
-                          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        />
-                      </div>
-                    </div>
-                    <div className="sm:col-span-6">
-                      <div>
+    
+                      <div className="sm:col-span-6">
                         <label
-                          htmlFor="location"
+                          htmlFor="description"
                           className="block text-sm font-medium leading-6 text-gray-900"
                         >
-                          Department
+                          Description
                         </label>
-                        <div className="relative mt-2 rounded-md shadow-sm">
+                        <div className="mt-2">
+                          <textarea
+                            id="description"
+                            name="description"
+                            rows={3}
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
+                              errors.description
+                                ? "ring-red-300 focus:ring-red-500"
+                                : "ring-gray-300 focus:ring-indigo-600"
+                            } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
+                          />
+                          {errors.description && (
+                            <div className="mt-2 text-sm text-red-600">
+                              {errors.description}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+    
+                      <div className="sm:col-span-3">
+                        <label
+                          htmlFor="organizer"
+                          className="block text-sm font-medium leading-6 text-gray-900"
+                        >
+                          Organizer/Contact
+                        </label>
+                        <div className="mt-2">
+                          <input
+                            type="text"
+                            name="organizer"
+                            id="organizer"
+                            value={organizer}
+                            onChange={(e) => setOrganizer(e.target.value)}
+                            className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
+                              errors.organizer
+                                ? "ring-red-300 focus:ring-red-500"
+                                : "ring-gray-300 focus:ring-indigo-600"
+                            } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
+                          />
+                          {errors.organizer && (
+                            <div className="mt-2 text-sm text-red-600">
+                              {errors.organizer}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+    
+                      <div className="sm:col-span-3">
+                        <label
+                          htmlFor="category"
+                          className="block text-sm font-medium leading-6 text-gray-900"
+                        >
+                          Category
+                        </label>
+                        <div className="mt-2">
                           <select
-                            id="location"
-                            name="location"
-                            value={department}
-                            onChange={(e) => setDepartment(e.target.value)}
-                            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            id="category"
+                            name="category"
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                            className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
+                              errors.category
+                                ? "ring-red-300 focus:ring-red-500"
+                                : "ring-gray-300 focus:ring-indigo-600"
+                            } sm:text-sm sm:leading-6`}
                           >
-                            <option value="">Select department</option>
-                            <option value="All" key="All">
-                              All departments
-                            </option>
-                            <option value="CS department" key="CS department">
-                              Computer Science department
-                            </option>
-                            <option
-                              value="Education Department"
-                              key="Education Department"
+                            <option value="">Select a Category</option>
+                            <option value="lecture">Lecture</option>
+                            <option value="workshop">Workshop</option>
+                            <option value="social">Social</option>
+                          </select>
+                          {errors.category && (
+                            <div className="mt-2 text-sm text-red-600">
+                              {errors.category}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+    
+                      <div className="sm:col-span-3">
+                        <label
+                          htmlFor="rsvpLink"
+                          className="block text-sm font-medium leading-6 text-gray-900"
+                        >
+                          RSVP/Registration Link
+                        </label>
+                        <div className="mt-2">
+                          <input
+                            type="url"
+                            name="rsvpLink"
+                            id="rsvpLink"
+                            value={rsvpLink}
+                            onChange={(e) => setRsvpLink(e.target.value)}
+                            className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
+                              errors.rsvpLink
+                                ? "ring-red-300 focus:ring-red-500"
+                                : "ring-gray-300 focus:ring-indigo-600"
+                            } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
+                          />
+                          {errors.rsvpLink && (
+                            <div className="mt-2 text-sm text-red-600">
+                              {errors.rsvpLink}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+    
+                      <div className="sm:col-span-3">
+                        <label
+                          htmlFor="cost"
+                          className="block text-sm font-medium leading-6 text-gray-900"
+                        >
+                          Cost
+                        </label>
+                        <div className="mt-2">
+                          <input
+                            type="text"
+                            name="cost"
+                            id="cost"
+                            value={cost}
+                            onChange={(e) => setCost(e.target.value)}
+                            className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
+                              errors.cost
+                                ? "ring-red-300 focus:ring-red-500"
+                                : "ring-gray-300 focus:ring-indigo-600"
+                            } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
+                          />
+                          {errors.cost && (
+                            <div className="mt-2 text-sm text-red-600">
+                              {errors.cost}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="sm:col-span-6">
+                        <div>
+                          <label
+                            htmlFor="location"
+                            className="block text-sm font-medium leading-6 text-gray-900"
+                          >
+                            Department
+                          </label>
+                          <div className="relative mt-2 rounded-md shadow-sm">
+                            <select
+                              id="location"
+                              name="location"
+                              value={department}
+                              onChange={(e) => setDepartment(e.target.value)}
+                              className={`block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ${
+                                errors.department
+                                  ? "ring-red-300 focus:ring-red-500"
+                                  : "ring-gray-300 focus:ring-indigo-600"
+                              } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
                             >
-                              Education Department
-                            </option>
-                            <option
+                              <option value="">Select department</option>
+                              <option value="All" key="All">
+                                All departments
+                              </option>
+                              <option value="CS department" key="CS department">
+                                Computer Science department
+                              </option>
+                              <option
+                                value="Education Department"
+                                key="Education Department"
+                              >
+                                Education Department
+                              </option>
+                              <option
                               value="Accountancy Department"
                               key="Accountancy Department"
                             >
@@ -386,54 +500,60 @@ export default function NewEvent({}) {
                             >
                               Hospitality Management and Tourism Department
                             </option>
-                          </select>
+                            </select>
+                            {errors.department && (
+                              <div className="mt-2 text-sm text-red-600">
+                                {errors.department}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="col-span-full">
-                      <label
-                        htmlFor="photo"
-                        className="block text-sm font-medium leading-6 text-gray-900"
-                      >
-                        Photo
-                      </label>
-                      <div className="mt-2 flex items-center gap-x-3">
-                        <UserCircleIcon
-                          className="h-12 w-12 text-gray-300"
-                          aria-hidden="true"
-                        />
-                        <button
-                          type="button"
-                          className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                          onClick={() => fileInputRef.current.click()} // Trigger file input
+                      <div className="col-span-full">
+                        <label
+                          htmlFor="photo"
+                          className="block text-sm font-medium leading-6 text-gray-900"
                         >
-                          Change
-                        </button>
-                        <input
-                          type="file"
-                          ref={fileInputRef}
-                          onChange={handleImageChange}
-                          className="hidden"
-                        />
-                      </div>
+                          Photo
+                        </label>
+                        <div className="mt-2 flex items-center gap-x-3">
+                          <UserCircleIcon
+                            className="h-12 w-12 text-gray-300"
+                            aria-hidden="true"
+                          />
+                        <button
+                        type="button"
+                        className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                        onClick={() => fileInputRef.current.click()} // Trigger file input
+                      >
+                        Change
+                      </button>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
                     </div>
                   </div>
+                  </div>
                 </div>
+              
+              </div>
 
-                <div className="mt-6 flex items-center justify-end gap-x-6">
-                  <button
-                    type="button"
-                    className="text-sm font-semibold leading-6 text-gray-900"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                  >
-                    Save
-                  </button>
-                </div>
+              <div className="mt-6 flex items-center justify-end gap-x-6">
+                <button
+                  type="button"
+                  className="text-sm font-semibold leading-6 text-gray-900"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                  Save
+                </button>
               </div>
             </form>
           </div>
@@ -441,4 +561,4 @@ export default function NewEvent({}) {
       </Layout>
     </>
   );
-}
+};

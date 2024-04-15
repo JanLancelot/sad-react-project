@@ -1,6 +1,6 @@
 import Layout from "./Layout";
 import DepartmentHeader from "./components/DepartmentHeader";
-import ActivityList from "./components/ActivityList";
+import StudentTableBody from "./components/StudentTableBody";
 import { useEffect, useState, useMemo } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
@@ -31,7 +31,7 @@ export default function Accountancy() {
   useEffect(() => {
     const fetchData = async () => {
       const usersRef = collection(db, "users");
-      const accountancyDepartmentQuery = query(usersRef, where("department", "==", "accountancy-department"));
+      const accountancyDepartmentQuery = query(usersRef, where("department", "==", "Accountancy Department"));
       const usersSnapshot = await getDocs(accountancyDepartmentQuery);
       const fetchedStudents = usersSnapshot.docs.map((doc) => ({
         ...doc.data(),
@@ -102,7 +102,7 @@ export default function Accountancy() {
             dean={deanName}
           />
         </header>
-        <ActivityList students={students} meetingCount={meetingCount} department={department} />
+        <StudentTableBody students={students} meetingCount={meetingCount} department={department} />
       </main>
     </Layout>
   );

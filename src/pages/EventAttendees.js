@@ -4,21 +4,26 @@ import { db } from "../firebaseConfig";
 import { doc, getDoc, collection } from "firebase/firestore";
 import Layout from "./Layout";
 import QRCode from "react-qr-code";
-import { PieChart, Pie, Tooltip, Legend, Cell } from 'recharts';
+import { PieChart, Pie, Tooltip, Legend, Cell } from "recharts";
+import { FaFilter } from "react-icons/fa";
 
 function AttendanceChart({ attendeesData }) {
-  const data = Object.values(attendeesData.reduce((acc, { department, fullName }) => {
-    acc[department] = (acc[department] || 0) + 1;
-    return acc;
-  }, {})).map((count, index) => ({
-    name: Object.keys(attendeesData.reduce((acc, { department, fullName }) => {
+  const data = Object.values(
+    attendeesData.reduce((acc, { department, fullName }) => {
       acc[department] = (acc[department] || 0) + 1;
       return acc;
-    }, {}))[index],
-    value: count
+    }, {})
+  ).map((count, index) => ({
+    name: Object.keys(
+      attendeesData.reduce((acc, { department, fullName }) => {
+        acc[department] = (acc[department] || 0) + 1;
+        return acc;
+      }, {})
+    )[index],
+    value: count,
   }));
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
   return (
     <PieChart width={400} height={400}>
@@ -46,6 +51,10 @@ function EventAttendees() {
   const { eventId } = useParams();
   const [eventData, setEventData] = useState(null);
   const [attendeesData, setAttendeesData] = useState([]);
+  const [filteredAttendeesData, setFilteredAttendeesData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [selectedDepartment, setSelectedDepartment] = useState("All");
 
   useEffect(() => {
     const fetchEventData = async () => {
@@ -67,20 +76,30 @@ function EventAttendees() {
             }))
           );
           setAttendeesData(attendees);
+          setFilteredAttendeesData(attendees);
         } else {
-          // If no attendees, clear the state
           setAttendeesData([]);
+          setFilteredAttendeesData([]);
         }
       } else {
-        // Handle error: event not found
       }
     };
     fetchEventData();
   }, [eventId]);
 
-  if (!eventData) {
-    return <div>Loading...</div>;
-  }
+  useEffect(() => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const filteredData =
+      selectedDepartment === "All"
+        ? attendeesData
+        : attendeesData.filter(
+            (attendee) => attendee.department === selectedDepartment
+          );
+    setFilteredAttendeesData(
+      filteredData.slice(indexOfFirstItem, indexOfLastItem)
+    );
+  }, [currentPage, itemsPerPage, attendeesData, selectedDepartment]);
 
   const onImageCownload = () => {
     const svg = document.getElementById("QRCode");
@@ -101,30 +120,118 @@ function EventAttendees() {
     img.src = `data:image/svg+xml;base64,${btoa(svgData)}`;
   };
 
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handleDepartmentFilter = (department) => {
+    setSelectedDepartment(department);
+    setCurrentPage(1);
+  };
+
+  if (!eventData) {
+    return <div>Loading...</div>;
+  }
+
+  const departments = [
+    "All",
+    ...new Set(attendeesData.map((attendee) => attendee.department)),
+  ];
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">{eventData.name}</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          {eventData.name}
+        </h1>
         <h2 className="text-xl font-semibold text-gray-700 mb-6">Attendees</h2>
-        {attendeesData.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {attendeesData.map(({ fullName, department }, index) => (
-              <div
-                key={index}
-                className="bg-gray-100 rounded-lg shadow-md p-4 flex items-center justify-between"
-              >
-                <div className="text-lg font-medium text-gray-900">
-                  {fullName} - {department}
-                </div>
-              </div>
-            ))}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center">
+            <FaFilter className="mr-2 text-gray-500" />
+            <select
+              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={selectedDepartment}
+              onChange={(e) => handleDepartmentFilter(e.target.value)}
+              style={{
+                 // Increase the width of the dropdown
+                paddingRight: "30px", // Add more right padding to accommodate the arrow
+              }}
+            >
+              {departments.map((department, index) => (
+                <option key={index} value={department}>
+                  {department}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="itemsPerPage" className="mr-2">
+              Items per page:
+            </label>
+            <select
+              id="itemsPerPage"
+              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={itemsPerPage}
+              onChange={(e) => setItemsPerPage(parseInt(e.target.value))}
+              style={{
+                width: "100px", // Increase the width of the dropdown
+                paddingRight: "20px", // Add more right padding to accommodate the arrow
+              }}
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={30}>50</option>
+            </select>
+          </div>
+        </div>
+        {filteredAttendeesData.length > 0 ? (
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <table className="w-full table-auto">
+              <thead>
+                <tr className="bg-gray-100 text-gray-700 font-medium">
+                  <th className="px-4 py-3 text-left">Name</th>
+                  <th className="px-4 py-3 text-left">Department</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredAttendeesData.map(
+                  ({ fullName, department }, index) => (
+                    <tr key={index} className="border-b border-gray-200">
+                      <td className="px-4 py-3">{fullName}</td>
+                      <td className="px-4 py-3">{department}</td>
+                    </tr>
+                  )
+                )}
+              </tbody>
+            </table>
+            <div className="flex justify-center mt-6">
+              <nav>
+                <ul className="inline-flex -space-x-px">
+                  {Array.from(
+                    { length: Math.ceil(attendeesData.length / itemsPerPage) },
+                    (_, i) => i + 1
+                  ).map((page) => (
+                    <li key={page}>
+                      <button
+                        className={`px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 ${
+                          currentPage === page ? "bg-blue-500 text-white" : ""
+                        }`}
+                        onClick={() => handlePageChange(page)}
+                      >
+                        {page}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </div>
           </div>
         ) : (
           <p className="text-gray-600">No attendees yet.</p>
         )}
       </div>
       <div className="container mx-auto px-4 py-8 flex flex-col items-center justify-center">
-        <div className="bg-gray-100 rounded-lg shadow-md p-6 border-2 border-blue-500">
+        <div className="bg-white rounded-lg shadow-md p-6 border-2 border-blue-500">
           <QRCode
             size={256}
             id="QRCode"
