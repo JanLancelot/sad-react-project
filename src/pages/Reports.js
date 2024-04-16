@@ -82,7 +82,7 @@ const EventChart = () => {
       setFutureEvents(futureMeetings);
     };
     fetchData();
-  }, [db, selectedDepartment]);
+  }, [selectedDepartment]);
 
   const pastEventData = pastEvents.map((event) => ({
     name: event.name,
