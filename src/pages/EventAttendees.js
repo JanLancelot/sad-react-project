@@ -100,7 +100,7 @@ function EventAttendees() {
     );
   }, [currentPage, itemsPerPage, attendeesData, selectedDepartment]);
 
-  const onImageCownload = () => {
+  const onImageDownload = () => {
     const svg = document.getElementById("QRCode");
     const svgData = new XMLSerializer().serializeToString(svg);
     const canvas = document.createElement("canvas");
@@ -234,15 +234,30 @@ function EventAttendees() {
             size={256}
             id="QRCode"
             style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-            value={eventId}
+            value={`${eventId}-checkin`}
             viewBox={`0 0 256 256`}
           />
         </div>
         <button
           className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          onClick={onImageCownload}
+          onClick={() => onImageDownload("checkin")}
         >
-          Download QR Code
+          Download Check-in QR Code
+        </button>
+        <div className="bg-white rounded-lg shadow-md p-6 border-2 border-green-500 mb-4 mt-4">
+          <QRCode
+            size={256}
+            id="QRCode"
+            style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+            value={`${eventId}-checkout`}
+            viewBox={`0 0 256 256`}
+          />
+        </div>
+        <button
+          className="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          onClick={() => onImageDownload("checkout")}
+        >
+          Download Check-out QR Code
         </button>
         <AttendanceChart attendeesData={attendeesData} />
       </div>

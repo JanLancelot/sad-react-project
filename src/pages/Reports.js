@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { getFirestore, collection, getDocs, query, where } from "firebase/firestore";
 import {
   BarChart,
   Bar,
@@ -46,42 +46,36 @@ const EventChart = () => {
   };
 
   useEffect(() => {
-    const dept = secondaryNavigation.filter(item => item.current === true).map(item => item.dval); 
-    setSelectedDepartment(dept);
-    
     const fetchData = async () => {
-      const querySnapshot = await getDocs(collection(db, "meetings"));
-      const fetchedMeetings = [];
-      querySnapshot.forEach((doc) => {
-        if (selectedDepartment.includes(doc.data().department) || doc.data().department === 'All') {
-          fetchedMeetings.push({ id: doc.id, ...doc.data() });
-        }
-      });
-  
-      let today = new Date();
-      const week = new Date();
-      const oneWeekAgo = new Date(today.setDate(today.getDate() - 7));
-      const oneWeekFromNow = new Date(week.setDate(week.getDate() + 7));
-      today = new Date();
-  
-      // Filter events efficiently within the desired range
-      const pastMeetings = fetchedMeetings.filter((event) => {
-        const [year, month, day] = event.date.split("-").map(Number);
-        const meetingDate = new Date(year, month - 1, day);
-        return meetingDate >= oneWeekAgo && meetingDate < today;
-      });
-  
-      const futureMeetings = fetchedMeetings.filter((event) => {
-        const [year, month, day] = event.date.split("-").map(Number);
-        const meetingDate = new Date(year, month - 1, day);
-        return meetingDate >= today && meetingDate <= oneWeekFromNow;
-      });
-  
+      const dept = secondaryNavigation.filter(item => item.current === true).map(item => item.dval);
+      setSelectedDepartment(dept);
+
+      const today = new Date();
+      const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const oneWeekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+      const pastEventsQuery = query(
+        collection(db, "meetings"),
+        where("department", "in", [...dept, "All"]),
+        where("date", ">=", oneWeekAgo.toISOString().slice(0, 10)),
+        where("date", "<", today.toISOString().slice(0, 10))
+      );
+      const pastQuerySnapshot = await getDocs(pastEventsQuery);
+      const pastMeetings = pastQuerySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setPastEvents(pastMeetings);
+
+      const futureEventsQuery = query(
+        collection(db, "meetings"),
+        where("department", "in", [...dept, "All"]),
+        where("date", ">=", today.toISOString().slice(0, 10)),
+        where("date", "<=", oneWeekFromNow.toISOString().slice(0, 10))
+      );
+      const futureQuerySnapshot = await getDocs(futureEventsQuery);
+      const futureMeetings = futureQuerySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setFutureEvents(futureMeetings);
     };
     fetchData();
-  }, [selectedDepartment]);
+  }, [selectedDepartment, secondaryNavigation]);
 
   const pastEventData = pastEvents.map((event) => ({
     name: event.name,
@@ -93,7 +87,7 @@ const EventChart = () => {
     interested: event.interestedCount || 0,
     notInterested: event.notInterestedUsers?.length || 0,
   }));
-
+  
   return (
     <Layout>
       <main>
