@@ -62,7 +62,6 @@ function EventAttendees() {
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         setEventData(docSnap.data());
-        // Only fetch attendees if the attendees array exists and is not empty
         if (docSnap.data().attendees && docSnap.data().attendees.length > 0) {
           const attendeeIds = docSnap.data().attendees;
           const usersCollectionRef = collection(db, "users");
@@ -153,8 +152,7 @@ function EventAttendees() {
               value={selectedDepartment}
               onChange={(e) => handleDepartmentFilter(e.target.value)}
               style={{
-                 // Increase the width of the dropdown
-                paddingRight: "30px", // Add more right padding to accommodate the arrow
+                paddingRight: "30px",
               }}
             >
               {departments.map((department, index) => (
@@ -174,8 +172,8 @@ function EventAttendees() {
               value={itemsPerPage}
               onChange={(e) => setItemsPerPage(parseInt(e.target.value))}
               style={{
-                width: "100px", // Increase the width of the dropdown
-                paddingRight: "20px", // Add more right padding to accommodate the arrow
+                width: "100px",
+                paddingRight: "20px",
               }}
             >
               <option value={10}>10</option>

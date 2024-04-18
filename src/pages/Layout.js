@@ -80,7 +80,7 @@ export default function Layout({ children }) {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      navigate("/"); // Navigate to the '/' route after signing out
+      navigate("/");
     } catch (error) {
       console.log(error);
     }

@@ -13,23 +13,22 @@ const StudentEventsPage = () => {
     const fetchStudentData = async () => {
       const studentDocRef = doc(db, "users", id);
       const studentDocSnapshot = await getDoc(studentDocRef);
+    
       if (studentDocSnapshot.exists()) {
         const studentData = studentDocSnapshot.data();
         setStudent(studentData);
-
+    
         // Fetch event details
-        const eventIds = studentData.eventsAttended;
+        const eventIds = studentData.eventsAttended || [];
+    
         const eventDetails = await Promise.all(
           eventIds.map(async (eventId) => {
             const eventDocRef = doc(db, "meetings", eventId);
             const eventDocSnapshot = await getDoc(eventDocRef);
-            if (eventDocSnapshot.exists()) {
-              return eventDocSnapshot.data();
-            } else {
-              return null;
-            }
+            return eventDocSnapshot.exists() ? eventDocSnapshot.data() : null;
           })
         );
+    
         setEvents(eventDetails.filter((event) => event !== null));
       }
     };

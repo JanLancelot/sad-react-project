@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import { Pagination } from "@mui/material"; // Import Pagination component
+import { Pagination } from "@mui/material";
 
 const statuses = {
   Complete: "text-green-400 bg-green-400/10",
@@ -18,14 +18,12 @@ export default function StudentTableBody({ students, meetingCount, department })
   const db = getFirestore();
   const navigate = useNavigate();
 
-  // Search and Pagination states
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [studentsPerPage] = useState(10); // Items per page
+  const [studentsPerPage] = useState(10);
 
   useEffect(() => {
     const fetchData = async () => {
-      // Fetch students
       const usersRef = collection(db, "users");
       const ccsDepartmentQuery = query(usersRef, where("department", "==", department));
       const usersSnapshot = await getDocs(ccsDepartmentQuery);
@@ -34,7 +32,6 @@ export default function StudentTableBody({ students, meetingCount, department })
         id: doc.id,
       }));
 
-      // Fetch department settings
       const departmentSettingsRef = collection(db, "department-settings");
       const departmentSettingsQuery = query(departmentSettingsRef, where("department", "==", department));
       const departmentSettingsSnapshot = await getDocs(departmentSettingsQuery);
@@ -51,17 +48,14 @@ export default function StudentTableBody({ students, meetingCount, department })
     fetchData();
   }, [db, department]);
 
-  // Filtered students based on search
   const filteredStudents = students.filter((student) =>
     student.fullName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Pagination logic
   const indexOfLastStudent = currentPage * studentsPerPage;
   const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
   const currentStudents = filteredStudents.slice(indexOfFirstStudent, indexOfLastStudent);
 
-  // Handle page change
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };

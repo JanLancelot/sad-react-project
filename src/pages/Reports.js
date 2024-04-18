@@ -25,7 +25,7 @@ const EventChart = () => {
       current: false,
     },
     { name: "Arts and Sciences", dval: 'Arts and Sciences Department', current: false },
-    { name: "Maritime", dval: 'Maritime department', current: false },
+    { name: "Maritime", dval: 'Maritime Department', current: false },
     { name: "Health Sciences", dval:'Health Sciences Department', current: false },
     {
       name: "Hospitality Management and Tourism",
@@ -58,7 +58,6 @@ const EventChart = () => {
         }
       });
   
-      // Calculate relevant dates
       let today = new Date();
       const week = new Date();
       const oneWeekAgo = new Date(today.setDate(today.getDate() - 7));

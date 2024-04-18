@@ -6,7 +6,6 @@ import { getFirestore, doc, updateDoc, getDoc, query, where, getDocs, setDoc, co
 const signInUser = async (email, password, navigate) => {
   const auth = getAuth();
 
-  // Check if the user account is locked before attempting to sign in
   const isAccountLocked = await checkAndLockUserAccount(email);
   if (isAccountLocked) {
     throw new Error('Your account is currently locked. Please contact support.');
@@ -17,7 +16,6 @@ const signInUser = async (email, password, navigate) => {
     const user = userCredential.user;
     console.log('User signed in:', user);
 
-    // Reset the failed login attempts to 0
     await checkAndLockUserAccount(email, false, 0);
 
     navigate("/dashboard");
@@ -26,7 +24,6 @@ const signInUser = async (email, password, navigate) => {
     const errorMessage = error.message;
     console.error('Error:', errorCode, errorMessage);
 
-    // Check if the user account is locked and increment the failed login attempts
     await checkAndLockUserAccount(email, true);
     throw new Error(errorMessage);
   }
@@ -38,76 +35,67 @@ const checkAndLockUserAccount = async (email, incrementFailedAttempts = false, r
   const userSnapshot = await getDoc(userRef);
 
   if (!userSnapshot.exists()) {
-    // Check if the user document exists in the "users" collection
     const usersRef = collection(db, "users");
     const userQuery = query(usersRef, where("email", "==", email));
     const querySnapshot = await getDocs(userQuery);
 
     if (!querySnapshot.empty) {
-      // User document exists, increment/reset the failed login attempts and lock the account if the limit is reached
       const userData = querySnapshot.docs[0].data();
       const failedAttempts = userData.failedAttempts || 0;
       const locked = userData.locked || false;
 
       if (locked) {
-        return true; // Account is locked
+        return true;
       }
 
       if (incrementFailedAttempts) {
         if (failedAttempts >= 3) {
-          // Lock the user account
           await updateDoc(querySnapshot.docs[0].ref, { locked: true, failedAttempts: 0 });
           console.log(`Account for ${email} has been locked.`);
-          return true; // Account is locked
+          return true;
         } else {
-          // Increment the failed attempts
           await updateDoc(querySnapshot.docs[0].ref, { failedAttempts: failedAttempts + 1 });
           console.log(`Failed login attempt for ${email}. Attempts: ${failedAttempts + 1}`);
-          return false; // Account is not locked
+          return false;
         }
       } else if (resetFailedAttempts !== null) {
-        // Reset the failed attempts
         await updateDoc(querySnapshot.docs[0].ref, { failedAttempts: resetFailedAttempts });
         console.log(`Failed login attempts for ${email} have been reset to ${resetFailedAttempts}.`);
-        return false; // Account is not locked
+        return false;
       } else {
-        return false; // Account is not locked
+        return false;
       }
     } else {
-      // User document doesn't exist, create a new one with initial failed attempts
       await setDoc(userRef, { failedAttempts: 1 });
       console.log(`Account for ${email} has been created with 1 failed attempt.`);
-      return false; // Account is not locked
+      return false;
     }
   } else {
-    // User document exists, increment/reset the failed login attempts and lock the account if the limit is reached
     const userData = userSnapshot.data();
     const failedAttempts = userData.failedAttempts || 0;
     const locked = userData.locked || false;
 
     if (locked) {
-      return true; // Account is locked
+      return true;
     }
 
     if (incrementFailedAttempts) {
-      if (failedAttempts >= 2) {
-        // Lock the user account
+      // Formerly 2
+      if (failedAttempts >= 3) {
         await updateDoc(userRef, { locked: true, failedAttempts: 0 });
         console.log(`Account for ${email} has been locked.`);
-        return true; // Account is locked
+        return true;
       } else {
-        // Increment the failed attempts
         await updateDoc(userRef, { failedAttempts: failedAttempts + 1 });
         console.log(`Failed login attempt for ${email}. Attempts: ${failedAttempts + 1}`);
-        return false; // Account is not locked
+        return false;
       }
     } else if (resetFailedAttempts !== null) {
-      // Reset the failed attempts
       await updateDoc(userRef, { failedAttempts: resetFailedAttempts });
       console.log(`Failed login attempts for ${email} have been reset to ${resetFailedAttempts}.`);
-      return false; // Account is not locked
+      return false;
     } else {
-      return false; // Account is not locked
+      return false;
     }
   }
 };
