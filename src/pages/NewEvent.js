@@ -1,8 +1,13 @@
 import React from "react";
 import Layout from "./Layout";
-import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
+import {
+  PhotoIcon,
+  UserCircleIcon,
+  MapPinIcon,
+  ClockIcon,
+} from "@heroicons/react/24/solid";
 import { Fragment, useState, useRef } from "react";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -30,7 +35,63 @@ export default function NewEvent({}) {
   const [errors, setErrors] = useState({});
   const [mapVisible, setMapVisible] = useState(false);
   const [markedLocation, setMarkedLocation] = useState(null);
-  
+  const [eventsForSelectedDate, setEventsForSelectedDate] = useState([]);
+
+  const fetchEventsForSelectedDate = async (date) => {
+    try {
+      const locationsQuery = query(
+        collection(db, "meetings"),
+        where("date", "==", date),
+        where("location", "in", [
+          "Main Court",
+          "Sapientia Building",
+          "Elementary Court",
+        ])
+      );
+
+      const querySnapshot = await getDocs(locationsQuery);
+      const events = querySnapshot.docs.map((doc) => doc.data());
+      setEventsForSelectedDate(events);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    }
+  };
+
+  const handleDateChange = (e) => {
+    setEventDate(e.target.value);
+    fetchEventsForSelectedDate(e.target.value);
+  };
+
+  const checkForOverlappingEvents = async (newEvent) => {
+    const { date, startTime, endTime, location, latitude, longitude } =
+      newEvent;
+    const startDateTime = new Date(`${date}T${startTime}`);
+    const endDateTime = new Date(`${date}T${endTime}`);
+
+    const querySnapshot = await getDocs(
+      query(
+        collection(db, "meetings"),
+        where("date", "==", date),
+        where("latitude", "==", latitude || null),
+        where("longitude", "==", longitude || null)
+      )
+    );
+
+    const overlappingEvents = querySnapshot.docs.some((doc) => {
+      const event = doc.data();
+      const eventStartDateTime = new Date(`${event.date}T${event.startTime}`);
+      const eventEndDateTime = new Date(`${event.date}T${event.endTime}`);
+
+      return (
+        (startDateTime >= eventStartDateTime &&
+          startDateTime < eventEndDateTime) ||
+        (endDateTime > eventStartDateTime && endDateTime <= eventEndDateTime) ||
+        (startDateTime <= eventStartDateTime && endDateTime >= eventEndDateTime)
+      );
+    });
+
+    return overlappingEvents;
+  };
 
   const handleImageChange = (event) => {
     if (event.target.files && event.target.files[0]) {
@@ -141,6 +202,16 @@ export default function NewEvent({}) {
         newMeeting.longitude = markedLocation?.lng;
       }
 
+      const overlappingEvents = await checkForOverlappingEvents(newMeeting);
+
+      if (overlappingEvents) {
+        setErrors({
+          general:
+            "There is an overlapping event at the same location and time",
+        });
+        return;
+      }
+
       const docRef = await addDoc(collection(db, "meetings"), newMeeting);
 
       const newActivityEntry = {
@@ -213,7 +284,7 @@ export default function NewEvent({}) {
                           name="eventdate"
                           id="eventdate"
                           value={eventDate}
-                          onChange={(e) => setEventDate(e.target.value)}
+                          onChange={handleDateChange}
                           className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
                             errors.eventDate
                               ? "ring-red-300 focus:ring-red-500"
@@ -226,6 +297,58 @@ export default function NewEvent({}) {
                           </div>
                         )}
                       </div>
+                    </div>
+
+                    <div className="sm:col-span-6">
+                      {eventsForSelectedDate.length > 0 && (
+                        <div className="mt-6">
+                          <h3 className="text-lg font-medium leading-6 text-gray-900">
+                            In-Campus Events for Selected Date
+                          </h3>
+                          <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                            {eventsForSelectedDate.map((event) => (
+                              <div
+                                key={event.name}
+                                className="bg-white rounded-lg shadow-md overflow-hidden"
+                              >
+                                <div className="px-4 py-5 sm:p-6">
+                                  <div className="flex justify-between items-center">
+                                    <h4 className="text-base font-semibold text-gray-900 truncate">
+                                      {event.name}
+                                    </h4>
+                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                      {event.category}
+                                    </span>
+                                  </div>
+                                  <div className="mt-2">
+                                    <p className="flex items-center text-sm text-gray-500">
+                                      <UserCircleIcon
+                                        className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
+                                        aria-hidden="true"
+                                      />
+                                      {event.organizer}
+                                    </p>
+                                    <p className="mt-2 flex items-center text-sm text-gray-500">
+                                      <MapPinIcon
+                                        className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
+                                        aria-hidden="true"
+                                      />
+                                      {event.location}
+                                    </p>
+                                    <p className="mt-2 flex items-center text-sm text-gray-500">
+                                      <ClockIcon
+                                        className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
+                                        aria-hidden="true"
+                                      />
+                                      {event.startTime} - {event.endTime}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className="sm:col-span-3">
@@ -322,7 +445,7 @@ export default function NewEvent({}) {
                                 Main Court
                               </option>
                             </select>
-                           ) : (
+                          ) : (
                             <input
                               type="text"
                               name="location"
@@ -360,15 +483,14 @@ export default function NewEvent({}) {
                         </div>
                       </div>
                       {mapVisible && (
-                      <div className="mt-6">
-                        <Map
-                          onMarkerDrag={handleMapMarker}
-                          markedLocation={markedLocation}
-                        />
-                      </div>
-                    )}
+                        <div className="mt-6">
+                          <Map
+                            onMarkerDrag={handleMapMarker}
+                            markedLocation={markedLocation}
+                          />
+                        </div>
+                      )}
                     </div>
-                    
 
                     <div className="sm:col-span-6">
                       <label
@@ -620,6 +742,12 @@ export default function NewEvent({}) {
                     </div>
                   </div>
                 </div>
+
+                {errors.general && (
+                  <div className="mt-2 text-sm text-red-600">
+                    {errors.general}
+                  </div>
+                )}
 
                 <div className="mt-6 flex items-center justify-end gap-x-6">
                   <button

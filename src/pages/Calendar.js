@@ -224,15 +224,15 @@ export default function Calendar() {
             </Link>
           </div>
           <ol className="mt-4 divide-y divide-gray-100 text-sm leading-6 lg:col-span-7 xl:col-span-8">
-          <div className="mb-4 lg:col-span-7 xl:col-span-8">
-  <input
-    type="text"
-    placeholder="Search events..."
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    className="border rounded-md px-3 py-2 w-full"
-  />
-</div>
+            <div className="mb-4 lg:col-span-7 xl:col-span-8">
+              <input
+                type="text"
+                placeholder="Search events..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="border rounded-md px-3 py-2 w-full"
+              />
+            </div>
             {filteredEvents.map((meeting) => (
               <li
                 key={meeting.id}
@@ -260,7 +260,7 @@ export default function Calendar() {
                       </dt>
                       <dd>
                         <time dateTime={meeting.datetime}>
-                          {meeting.date} at {meeting.time}
+                          {meeting.date} at ({meeting.startTime} - {meeting.endTime})
                         </time>
                       </dd>
                     </div>
