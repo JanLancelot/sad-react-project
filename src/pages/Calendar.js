@@ -44,6 +44,7 @@ export default function Calendar() {
   const [open, setOpen] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [selectedDate, setSelectedDate] = useState(null);
 
   useEffect(() => {
     const meetingsCollectionRef = collection(db, "meetings");
@@ -83,16 +84,25 @@ export default function Calendar() {
         date.getFullYear() === new Date().getFullYear() &&
         date.getMonth() === new Date().getMonth() &&
         date.getDate() === new Date().getDate();
-      const isSelected = false;
-      let eventsOnDay =
-        meetings.filter(
-          (meeting) =>
-            new Date(meeting.datetime).getDate() === date.getDate() &&
-            new Date(meeting.datetime).getMonth() === currentMonth &&
-            new Date(meeting.datetime).getFullYear() === currentYear
-        ) || [];
 
-      days.push({ date, isToday, isSelected, eventsOnDay });
+      const isSelected =
+        selectedDate &&
+        date.getFullYear() === selectedDate.getFullYear() &&
+        date.getMonth() === selectedDate.getMonth() &&
+        date.getDate() === selectedDate.getDate();
+
+      const eventsOnDay =
+        meetings.filter((meeting) => {
+          const meetingDate = new Date(meeting.date);
+          return (
+            meetingDate.getDate() === date.getDate() &&
+            meetingDate.getMonth() === currentMonth &&
+            meetingDate.getFullYear() === currentYear
+          );
+        }) || [];
+      const eventsCount = eventsOnDay.length;
+
+      days.push({ date, isToday, isSelected, eventsOnDay, eventsCount });
     }
 
     for (let i = 1; i <= 6 - lastDayOfMonth; i++) {
@@ -123,18 +133,26 @@ export default function Calendar() {
 
   // Filter events based on search and sort
   const filteredEvents = retrievedMeetings
-    .filter((meeting) =>
-      meeting.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      const dateA = new Date(a.datetime);
-      const dateB = new Date(b.datetime);
-      if (sortByDate === "asc") {
-        return dateA - dateB;
-      } else {
-        return dateB - dateA;
-      }
-    });
+  .filter((meeting) => {
+    if (!selectedDate) return true; // If no date is selected, show all events
+
+    const meetingDate = new Date(meeting.date);
+    return (
+      meetingDate.getDate() === selectedDate.getDate() &&
+      meetingDate.getMonth() === selectedDate.getMonth() &&
+      meetingDate.getFullYear() === selectedDate.getFullYear()
+    );
+  })
+  .filter((meeting) => meeting.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  .sort((a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    if (sortByDate === "asc") {
+      return dateA - dateB;
+    } else {
+      return dateB - dateA;
+    }
+  });
 
   return (
     <Layout>
@@ -182,7 +200,7 @@ export default function Calendar() {
                   key={dayIdx}
                   type="button"
                   className={classNames(
-                    "py-1.5 hover:bg-gray-100 focus:z-10",
+                    "py-1.5 hover:bg-gray-100 focus:z-10 relative", // Add 'relative' class for positioning the events count
                     day.date ? "bg-white" : "bg-gray-50",
                     (day.isSelected || day.isToday) && "font-semibold",
                     day.isSelected && "text-white",
@@ -200,6 +218,21 @@ export default function Calendar() {
                     dayIdx === days.length - 7 && "rounded-bl-lg",
                     dayIdx === days.length - 1 && "rounded-br-lg"
                   )}
+                  onClick={() => {
+                    if (
+                      selectedDate &&
+                      day.date &&
+                      day.date.getFullYear() === selectedDate.getFullYear() &&
+                      day.date.getMonth() === selectedDate.getMonth() &&
+                      day.date.getDate() === selectedDate.getDate()
+                    ) {
+                      setSelectedDate(null); // Remove filtering if the same date is clicked again
+                    } else {
+                      setSelectedDate(
+                        day.date ? new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate()) : null
+                      );
+                    }
+                  }}
                 >
                   <time
                     dateTime={day.date ? day.date.toISOString() : null}
@@ -211,6 +244,11 @@ export default function Calendar() {
                   >
                     {day.date ? day.date.getDate() : ""}
                   </time>
+                  {day.eventsCount > 0 && (
+                    <div className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+                      {day.eventsCount}
+                    </div>
+                  )}
                 </button>
               ))}
             </div>
@@ -260,7 +298,8 @@ export default function Calendar() {
                       </dt>
                       <dd>
                         <time dateTime={meeting.datetime}>
-                          {meeting.date} at ({meeting.startTime} - {meeting.endTime})
+                          {meeting.date} at ({meeting.startTime} -{" "}
+                          {meeting.endTime})
                         </time>
                       </dd>
                     </div>

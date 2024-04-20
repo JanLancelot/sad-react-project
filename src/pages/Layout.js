@@ -1,8 +1,9 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { signOut, getAuth } from "firebase/auth";
-import { Fragment, useState } from "react";
+import { signOut, getAuth, onAuthStateChanged } from "firebase/auth";
+import { Fragment, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   Bars3Icon,
@@ -76,7 +77,33 @@ export default function Layout({ children }) {
   );
 
   const auth = getAuth();
+  const db = getFirestore();
   const navigate = useNavigate();
+  const [fullName, setFullName] = useState("");
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        try {
+          const userDocRef = doc(db, "users", currentUser.uid);
+          const userDocSnap = await getDoc(userDocRef);
+
+          if (userDocSnap.exists()) {
+            setFullName(userDocSnap.data().fullName);
+          } else {
+            console.log("User document not found");
+          }
+        } catch (error) {
+          console.error("Error fetching user document:", error);
+        }
+      } else {
+        setFullName("");
+      }
+    });
+
+    return unsubscribe;
+  }, [auth, db]);
+
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -88,6 +115,7 @@ export default function Layout({ children }) {
 
   const userNavigation = [
     { name: "Your profile", href: "#" },
+    { name: `Signed in as ${fullName}`, href: "#", disabled: true },
     { name: "Sign out", href: "#", onClick: handleSignOut },
   ];
 
@@ -319,12 +347,8 @@ export default function Layout({ children }) {
 
             <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
               <form className="relative flex flex-1" action="#" method="GET">
-                <label htmlFor="search-field" className="sr-only">
-                  
-                </label>
-                <div
-                  className="block h-full w-full border-0 py-0 pl-8 pr-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm"
-                />
+                <label htmlFor="search-field" className="sr-only"></label>
+                <div className="block h-full w-full border-0 py-0 pl-8 pr-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm" />
               </form>
               <div className="flex items-center gap-x-4 lg:gap-x-6">
                 <button
@@ -343,19 +367,15 @@ export default function Layout({ children }) {
 
                 {/* Profile dropdown */}
                 <Menu as="div" className="relative">
-                  <Menu.Button className="-m-1.5 flex items-center p-1.5">
+                  <Menu.Button className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     <span className="sr-only">Open user menu</span>
-                    <img
-                      className="h-8 w-8 rounded-full bg-gray-50"
-                      src="https://scontent.fmnl33-2.fna.fbcdn.net/v/t39.30808-6/256642337_111854787976909_5883138854520283023_n.jpg?_nc_cat=103&cb=99be929b-b574a898&ccb=1-7&_nc_sid=9c7eae&_nc_eui2=AeFE1v3djmBZvmrKjOnJG5iy12hMaUykuo7XaExpTKS6jlfFx3haAEQdA6CU62LdI9bat4c3n7H6JVcFZI57j-mj&_nc_ohc=LsNbglx625cAX-AyJIf&_nc_zt=23&_nc_ht=scontent.fmnl33-2.fna&oh=00_AfAu3l31Kf1M-B2OuXQhY8kQ3gsQPUh6XItGRaeCbcDGYA&oe=65E9BC75"
-                      alt=""
-                    />
-                    <span className="hidden lg:flex lg:items-center">
+                    
+                    <span className="hidden md:flex md:items-center">
                       <span
-                        className="ml-4 text-sm font-semibold leading-6 text-gray-900"
+                        className="ml-2 text-sm font-semibold leading-6 text-gray-900"
                         aria-hidden="true"
                       >
-                        Jan Lancelot P. Mailig
+                        {fullName}
                       </span>
                       <ChevronDownIcon
                         className="ml-2 h-5 w-5 text-gray-400"

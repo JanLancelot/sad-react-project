@@ -1,7 +1,18 @@
 import React, { useState, useEffect } from "react";
 import Layout from "../Layout";
+import LoadingSpinner from './LoadingSpinner';
 import { useParams } from "react-router-dom";
-import { doc, getDoc, getFirestore, collection, getDocs, query, where } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  getFirestore,
+  updateDoc,
+  arrayRemove,
+  collection,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 
 const StudentEventsPage = () => {
   const { id } = useParams();
@@ -13,30 +24,43 @@ const StudentEventsPage = () => {
     const fetchStudentData = async () => {
       const studentDocRef = doc(db, "users", id);
       const studentDocSnapshot = await getDoc(studentDocRef);
-    
       if (studentDocSnapshot.exists()) {
         const studentData = studentDocSnapshot.data();
         setStudent(studentData);
-    
-        // Fetch event details
+
+        // Fetch event details and remove non-existent eventIds
         const eventIds = studentData.eventsAttended || [];
-    
-        const eventDetails = await Promise.all(
-          eventIds.map(async (eventId) => {
-            const eventDocRef = doc(db, "meetings", eventId);
-            const eventDocSnapshot = await getDoc(eventDocRef);
-            return eventDocSnapshot.exists() ? eventDocSnapshot.data() : null;
-          })
-        );
-    
-        setEvents(eventDetails.filter((event) => event !== null));
+        const eventDetails = [];
+        const nonExistentEventIds = [];
+
+        const eventPromises = eventIds.map(async (eventId) => {
+          const eventDocRef = doc(db, "meetings", eventId);
+          const eventDocSnapshot = await getDoc(eventDocRef);
+          if (eventDocSnapshot.exists()) {
+            eventDetails.push(eventDocSnapshot.data());
+          } else {
+            nonExistentEventIds.push(eventId);
+          }
+        });
+
+        await Promise.all(eventPromises);
+
+        // Remove non-existent eventIds from the eventAttendees array
+        if (nonExistentEventIds.length > 0) {
+          const userRef = doc(db, "users", id);
+          await updateDoc(userRef, {
+            eventsAttended: arrayRemove(...nonExistentEventIds),
+          });
+        }
+
+        setEvents(eventDetails);
       }
     };
     fetchStudentData();
   }, [db, id]);
 
   if (!student) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   return (
