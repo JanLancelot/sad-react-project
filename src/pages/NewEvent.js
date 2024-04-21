@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Dialog, Transition } from "@headlessui/react";
 import { CheckIcon } from "@heroicons/react/24/outline";
+import { useAuth } from "./components/AuthContext";
 import Map from "./Map";
 
 export default function NewEvent({}) {
@@ -36,6 +37,8 @@ export default function NewEvent({}) {
   const [mapVisible, setMapVisible] = useState(false);
   const [markedLocation, setMarkedLocation] = useState(null);
   const [eventsForSelectedDate, setEventsForSelectedDate] = useState([]);
+  const auth = useAuth();
+  const user = auth?.user;
 
   const fetchEventsForSelectedDate = async (date) => {
     try {
@@ -170,6 +173,7 @@ export default function NewEvent({}) {
       department: department,
       rsvpLink: rsvpLink,
       cost: cost,
+      creatorID: user.uid,
     };
 
     try {

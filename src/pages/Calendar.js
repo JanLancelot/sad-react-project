@@ -17,7 +17,15 @@ import {
   QuestionMarkCircleIcon,
 } from "@heroicons/react/20/solid";
 import { db } from "../firebaseConfig";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  doc,
+  collection,
+  getDoc,
+  getDocs,
+  getFirestore,
+} from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useAuth } from "./components/AuthContext";
 
 let meetings = [];
 const months = [
@@ -45,6 +53,10 @@ export default function Calendar() {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedDate, setSelectedDate] = useState(null);
+  const [userRole, setUserRole] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const auth = getAuth();
+  const db = getFirestore();
 
   useEffect(() => {
     const meetingsCollectionRef = collection(db, "meetings");
@@ -59,6 +71,44 @@ export default function Calendar() {
       setRetrievedMeetings(meetings);
     });
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setCurrentUserId(currentUser.uid);
+      } else {
+        setCurrentUserId(null);
+      }
+    });
+
+    return unsubscribe;
+  }, [auth]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        const fetchUserRole = async () => {
+          try {
+            const userDocRef = doc(db, "users", currentUser.uid);
+            const userDocSnap = await getDoc(userDocRef);
+            if (userDocSnap.exists()) {
+              setUserRole(userDocSnap.data().role);
+            } else {
+              setUserRole(null);
+            }
+          } catch (error) {
+            console.error("Error fetching user document:", error);
+            setUserRole(null);
+          }
+        };
+        fetchUserRole();
+      } else {
+        setUserRole(null);
+      }
+    });
+
+    return unsubscribe;
+  }, [auth, db]);
 
   const getDaysInMonth = (month, year) => {
     return new Date(year, month + 1, 0).getDate();
@@ -133,26 +183,28 @@ export default function Calendar() {
 
   // Filter events based on search and sort
   const filteredEvents = retrievedMeetings
-  .filter((meeting) => {
-    if (!selectedDate) return true; // If no date is selected, show all events
+    .filter((meeting) => {
+      if (!selectedDate) return true; // If no date is selected, show all events
 
-    const meetingDate = new Date(meeting.date);
-    return (
-      meetingDate.getDate() === selectedDate.getDate() &&
-      meetingDate.getMonth() === selectedDate.getMonth() &&
-      meetingDate.getFullYear() === selectedDate.getFullYear()
-    );
-  })
-  .filter((meeting) => meeting.name.toLowerCase().includes(searchTerm.toLowerCase()))
-  .sort((a, b) => {
-    const dateA = new Date(a.date);
-    const dateB = new Date(b.date);
-    if (sortByDate === "asc") {
-      return dateA - dateB;
-    } else {
-      return dateB - dateA;
-    }
-  });
+      const meetingDate = new Date(meeting.date);
+      return (
+        meetingDate.getDate() === selectedDate.getDate() &&
+        meetingDate.getMonth() === selectedDate.getMonth() &&
+        meetingDate.getFullYear() === selectedDate.getFullYear()
+      );
+    })
+    .filter((meeting) =>
+      meeting.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      if (sortByDate === "asc") {
+        return dateA - dateB;
+      } else {
+        return dateB - dateA;
+      }
+    });
 
   return (
     <Layout>
@@ -229,7 +281,13 @@ export default function Calendar() {
                       setSelectedDate(null); // Remove filtering if the same date is clicked again
                     } else {
                       setSelectedDate(
-                        day.date ? new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate()) : null
+                        day.date
+                          ? new Date(
+                              day.date.getFullYear(),
+                              day.date.getMonth(),
+                              day.date.getDate()
+                            )
+                          : null
                       );
                     }
                   }}
@@ -252,14 +310,18 @@ export default function Calendar() {
                 </button>
               ))}
             </div>
-            <Link to="/new-event">
-              <button
-                type="button"
-                className="mt-8 w-full rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                Add event
-              </button>
-            </Link>
+            {userRole === "admin" || userRole === "osas" ? (
+              <Link to="/new-event">
+                <button
+                  type="button"
+                  className="mt-8 w-full rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                  Add event
+                </button>
+              </Link>
+            ) : (
+              <p className="pt-4">You do not have permission to add events.</p>
+            )}
           </div>
           <ol className="mt-4 divide-y divide-gray-100 text-sm leading-6 lg:col-span-7 xl:col-span-8">
             <div className="mb-4 lg:col-span-7 xl:col-span-8">
@@ -339,36 +401,25 @@ export default function Calendar() {
                   >
                     <Menu.Items className="absolute right-0 z-10 mt-2 w-36 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                       <div className="py-1">
-                        <Menu.Item>
-                          {({ active }) => (
-                            <a
-                              href={`/events/${meeting.id}/edit`}
-                              className={classNames(
-                                active
-                                  ? "bg-gray-100 text-gray-900"
-                                  : "text-gray-700",
-                                "block px-4 py-2 text-sm"
-                              )}
-                            >
-                              Edit
-                            </a>
-                          )}
-                        </Menu.Item>
-                        <Menu.Item>
-                          {({ active }) => (
-                            <a
-                              href="#"
-                              className={classNames(
-                                active
-                                  ? "bg-gray-100 text-gray-900"
-                                  : "text-gray-700",
-                                "block px-4 py-2 text-sm"
-                              )}
-                            >
-                              Cancel
-                            </a>
-                          )}
-                        </Menu.Item>
+                        {(userRole === "admin" ||
+                          (meeting.creatorId &&
+                            currentUserId === meeting.creatorId)) && (
+                          <Menu.Item>
+                            {({ active }) => (
+                              <a
+                                href={`/events/${meeting.id}/edit`}
+                                className={classNames(
+                                  active
+                                    ? "bg-gray-100 text-gray-900"
+                                    : "text-gray-700",
+                                  "block px-4 py-2 text-sm"
+                                )}
+                              >
+                                Edit
+                              </a>
+                            )}
+                          </Menu.Item>
+                        )}
                       </div>
                     </Menu.Items>
                   </Transition>
