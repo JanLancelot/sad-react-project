@@ -369,7 +369,9 @@ export default function Layout({ children }) {
                 <Menu as="div" className="relative">
                   <Menu.Button className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     <span className="sr-only">Open user menu</span>
-                    
+                    <div className="bg-indigo-500 rounded-full h-8 w-8 flex items-center justify-center text-white text-base font-bold mr-2">
+                      {fullName?.charAt(0).toUpperCase()}
+                    </div>
                     <span className="hidden md:flex md:items-center">
                       <span
                         className="ml-2 text-sm font-semibold leading-6 text-gray-900"
