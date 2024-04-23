@@ -6,11 +6,12 @@ import {
   MapPinIcon,
   ClockIcon,
 } from "@heroicons/react/24/solid";
-import { Fragment, useState, useRef } from "react";
-import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
+import { Fragment, useState, useRef, useEffect } from "react";
+import { collection, addDoc, getDocs, query, where, getFirestore } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { Dialog, Transition } from "@headlessui/react";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "./components/AuthContext";
@@ -37,8 +38,23 @@ export default function NewEvent({}) {
   const [mapVisible, setMapVisible] = useState(false);
   const [markedLocation, setMarkedLocation] = useState(null);
   const [eventsForSelectedDate, setEventsForSelectedDate] = useState([]);
-  const auth = useAuth();
-  const user = auth?.user;
+  const [currentUserId, setCurrentUserId] = useState(null);
+
+  const auth = getAuth();
+  const db = getFirestore();
+
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setCurrentUserId(currentUser.uid);
+      } else {
+        setCurrentUserId(null);
+      }
+    });
+
+    return unsubscribe;
+  }, [auth]);
 
   const fetchEventsForSelectedDate = async (date) => {
     try {
@@ -173,7 +189,7 @@ export default function NewEvent({}) {
       department: department,
       rsvpLink: rsvpLink,
       cost: cost,
-      creatorID: user.uid,
+      creatorID: currentUserId,
     };
 
     try {

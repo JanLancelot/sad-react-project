@@ -71,7 +71,7 @@ export default function Layout({ children }) {
     window.location.pathname === "/maritime" ||
     window.location.pathname === "/health-sciences" ||
     window.location.pathname === "/hospitality" ||
-    window.location.pathname === "/reports" ||
+    window.location.pathname === "/reports#" ||
     window.location.pathname === "/dashboard" ||
     window.location.pathname.startsWith("/student/")
   );
