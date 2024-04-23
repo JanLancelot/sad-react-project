@@ -226,32 +226,6 @@ const EventChart = React.memo(() => {
       <div className="bg-white shadow-md rounded-lg p-6">
         <h2 className="text-2xl font-bold mb-4 pt-2">Event Chart</h2>
         {memoizedBlobProvider(memoizedMyPDF)}
-        {memoizedBlobProvider(
-          <Document>
-            <Page size="A4" style={styles.container}>
-              <Text style={styles.header}>Events and Attendants</Text>
-              <Text style={styles.subheader}>
-                Department: {selectedDepartment.join(", ")}
-              </Text>
-              <View style={styles.table}>
-                <View style={[styles.tableRow, styles.tableHeader]}>
-                  <Text style={styles.tableCol}>Event Name</Text>
-                  <Text style={styles.tableCol}>Category</Text>
-                  <Text style={styles.tableCol}>Attendants</Text>
-                </View>
-                {[...pastEvents, ...futureEvents].map((event, index) => (
-                  <View key={index} style={styles.tableRow}>
-                    <Text style={styles.tableCol}>{event.name}</Text>
-                    <Text style={styles.tableCol}>{event.category}</Text>
-                    <Text style={styles.tableCol}>
-                      {event.attendees?.length || 0}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            </Page>
-          </Document>
-        )}
       </div>
     </Layout>
   );
