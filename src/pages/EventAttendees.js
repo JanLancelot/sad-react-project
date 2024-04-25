@@ -72,6 +72,7 @@ function EventAttendees() {
           );
           const attendees = await Promise.all(
             attendeeDocs.map(async (doc) => ({
+              id: doc.id,
               fullName: doc.data().fullName,
               department: doc.data().department,
             }))
@@ -103,7 +104,7 @@ function EventAttendees() {
   }, [currentPage, itemsPerPage, attendeesData, selectedDepartment]);
 
   const handleAttendeeClick = (evalId) => {
-    navigate(`/events/${eventId}/evalform/${evalId}`);
+    navigate(`/${eventId}/${evalId}`);
   };
 
   const onImageDownload = () => {
@@ -198,17 +199,14 @@ function EventAttendees() {
                 </tr>
               </thead>
               <tbody>
-              {filteredAttendeesData.map((attendee, index) => (
+              {filteredAttendeesData.map(({ fullName, department, id }, index) => (
                 <tr key={index} className="border-b border-gray-200">
                   <td className="px-4 py-3">
-                    <Link
-                      to={`/${eventId}/evalId/${attendee.id}`}
-                      onClick={() => handleAttendeeClick(attendee.id)}
-                    >
-                      {attendee.fullName}
+                    <Link to={`/${eventId}/${id}`} onClick={() => handleAttendeeClick(id)}>
+                      {fullName}
                     </Link>
                   </td>
-                  <td className="px-4 py-3">{attendee.department}</td>
+                  <td className="px-4 py-3">{department}</td>
                 </tr>
               ))}
               </tbody>
