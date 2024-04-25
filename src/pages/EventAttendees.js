@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { db } from "../firebaseConfig";
 import { doc, getDoc, collection } from "firebase/firestore";
 import Layout from "./Layout";
@@ -56,6 +56,8 @@ function EventAttendees() {
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [selectedDepartment, setSelectedDepartment] = useState("All");
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchEventData = async () => {
       const docRef = doc(db, "meetings", eventId);
@@ -99,6 +101,10 @@ function EventAttendees() {
       filteredData.slice(indexOfFirstItem, indexOfLastItem)
     );
   }, [currentPage, itemsPerPage, attendeesData, selectedDepartment]);
+
+  const handleAttendeeClick = (attendeeId) => {
+    navigate(`/${eventId}/${attendeeId}`);
+  };
 
   const onImageDownload = () => {
     const svg = document.getElementById("QRCode");
@@ -192,14 +198,16 @@ function EventAttendees() {
                 </tr>
               </thead>
               <tbody>
-                {filteredAttendeesData.map(
-                  ({ fullName, department }, index) => (
-                    <tr key={index} className="border-b border-gray-200">
-                      <td className="px-4 py-3">{fullName}</td>
-                      <td className="px-4 py-3">{department}</td>
-                    </tr>
-                  )
-                )}
+              {filteredAttendeesData.map(({ fullName, department, id }, index) => (
+                <tr key={index} className="border-b border-gray-200">
+                  <td className="px-4 py-3">
+                    <Link to={`/${eventId}/${id}`} onClick={() => handleAttendeeClick(id)}>
+                      {fullName}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3">{department}</td>
+                </tr>
+              ))}
               </tbody>
             </table>
             <div className="flex justify-center mt-6">
