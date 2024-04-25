@@ -30,9 +30,7 @@ const ViewEvalForm = () => {
           if (evalSnapshot.exists()) {
             const evalData = evalSnapshot.data();
             setFormData({
-              ...evalData,
-              fullName: userUid,
-              yearSection: userUid,
+              ...evalData
             });
           } else {
             console.log("Evaluation document does not exist");
