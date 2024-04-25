@@ -102,8 +102,8 @@ function EventAttendees() {
     );
   }, [currentPage, itemsPerPage, attendeesData, selectedDepartment]);
 
-  const handleAttendeeClick = (attendeeId) => {
-    navigate(`/${eventId}/${attendeeId}`);
+  const handleAttendeeClick = (evalId) => {
+    navigate(`/events/${eventId}/evalform/${evalId}`);
   };
 
   const onImageDownload = () => {
@@ -198,14 +198,17 @@ function EventAttendees() {
                 </tr>
               </thead>
               <tbody>
-              {filteredAttendeesData.map(({ fullName, department, id }, index) => (
+              {filteredAttendeesData.map((attendee, index) => (
                 <tr key={index} className="border-b border-gray-200">
                   <td className="px-4 py-3">
-                    <Link to={`/${eventId}/${id}`} onClick={() => handleAttendeeClick(id)}>
-                      {fullName}
+                    <Link
+                      to={`/${eventId}/evalId/${attendee.id}`}
+                      onClick={() => handleAttendeeClick(attendee.id)}
+                    >
+                      {attendee.fullName}
                     </Link>
                   </td>
-                  <td className="px-4 py-3">{department}</td>
+                  <td className="px-4 py-3">{attendee.department}</td>
                 </tr>
               ))}
               </tbody>
