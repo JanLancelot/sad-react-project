@@ -17,6 +17,7 @@ import Reports from "./pages/Reports"
 import Signin from "./pages/Signin";
 import EventAttendees from "./pages/EventAttendees";
 import StudentEventPage from "./pages/components/StudentEventPage"
+import ViewEvalForm from "./pages/ViewEvalForm";
 import { ProtectedRoute } from "./pages/components/ProtectedRoute";
 import { Protected } from "./pages/components/Protected";
 import { AuthContext } from "./pages/components/AuthContext";
@@ -95,6 +96,10 @@ const router = createBrowserRouter([
     path: "/student/:id",
     element: <Protected><StudentEventPage /></Protected>,
   },
+  {
+    path: "/events/:eventId/attendees/evalform/:evalId",
+    element: <Protected><ViewEvalForm /></Protected>
+  }
 ]);
 
 function App() {

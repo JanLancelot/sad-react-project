@@ -104,7 +104,7 @@ function EventAttendees() {
   }, [currentPage, itemsPerPage, attendeesData, selectedDepartment]);
 
   const handleAttendeeClick = (evalId) => {
-    navigate(`/${eventId}/${evalId}`);
+    navigate(`/events/${eventId}/attendees/evalform/${evalId}`);
   };
 
   const onImageDownload = () => {
