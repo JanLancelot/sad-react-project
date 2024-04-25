@@ -202,7 +202,7 @@ function EventAttendees() {
               {filteredAttendeesData.map(({ fullName, department, id }, index) => (
                 <tr key={index} className="border-b border-gray-200">
                   <td className="px-4 py-3">
-                    <Link to={`/${eventId}/${id}`} onClick={() => handleAttendeeClick(id)}>
+                    <Link onClick={() => handleAttendeeClick(id)}>
                       {fullName}
                     </Link>
                   </td>
