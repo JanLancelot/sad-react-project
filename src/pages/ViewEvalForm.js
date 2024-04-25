@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import Layout from "./Layout";
 
 const ViewEvalForm = () => {
+  const git = "";
   const { eventId, evalId } = useParams();
   const [formData, setFormData] = useState({
     fullName: "",
@@ -30,7 +31,7 @@ const ViewEvalForm = () => {
           if (evalSnapshot.exists()) {
             const evalData = evalSnapshot.data();
             setFormData({
-              ...evalData
+              ...evalData,
             });
           } else {
             console.log("Evaluation document does not exist");
@@ -81,7 +82,10 @@ const ViewEvalForm = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
           </div>
-          <div className="mb-4">LEGEND:	Excellent ( 5 )	Very Good ( 4 )	Good ( 3 )	Needs Improvement ( 2 ) Poor ( 1 )</div>
+          <div className="mb-4">
+            LEGEND: Excellent ( 5 ) Very Good ( 4 ) Good ( 3 ) Needs Improvement
+            ( 2 ) Poor ( 1 )
+          </div>
           {ratingLabels.map((label, index) => (
             <div key={index} className="mb-4">
               <label className="block text-gray-700 font-bold mb-2">{`${
