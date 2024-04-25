@@ -45,11 +45,11 @@ const ViewEvalForm = () => {
   }, [eventId, evalId]);
 
   const ratingLabels = [
-    "The activitywas in-line with the DYCI Vision-Mission and core values",
+    "The activity was in-line with the DYCI Vision-Mission and core values",
     "The activity achieved its goals/objectives (or theme)",
-    "The activity met the need of the students",
+    "The activity met the needs of the students",
     "The committees performed their service",
-    "The activity was well-participated by uthe student",
+    "The activity was well-participated by the students",
     "The date and time was appropriate for the activity",
     "The venue was appropriate for the activity",
     "The school resources were properly managed",
@@ -81,6 +81,7 @@ const ViewEvalForm = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
           </div>
+          <div className="mb-4">LEGEND:	Excellent ( 5 )	Very Good ( 4 )	Good ( 3 )	Needs Improvement ( 2 ) Poor ( 1 )</div>
           {ratingLabels.map((label, index) => (
             <div key={index} className="mb-4">
               <label className="block text-gray-700 font-bold mb-2">{`${
@@ -132,7 +133,7 @@ const ViewEvalForm = () => {
           </div>
           <div className="mb-6">
             <label className="block text-gray-700 font-bold mb-2">
-              CORE VALUE APPLIED
+              CORE VALUES APPLIED
             </label>
             <div className="flex flex-wrap">
               <div className="mr-4 mb-2">
@@ -146,7 +147,7 @@ const ViewEvalForm = () => {
                   className="form-checkbox h-4 w-4 text-indigo-600"
                 />
                 <label htmlFor="caritas" className="ml-2 text-gray-700">
-                  CARITAS(Charity)
+                  CARITAS (Charity)
                 </label>
               </div>
               <div className="mr-4 mb-2">
@@ -160,7 +161,7 @@ const ViewEvalForm = () => {
                   className="form-checkbox h-4 w-4 text-indigo-600"
                 />
                 <label htmlFor="sapientia" className="ml-2 text-gray-700">
-                  SAPIENTIA(Wisdom)
+                  SAPIENTIA (Wisdom)
                 </label>
               </div>
               <div className="mr-4 mb-2">
@@ -174,7 +175,7 @@ const ViewEvalForm = () => {
                   className="form-checkbox h-4 w-4 text-indigo-600"
                 />
                 <label htmlFor="veritas" className="ml-2 text-gray-700">
-                  VERITAS(Truth)
+                  VERITAS (Truth)
                 </label>
               </div>
               <div className="mr-4 mb-2">
@@ -188,7 +189,7 @@ const ViewEvalForm = () => {
                   className="form-checkbox h-4 w-4 text-indigo-600"
                 />
                 <label htmlFor="patria" className="ml-2 text-gray-700">
-                  PATRIA(Patriotism)
+                  PATRIA (Patriotism)
                 </label>
               </div>
               <div className="mr-4 mb-2">
@@ -204,7 +205,7 @@ const ViewEvalForm = () => {
                   className="form-checkbox h-4 w-4 text-indigo-600"
                 />
                 <label htmlFor="excellentia" className="ml-2 text-gray-700">
-                  EXCELLENTIA(Excellence)
+                  EXCELLENTIA (Excellence)
                 </label>
               </div>
               <div className="mr-4 mb-2">
@@ -218,7 +219,7 @@ const ViewEvalForm = () => {
                   className="form-checkbox h-4 w-4 text-indigo-600"
                 />
                 <label htmlFor="fides" className="ml-2 text-gray-700">
-                  FIDES(Faith)
+                  FIDES (Faith)
                 </label>
               </div>
             </div>
