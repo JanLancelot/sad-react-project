@@ -208,15 +208,20 @@ function EventAttendees() {
   useEffect(() => {
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const filteredData =
-      selectedDepartment === "All"
-        ? attendeesData
-        : attendeesData.filter(
-            (attendee) => attendee.department === selectedDepartment
-          );
-    setFilteredAttendeesData(
-      filteredData.slice(indexOfFirstItem, indexOfLastItem)
-    );
+
+    if (attendeesData && attendeesData.length > 0) {
+      const filteredData =
+        selectedDepartment === "All"
+          ? attendeesData
+          : attendeesData.filter(
+              (attendee) => attendee.department === selectedDepartment
+            );
+      setFilteredAttendeesData(
+        filteredData.slice(indexOfFirstItem, indexOfLastItem)
+      );
+    } else {
+      setFilteredAttendeesData([]);
+    }
   }, [currentPage, itemsPerPage, attendeesData, selectedDepartment]);
 
   const handleAttendeeClick = (evalId) => {
@@ -489,7 +494,8 @@ function EventAttendees() {
         >
           Download Check-out QR Code
         </button>
-        <AttendanceChart attendeesData={attendeesData} />
+        {attendeesData.length > 0 && <AttendanceChart attendeesData={attendeesData} />}
+        {evaluationData.length > 0 && (
         <div className="mt-8 overflow-x-auto w-full">
           <h2 className="text-xl font-semibold text-gray-700 mb-4">
             Evaluation Ratings
@@ -529,6 +535,7 @@ function EventAttendees() {
             <CoreValuesChart evaluations={evaluations} />
           </div>
         </div>
+        )}
         <div className="flex justify-center">
           <nav>
             <ul className="inline-flex -space-x-px">
