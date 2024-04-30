@@ -18,6 +18,8 @@ import Signin from "./pages/Signin";
 import EventAttendees from "./pages/EventAttendees";
 import StudentEventPage from "./pages/components/StudentEventPage"
 import ViewEvalForm from "./pages/ViewEvalForm";
+import Register from "./pages/Register";
+import SignupStudent from "./pages/SignupStudent";
 import { ProtectedRoute } from "./pages/components/ProtectedRoute";
 import { Protected } from "./pages/components/Protected";
 import { AuthContext } from "./pages/components/AuthContext";
@@ -27,6 +29,14 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Signin />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
+  },
+  {
+    path: "/signup-student",
+    element: <SignupStudent />,
   },
   {
     path: "/dashboard",

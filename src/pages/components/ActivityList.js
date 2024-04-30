@@ -1,7 +1,14 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import StudentTableBody from "./StudentTableBody";
 
 export default function ActivityList({students, meetingCount, department}){
+    const navigate = useNavigate();
+
+    const handleSignupClick = () => {
+        navigate('/signup-student');
+    };
+
     return(
         <div className="border-t border-gray-200 pt-11">
           <h2 className="px-4 text-base font-semibold leading-7 text-gray-900 sm:px-6 lg:px-8">
@@ -51,6 +58,15 @@ export default function ActivityList({students, meetingCount, department}){
             </thead>
             <StudentTableBody students={students} meetingCount={meetingCount} department={department}/>
           </table>
+
+          <div className="mt-8 flex justify-end">
+            <button
+              onClick={handleSignupClick}
+              className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              Sign Up Student
+            </button>
+          </div>
         </div>
-    )
+    );
 }

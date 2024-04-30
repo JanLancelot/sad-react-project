@@ -64,11 +64,23 @@ export default function StudentTableBody({ students, meetingCount, department })
     navigate(`/student/${student.id}`);
   };
 
+  const handleRedirectToSignup = () => {
+    navigate("/signup-student");
+  };
+
   return (
     <div className="border-t border-gray-200 pt-11">
-      <h2 className="px-4 text-base font-semibold leading-7 text-gray-900 sm:px-6 lg:px-8">
-        List of Students
-      </h2>
+      <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
+        <h2 className="text-base font-semibold leading-7 text-gray-900">
+          List of Students
+        </h2>
+        <button
+          onClick={handleRedirectToSignup}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Add New Student
+        </button>
+      </div>
 
       {/* Search Input */}
       <div className="px-4 py-5 sm:px-6">
