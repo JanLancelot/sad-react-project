@@ -7,7 +7,14 @@ import {
   ClockIcon,
 } from "@heroicons/react/24/solid";
 import { Fragment, useState, useRef, useEffect } from "react";
-import { collection, addDoc, getDocs, query, where, getFirestore } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  getFirestore,
+} from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -42,7 +49,6 @@ export default function NewEvent({}) {
 
   const auth = getAuth();
   const db = getFirestore();
-
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -134,15 +140,20 @@ export default function NewEvent({}) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     const errors = {};
     if (!eventName.trim()) {
       errors.eventName = "Event name is required";
     }
     if (!eventDate.trim()) {
       errors.eventDate = "Event date is required";
-    } else if (new Date(eventDate) < new Date()) {
-      errors.eventDate = "Event date must be in the future";
+    } else {
+      const eventDateObj = new Date(eventDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (eventDateObj < today) {
+        errors.eventDate = "Event date cannot be in the past";
+      }
     }
     if (!eventStartTime.trim()) {
       errors.eventStartTime = "Event start time is required";

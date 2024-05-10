@@ -31,13 +31,8 @@ const DepartmentHeader = ({ departmentName, course, dean, stats, secondaryNaviga
               <span className="font-semibold text-gray-900">
                 {departmentName}
               </span>
-              <span className="text-gray-600">/</span>
-              <span className="font-semibold text-gray-900">{course}</span>
             </h1>
           </div>
-          <p className="mt-2 text-xs leading-6 text-gray-600">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit...
-          </p>
         </div>
         <div className="order-first flex-none rounded-full bg-indigo-400/10 px-2 py-1 text-xs font-medium text-indigo-400 ring-1 ring-inset ring-indigo-400/30 sm:order-none">
           {dean}

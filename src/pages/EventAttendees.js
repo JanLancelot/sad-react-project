@@ -122,6 +122,51 @@ function EventAttendees() {
 
   const navigate = useNavigate();
 
+  // Helper function to count core values (updated to sort by count)
+  const countCoreValues = (coreValues) => {
+    const counts = {};
+    coreValues.forEach((value) => {
+      counts[value] = (counts[value] || 0) + 1;
+    });
+
+    // Sort core values by count in descending order
+    const sortedValues = Object.entries(counts)
+      .sort(([, countA], [, countB]) => countB - countA)
+      .map(([name, value]) => ({ name, value }));
+
+    return sortedValues;
+  };
+
+  // Render the CoreValuesChart component (updated to use BarChart)
+  function CoreValuesChart({ evaluations }) {
+    const coreValues = evaluations.flatMap(
+      (evaluation) => evaluation.coreValues
+    );
+    const data = countCoreValues(coreValues);
+    console.log("Counted core values", data);
+
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <table className="w-full table-auto">
+          <thead>
+            <tr className="bg-gray-100 text-gray-700 font-medium">
+              <th className="px-4 py-3 text-left">Core Value</th>
+              <th className="px-4 py-3 text-left">Count</th>
+            </tr>
+          </thead>
+          <tbody className="text-gray-700 font-medium">
+            {data.map((entry, index) => (
+              <tr key={index} className="border-b border-gray-200">
+                <td className="px-4 py-3 text-left">{entry.name}</td>
+                <td className="px-4 py-3 text-left">{entry.value}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
   useEffect(() => {
     const fetchEvaluationData = async () => {
       const promises = attendeesData.map(async (attendee) => {
@@ -152,6 +197,29 @@ function EventAttendees() {
     };
     return { ...attendee, averageRating: evaluation.averageRating };
   });
+
+  const sortAttendees = (attendeesData) => {
+    return attendeesData.sort((a, b) => {
+      if (sortOrder === "asc") {
+        return a.averageRating - b.averageRating;
+      } else {
+        return b.averageRating - a.averageRating;
+      }
+    });
+  };
+
+  useEffect(() => {
+    // Sort mergedAttendeesData by averageRating in ascending order
+    const sortedData = sortAttendees(mergedAttendeesData);
+
+    // Set filteredAttendeesData with the sorted data for the current page
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+    setFilteredAttendeesData(
+      sortedData.slice(indexOfFirstItem, indexOfLastItem)
+    );
+  }, [mergedAttendeesData, currentPage, itemsPerPage, evaluationData]);
 
   useEffect(() => {
     const fetchEventData = async () => {
@@ -247,33 +315,6 @@ function EventAttendees() {
     img.src = `data:image/svg+xml;base64,${btoa(svgData)}`;
   };
 
-  // Helper function to count the core values
-  const countCoreValues = (coreValues) => {
-    const counts = {};
-    coreValues.forEach((value) => {
-      counts[value] = (counts[value] || 0) + 1;
-    });
-    return Object.entries(counts).map(([name, value]) => ({ name, value }));
-  };
-
-  // Render the CoreValuesChart component
-  function CoreValuesChart({ evaluations }) {
-    const coreValues = evaluations.flatMap(
-      (evaluation) => evaluation.coreValues
-    );
-    const data = countCoreValues(coreValues);
-
-    return (
-      <BarChart width={600} height={300} data={data}>
-        <XAxis dataKey="name" />
-        <YAxis />
-        <CartesianGrid strokeDasharray="3 3" />
-        <Tooltip />
-        <Bar dataKey="value" fill="#8884d8" />
-      </BarChart>
-    );
-  }
-
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
@@ -317,16 +358,13 @@ function EventAttendees() {
     );
   }
 
+  // Helper function to sort attendees based on averageRating and sortOrder
+
+  // Handler for sort button clicks
   const handleSortRating = (order) => {
     setSortOrder(order);
-    const sortedData = [...mergedAttendeesData].sort((a, b) => {
-      if (order === "asc") {
-        return a.averageRating - b.averageRating;
-      } else {
-        return b.averageRating - a.averageRating;
-      }
-    });
-
+    // Sort the attendeesData and update filteredAttendeesData
+    const sortedData = sortAttendees(mergedAttendeesData);
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const filteredData =
@@ -386,6 +424,7 @@ function EventAttendees() {
           </div>
           <div className="flex items-center">
             <span className="mr-2">Sort by Rating:</span>
+            {/* Ascending button */}
             <button
               className={`px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                 sortOrder === "asc"
@@ -396,6 +435,7 @@ function EventAttendees() {
             >
               Ascending
             </button>
+            {/* Descending button */}
             <button
               className={`px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                 sortOrder === "desc"
@@ -419,7 +459,8 @@ function EventAttendees() {
                 </tr>
               </thead>
               <tbody>
-                {mergedAttendeesData.map(
+                {/* Iterate over the filteredAttendeesData */}
+                {filteredAttendeesData.map(
                   ({ fullName, department, id, averageRating }, index) => (
                     <tr key={index} className="border-b border-gray-200">
                       <td className="px-4 py-3">
@@ -464,77 +505,90 @@ function EventAttendees() {
         )}
       </div>
       <div className="container mx-auto px-4 py-8 flex flex-col items-center justify-center">
-        <div className="bg-white rounded-lg shadow-md p-6 border-2 border-blue-500">
-          <QRCode
-            size={256}
-            id="QRCode"
-            style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-            value={`${eventId}-checkin`}
-            viewBox={`0 0 256 256`}
-          />
+        <div className="flex flex-col md:flex-row items-center justify-center mb-8">
+          <div className="bg-white rounded-lg shadow-md p-6 border-2 border-blue-500 mr-4 mb-4">
+            <QRCode
+              size={256}
+              id="QRCode"
+              style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+              value={`${eventId}-checkin`}
+              viewBox={`0 0 256 256`}
+            />
+            <button
+              className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full"
+              onClick={() => onImageDownload("checkin")}
+            >
+              Download Check-in QR Code
+            </button>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6 border-2 border-green-500 mb-4">
+            <QRCode
+              size={256}
+              id="QRCode"
+              style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+              value={`${eventId}-checkout`}
+              viewBox={`0 0 256 256`}
+            />
+            <button
+              className="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full"
+              onClick={() => onImageDownload("checkout")}
+            >
+              Download Check-out QR Code
+            </button>
+          </div>
         </div>
-        <button
-          className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          onClick={() => onImageDownload("checkin")}
-        >
-          Download Check-in QR Code
-        </button>
-        <div className="bg-white rounded-lg shadow-md p-6 border-2 border-green-500 mb-4 mt-4">
-          <QRCode
-            size={256}
-            id="QRCode"
-            style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-            value={`${eventId}-checkout`}
-            viewBox={`0 0 256 256`}
-          />
-        </div>
-        <button
-          className="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-          onClick={() => onImageDownload("checkout")}
-        >
-          Download Check-out QR Code
-        </button>
-        {attendeesData.length > 0 && <AttendanceChart attendeesData={attendeesData} />}
+        {attendeesData.length > 0 && (
+          <AttendanceChart attendeesData={attendeesData} />
+        )}
         {evaluationData.length > 0 && (
-        <div className="mt-8 overflow-x-auto w-full">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">
-            Evaluation Ratings
-          </h2>
-          <div className="md:w-auto">
-            <table className="w-full table-auto">
-              <thead>
-                <tr className="bg-gray-100 text-gray-700 font-medium">
-                  <th className="px-4 py-3 text-left">Question</th>
-                  <th className="px-4 py-3 text-left">Average Rating</th>
-                  <th className="px-4 py-3 text-left">Rating Distribution</th>
-                </tr>
-              </thead>
-              <tbody>
-                {averageRatings.map((rating, index) => (
-                  <tr key={index} className="border-b border-gray-200">
-                    <td className="px-4 py-3">{questions[index]}</td>
-                    <td className="px-4 py-3">
-                      <RatingDisplay rating={rating} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <RatingChart
-                        ratings={evaluations.map(
-                          (evaluation) => evaluation.ratings[index]
-                        )}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="container mx-auto px-4 py-8 overflow-x-auto w-full">
+          <div className="mt-8 overflow-x-auto w-full">
             <h2 className="text-xl font-semibold text-gray-700 mb-4">
-              Core Values
+              Evaluation Ratings
             </h2>
-            <CoreValuesChart evaluations={evaluations} />
+            <div className="md:w-auto">
+              <table className="w-full table-auto">
+                <thead>
+                  <tr className="bg-gray-100 text-gray-700 font-medium">
+                    <th className="px-4 py-3 text-left">Question</th>
+                    <th className="px-4 py-3 text-left">Average Rating</th>
+                    <th className="px-4 py-3 text-left">Rating Distribution</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {averageRatings.map((rating, index) => (
+                    <tr key={index} className="border-b border-gray-200">
+                      <td className="px-4 py-3">{questions[index]}</td>
+                      <td className="px-4 py-3">
+                        <RatingDisplay rating={rating} />
+                      </td>
+                      <td className="px-4 py-3">
+                        <RatingChart
+                          ratings={evaluations.map(
+                            (evaluation) => evaluation.ratings[index]
+                          )}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="container mx-auto px-4 py-8 overflow-x-auto w-full">
+              {evaluationData.length > 0 && (
+                <div className="mt-8 overflow-x-auto w-full">
+                  {/* ... Evaluation Ratings table ... */}
+                  <div className="container mx-auto px-4 py-8 overflow-x-auto w-full">
+                    <h2 className="text-xl font-semibold text-gray-700 mb-4">
+                      Most Common Core Values
+                    </h2>
+                    <CoreValuesChart evaluations={evaluations} />{" "}
+                    {/* Render the chart */}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
         )}
         <div className="flex justify-center">
           <nav>

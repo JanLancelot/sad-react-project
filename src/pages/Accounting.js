@@ -6,15 +6,23 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 
 const secondaryNavigation = [
-  { name: 'Computer Studies', href: '/computer-studies', current: false },
-  { name: 'Education', href: '/education', current: false },
-  { name: 'Accountancy', href: '/accountancy', current: true },
-  { name: 'Business Administration', href: '/business-administration', current: false },
-  { name: 'Arts and Sciences', href: '/arts-and-sciences', current: false },
-  { name: 'Maritime', href: '/maritime', current: false },
-  { name: 'Health Sciences', href: '/health-sciences', current: false },
-  { name: 'Hospitality Management and Tourism', href: '/hospitality', current: false },
-]
+  { name: "Computer Studies", href: "/computer-studies", current: false },
+  { name: "Education", href: "/education", current: false },
+  { name: "Accountancy", href: "/accountancy", current: true },
+  {
+    name: "Business Administration",
+    href: "/business-administration",
+    current: false,
+  },
+  { name: "Arts and Sciences", href: "/arts-and-sciences", current: false },
+  { name: "Maritime", href: "/maritime", current: false },
+  { name: "Health Sciences", href: "/health-sciences", current: false },
+  {
+    name: "Hospitality Management and Tourism",
+    href: "/hospitality",
+    current: false,
+  },
+];
 
 const departmentName = "Accountancy Department";
 const deanName = "Accountancy Department Dean";
@@ -31,7 +39,10 @@ export default function Accountancy() {
   useEffect(() => {
     const fetchData = async () => {
       const usersRef = collection(db, "users");
-      const accountancyDepartmentQuery = query(usersRef, where("department", "==", "Accountancy Department"));
+      const accountancyDepartmentQuery = query(
+        usersRef,
+        where("department", "==", "Accountancy Department")
+      );
       const usersSnapshot = await getDocs(accountancyDepartmentQuery);
       const fetchedStudents = usersSnapshot.docs.map((doc) => ({
         ...doc.data(),
@@ -39,8 +50,13 @@ export default function Accountancy() {
       }));
       setStudents(fetchedStudents);
 
-      const meetingsRef = query(collection(db, "meetings"), where("department", "==", "Accountancy Department"));
-      const meetingSnapshot = await getDocs(meetingsRef);
+      // Create a compound query to fetch meetings for both "Maritime department" and "All"
+      const maritimeDepartmentMeetingsQuery = query(
+        collection(db, "meetings"),
+        where("department", "in", ["Accountancy Department", "All"])
+      );
+
+      const meetingSnapshot = await getDocs(maritimeDepartmentMeetingsQuery);
       setMeetingCount(meetingSnapshot.docs.length);
 
       // Fetch department settings
@@ -51,10 +67,12 @@ export default function Accountancy() {
       );
       const departmentSettingsSnapshot = await getDocs(departmentSettingsQuery);
       if (!departmentSettingsSnapshot.empty) {
-        const departmentSettingsData = departmentSettingsSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const departmentSettingsData = departmentSettingsSnapshot.docs.map(
+          (doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          })
+        );
         setDepartmentSettings(departmentSettingsData[0]);
       } else {
         setDepartmentSettings(null);
@@ -76,7 +94,10 @@ export default function Accountancy() {
   }, [students, departmentSettings]);
 
   const attendanceRate = useMemo(() => {
-    const totalAttendance = students.reduce((sum, student) => sum + student.eventsAttended?.length || 0, 0);
+    const totalAttendance = students.reduce(
+      (sum, student) => sum + student.eventsAttended?.length || 0,
+      0
+    );
     return (totalAttendance / (studentCount * meetingCount)) * 100;
   }, [students, meetingCount]);
 
@@ -84,7 +105,10 @@ export default function Accountancy() {
     () => [
       { name: "Total number of students", value: studentCount },
       { name: "Total number of events", value: meetingCount, unit: "" },
-      { name: "Percentage of students with complete requirements", value: `${pCompleteRequirements.toFixed(2)}%` },
+      {
+        name: "Percentage of students with complete requirements",
+        value: `${pCompleteRequirements.toFixed(2)}%`,
+      },
       { name: "Attendance rate", value: `${attendanceRate.toFixed(2)}%` },
     ],
     [studentCount, meetingCount, pCompleteRequirements, attendanceRate]
@@ -102,7 +126,11 @@ export default function Accountancy() {
             dean={deanName}
           />
         </header>
-        <StudentTableBody students={students} meetingCount={meetingCount} department={department} />
+        <StudentTableBody
+          students={students}
+          meetingCount={meetingCount}
+          department={department}
+        />
       </main>
     </Layout>
   );
