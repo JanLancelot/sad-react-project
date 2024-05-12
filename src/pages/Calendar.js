@@ -67,7 +67,7 @@ export default function Calendar() {
         id: doc.id,
       }));
     };
-    fetchMeetings().then(() => {
+    fetchMeetings().then(() => {li
       setRetrievedMeetings(meetings);
     });
   }, []);

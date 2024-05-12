@@ -28,24 +28,28 @@ const navigation = [
     name: "Dashboard",
     href: "/dashboard",
     icon: HomeIcon,
+    current: false,
     current: window.location.pathname === "/",
   },
   {
     name: "Students",
     href: "/computer-studies",
     icon: UsersIcon,
+    current: false,
     current: window.location.pathname === "/students",
   },
   {
     name: "Calendar",
     href: "/calendar",
     icon: CalendarIcon,
+    current: false,
     current: window.location.pathname === "/calendar",
   },
   {
     name: "Reports",
     href: "/reports",
     icon: ChartPieIcon,
+    current: false,
     current: window.location.pathname === "/reports",
   },
 ];
@@ -56,7 +60,22 @@ const teams = [
 ];
 
 function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
+  const currentPath = window.location.pathname;
+  return classes
+    .filter(Boolean)
+    .map((cls) => {
+      if (cls.includes("bg-gray-800")) {
+        const navItem = navigation.find((item) => item.path === currentPath);
+        if (navItem) {
+          return cls.replace(
+            "bg-gray-800",
+            "bg-gray-800 animate-pulse transition-colors duration-500"
+          );
+        }
+      }
+      return cls;
+    })
+    .join(" ");
 }
 
 export default function Layout({ children }) {
@@ -192,7 +211,7 @@ export default function Layout({ children }) {
                                 <a
                                   href={item.href}
                                   className={classNames(
-                                    item.current
+                                    item.path === window.location.pathname
                                       ? "bg-gray-800 text-white"
                                       : "text-gray-400 hover:text-white hover:bg-gray-800",
                                     "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
@@ -272,7 +291,7 @@ export default function Layout({ children }) {
                         <a
                           href={item.href}
                           className={classNames(
-                            item.current
+                            item.path === window.location.pathname
                               ? "bg-gray-800 text-white"
                               : "text-gray-400 hover:text-white hover:bg-gray-800",
                             "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
