@@ -110,6 +110,14 @@ export default function Dashboard() {
     });
   }, []);
 
+  function convertTo12Hour(time) {
+    if (!time) return '';  // Return an empty string if time is undefined or null
+    const [hours, minutes] = time.split(':');
+    const period = +hours < 12 ? 'AM' : 'PM';
+    const hour = +hours % 12 || 12;
+    return `${hour}:${minutes} ${period}`;
+  }
+
   return (
     <Layout>
       <main className="lg:pr-96">
@@ -198,7 +206,7 @@ export default function Dashboard() {
                           </dt>
                           <dd>
                             <time dateTime={meeting.datetime}>
-                              {meeting.date} at {meeting.time}
+                            {meeting.date} at {convertTo12Hour(meeting.startTime)} - {convertTo12Hour(meeting.endTime)}
                             </time>
                           </dd>
                         </div>
