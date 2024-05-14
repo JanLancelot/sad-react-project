@@ -26,7 +26,7 @@ const secondaryNavigation = [
 ];
 
 const departmentName = "Computer Studies";
-const deanName = "Ann Lim";
+const deanName = "Mary Ann Lim";
 
 export default function Students() {
   const [students, setStudents] = useState([]);

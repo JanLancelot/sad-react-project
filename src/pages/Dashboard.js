@@ -119,7 +119,7 @@ export default function Dashboard() {
           </h1>
 
           {/* Sort dropdown */}
-          <Menu as="div" className="relative">
+          {/* <Menu as="div" className="relative">
             <Menu.Button className="flex items-center gap-x-1 text-sm font-medium leading-6 text-gray-800">
               Sort by
               <ChevronUpDownIcon
@@ -165,7 +165,7 @@ export default function Dashboard() {
                 </Menu.Item>
               </Menu.Items>
             </Transition>
-          </Menu>
+          </Menu> */}
         </header>
 
         <main className="">

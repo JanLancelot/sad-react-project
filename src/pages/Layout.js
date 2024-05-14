@@ -45,13 +45,6 @@ const navigation = [
     current: window.location.pathname === "/calendar",
     path: "/calendar",
   },
-  {
-    name: "Reports",
-    href: "/reports",
-    icon: ChartPieIcon,
-    current: window.location.pathname === "/reports",
-    path: "/reports",
-  },
 ];
 
 const teams = [
@@ -101,6 +94,7 @@ export default function Layout({ children }) {
   const db = getFirestore();
   const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
+  const [userRole, setUserRole] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -111,6 +105,7 @@ export default function Layout({ children }) {
 
           if (userDocSnap.exists()) {
             setFullName(userDocSnap.data().fullName);
+            setUserRole(userDocSnap.data().role);
           } else {
             console.log("User document not found");
           }
@@ -119,6 +114,7 @@ export default function Layout({ children }) {
         }
       } else {
         setFullName("");
+        setUserRole("");
       }
     });
 
@@ -134,11 +130,14 @@ export default function Layout({ children }) {
     }
   };
 
+  const isAdmin = userRole === "admin";
+
   const userNavigation = [
-    { name: "Your profile", href: "#" },
-    { name: `Signed in as ${fullName}`, href: "#", disabled: true },
+    ...(isAdmin ? [{ name: "Add New User", href: "/add-user" }] : []),
     { name: "Sign out", href: "#", onClick: handleSignOut },
   ];
+
+  const isReportsVisible = userRole === "admin" || userRole === "osas";
 
   return (
     <>
@@ -295,6 +294,25 @@ export default function Layout({ children }) {
                         </a>
                       </li>
                     ))}
+                    {isReportsVisible && (
+                      <li key="Reports">
+                        <a
+                          href="/reports"
+                          className={classNames(
+                            window.location.pathname === "/reports"
+                              ? "bg-gray-800 text-white"
+                              : "text-gray-400 hover:text-white hover:bg-gray-800",
+                            "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                          )}
+                        >
+                          <ChartPieIcon
+                            className="h-6 w-6 shrink-0"
+                            aria-hidden="true"
+                          />
+                          Reports
+                        </a>
+                      </li>
+                    )}
                   </ul>
                 </li>
                 {/* <li>
