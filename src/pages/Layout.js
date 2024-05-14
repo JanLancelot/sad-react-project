@@ -133,7 +133,7 @@ export default function Layout({ children }) {
   const isAdmin = userRole === "admin";
 
   const userNavigation = [
-    ...(isAdmin ? [{ name: "Add New User", href: "/add-user" }] : []),
+    ...(isAdmin ? [{ name: "Add New User", href: "/register" }] : []),
     { name: "Sign out", href: "#", onClick: handleSignOut },
   ];
 
