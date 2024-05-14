@@ -44,22 +44,24 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
+  
     try {
       const auth = getAuth();
-      const { user } = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
+      const { user } = await createUserWithEmailAndPassword(auth, email, password);
+  
       const db = getFirestore();
-      await setDoc(doc(db, "users", user.uid), {
+      const userRole = role === "College Dean" ? "College Dean" : role;
+      const userData = {
         fullName,
         email,
-        adRole: role,
+        role: userRole,
         ...(role === "College Dean" && { department }),
-      });
+      };
+      await setDoc(doc(db, "users", user.uid), userData);
+  
+      // Update state with the created user information
+      setCreatedUser(userData);
+      setIsRegistered(true);
     } catch (err) {
       setError(err.message);
     }
