@@ -7,15 +7,14 @@ import {
   ChevronRightIcon,
   EllipsisHorizontalIcon,
   MapPinIcon,
+  OfficeBuildingIcon,
+  XMarkIcon,
+  LinkIcon,
+  PlusIcon,
+  BriefcaseIcon,
 } from "@heroicons/react/20/solid";
 import { Menu, Transition, Dialog } from "@headlessui/react";
 import React, { useEffect } from "react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
-import {
-  LinkIcon,
-  PlusIcon,
-  QuestionMarkCircleIcon,
-} from "@heroicons/react/20/solid";
 import { db } from "../firebaseConfig";
 import {
   doc,
@@ -55,8 +54,36 @@ export default function Calendar() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [selectedDepartment, setSelectedDepartment] = useState("");
   const auth = getAuth();
   const db = getFirestore();
+
+  const [secondaryNavigation, setSecondaryNavigation] = useState([
+    { name: "Computer Studies", dval: "CS department", current: true },
+    { name: "Education", dval: "Education Department", current: false },
+    { name: "Accountancy", dval: "Accountancy Department", current: false },
+    {
+      name: "Business Administration",
+      dval: "Business Administration Department",
+      current: false,
+    },
+    {
+      name: "Arts and Sciences",
+      dval: "Arts and Sciences Department",
+      current: false,
+    },
+    { name: "Maritime", dval: "Maritime Department", current: false },
+    {
+      name: "Health Sciences",
+      dval: "Health Sciences Department",
+      current: false,
+    },
+    {
+      name: "Hospitality Management and Tourism",
+      dval: "Hospitality Management and Tourism Department",
+      current: false,
+    },
+  ]);
 
   useEffect(() => {
     const meetingsCollectionRef = collection(db, "meetings");
@@ -67,7 +94,7 @@ export default function Calendar() {
         id: doc.id,
       }));
     };
-    fetchMeetings().then(() => {li
+    fetchMeetings().then(() => {
       setRetrievedMeetings(meetings);
     });
   }, []);
@@ -185,16 +212,19 @@ export default function Calendar() {
   const filteredEvents = retrievedMeetings
     .filter((meeting) => {
       if (!selectedDate) return true; // If no date is selected, show all events
-
       const meetingDate = new Date(meeting.date);
       return (
         meetingDate.getDate() === selectedDate.getDate() &&
         meetingDate.getMonth() === selectedDate.getMonth() &&
-        meetingDate.getFullYear() === selectedDate.getFullYear()
+        meetingDate.getFullYear() === currentYear
       );
     })
     .filter((meeting) =>
       meeting.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter(
+      (meeting) =>
+        selectedDepartment === "" || meeting.department === selectedDepartment
     )
     .sort((a, b) => {
       const dateA = new Date(a.date);
@@ -205,6 +235,15 @@ export default function Calendar() {
         return dateB - dateA;
       }
     });
+
+    function convertTo12Hour(time) {
+      if (!time) return '';  // Return an empty string if time is undefined or null
+      const [hours, minutes] = time.split(':');
+      const period = +hours < 12 ? 'AM' : 'PM';
+      const hour = +hours % 12 || 12;
+      return `${hour}:${minutes} ${period}`;
+    }
+    
 
   return (
     <Layout>
@@ -324,7 +363,7 @@ export default function Calendar() {
             )}
           </div>
           <ol className="mt-4 divide-y divide-gray-100 text-sm leading-6 lg:col-span-7 xl:col-span-8">
-            <div className="mb-4 lg:col-span-7 xl:col-span-8">
+            <div className="flex space-x-2 mb-4 lg:col-span-7 xl:col-span-8">
               <input
                 type="text"
                 placeholder="Search events..."
@@ -332,7 +371,20 @@ export default function Calendar() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="border rounded-md px-3 py-2 w-full"
               />
+              <select
+                value={selectedDepartment}
+                onChange={(e) => setSelectedDepartment(e.target.value)}
+                className="border rounded-md px-3 py-2"
+              >
+                <option value="">All Departments</option>
+                {secondaryNavigation.map((department) => (
+                  <option key={department.dval} value={department.dval}>
+                    {department.name}
+                  </option>
+                ))}
+              </select>
             </div>
+
             {filteredEvents.map((meeting) => (
               <li
                 key={meeting.id}
@@ -344,12 +396,58 @@ export default function Calendar() {
                   className="h-14 w-14 flex-none rounded-full"
                 />
                 <div className="flex-auto">
-                  <Link to={`/events/${meeting.id}/attendees`}>
-                    <h3 className="pr-10 font-semibold text-gray-900 xl:pr-0">
-                      {meeting.name}
-                    </h3>
-                  </Link>
-                  <dl className="mt-2 flex flex-col text-gray-500 xl:flex-row">
+                  <div className="flex justify-between">
+                    <Link to={`/events/${meeting.id}/attendees`}>
+                      <h3 className="pr-10 font-semibold text-gray-900 xl:pr-0">
+                        {meeting.name}
+                      </h3>
+                    </Link>
+                    {(userRole === "admin" ||
+                      (meeting.creatorId &&
+                        currentUserId === meeting.creatorId)) && (
+                      <Menu as="div" className="relative">
+                        <div>
+                          <Menu.Button className="-m-2 flex items-center rounded-full p-2 text-gray-500 hover:text-gray-600">
+                            <span className="sr-only">Open options</span>
+                            <EllipsisHorizontalIcon
+                              className="h-5 w-5"
+                              aria-hidden="true"
+                            />
+                          </Menu.Button>
+                        </div>
+                        <Transition
+                          as={Fragment}
+                          enter="transition ease-out duration-100"
+                          enterFrom="transform opacity-0 scale-95"
+                          enterTo="transform opacity-100 scale-100"
+                          leave="transition ease-in duration-75"
+                          leaveFrom="transform opacity-100 scale-100"
+                          leaveTo="transform opacity-0 scale-95"
+                        >
+                          <Menu.Items className="absolute right-0 z-10 mt-2 w-36 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                            <div className="py-1">
+                              <Menu.Item>
+                                {({ active }) => (
+                                  <a
+                                    href={`/events/${meeting.id}/edit`}
+                                    className={classNames(
+                                      active
+                                        ? "bg-gray-100 text-gray-900"
+                                        : "text-gray-700",
+                                      "block px-4 py-2 text-sm"
+                                    )}
+                                  >
+                                    Edit
+                                  </a>
+                                )}
+                              </Menu.Item>
+                            </div>
+                          </Menu.Items>
+                        </Transition>
+                      </Menu>
+                    )}
+                  </div>
+                  <dl className="mt-2 flex flex-col text-gray-500">
                     <div className="flex items-start space-x-3">
                       <dt className="mt-0.5">
                         <span className="sr-only">Date</span>
@@ -360,12 +458,11 @@ export default function Calendar() {
                       </dt>
                       <dd>
                         <time dateTime={meeting.datetime}>
-                          {meeting.date} at ({meeting.startTime} -{" "}
-                          {meeting.endTime})
+                        {meeting.date} at {convertTo12Hour(meeting.startTime)} - {convertTo12Hour(meeting.endTime)}
                         </time>
                       </dd>
                     </div>
-                    <div className="mt-2 flex items-start space-x-3 xl:ml-3.5 xl:mt-0 xl:border-l xl:border-gray-400 xl:border-opacity-50 xl:pl-3.5">
+                    <div className="mt-2 flex items-start space-x-3">
                       <dt className="mt-0.5">
                         <span className="sr-only">Location</span>
                         <MapPinIcon
@@ -375,55 +472,18 @@ export default function Calendar() {
                       </dt>
                       <dd>{meeting.location}</dd>
                     </div>
+                    <div className="mt-2 flex items-start space-x-3">
+                      <dt className="mt-0.5">
+                        <span className="sr-only">Department</span>
+                        <BriefcaseIcon
+                          className="h-5 w-5 text-gray-400"
+                          aria-hidden="true"
+                        />
+                      </dt>
+                      <dd>{meeting.department}</dd>
+                    </div>
                   </dl>
                 </div>
-                <Menu
-                  as="div"
-                  className="absolute right-0 top-6 xl:relative xl:right-auto xl:top-auto xl:self-center"
-                >
-                  <div>
-                    <Menu.Button className="-m-2 flex items-center rounded-full p-2 text-gray-500 hover:text-gray-600">
-                      <span className="sr-only">Open options</span>
-                      <EllipsisHorizontalIcon
-                        className="h-5 w-5"
-                        aria-hidden="true"
-                      />
-                    </Menu.Button>
-                  </div>
-                  <Transition
-                    as={Fragment}
-                    enter="transition ease-out duration-100"
-                    enterFrom="transform opacity-0 scale-95"
-                    enterTo="transform opacity-100 scale-100"
-                    leave="transition ease-in duration-75"
-                    leaveFrom="transform opacity-100 scale-100"
-                    leaveTo="transform opacity-0 scale-95"
-                  >
-                    <Menu.Items className="absolute right-0 z-10 mt-2 w-36 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      <div className="py-1">
-                        {(userRole === "admin" ||
-                          (meeting.creatorId &&
-                            currentUserId === meeting.creatorId)) && (
-                          <Menu.Item>
-                            {({ active }) => (
-                              <a
-                                href={`/events/${meeting.id}/edit`}
-                                className={classNames(
-                                  active
-                                    ? "bg-gray-100 text-gray-900"
-                                    : "text-gray-700",
-                                  "block px-4 py-2 text-sm"
-                                )}
-                              >
-                                Edit
-                              </a>
-                            )}
-                          </Menu.Item>
-                        )}
-                      </div>
-                    </Menu.Items>
-                  </Transition>
-                </Menu>
               </li>
             ))}
           </ol>

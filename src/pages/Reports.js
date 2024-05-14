@@ -2,10 +2,13 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   getFirestore,
   collection,
+  doc,
+  getDoc,
   getDocs,
   query,
   where,
 } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { pdf, BlobProvider } from "@react-pdf/renderer";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import Layout from "./Layout";
@@ -44,7 +47,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   tableCol: {
-    width: "33.33%", // Change the width to 33.33% for three columns
+    width: "14.28%", // Change the width to 14.28% for seven columns
     borderStyle: "solid",
     borderWidth: 1,
     borderColor: "#dddddd",
@@ -63,7 +66,7 @@ const styles = StyleSheet.create({
 const EventChart = React.memo(() => {
   const [pastEvents, setPastEvents] = useState([]);
   const [futureEvents, setFutureEvents] = useState([]);
-  const [selectedDepartment, setSelectedDepartment] = useState([]);
+  // const [selectedDepartment, setSelectedDepartment] = useState([]);
   const [secondaryNavigation, setSecondaryNavigation] = useState([
     { name: "Computer Studies", dval: "CS department", current: true },
     { name: "Education", dval: "Education Department", current: false },
@@ -90,50 +93,71 @@ const EventChart = React.memo(() => {
       current: false,
     },
   ]);
+  const [dateRange, setDateRange] = useState("month"); // Add this line
+  // const [selectedMonth, setSelectedMonth] = useState(null); // Add this line
+  const [selectedWeek, setSelectedWeek] = useState(null); // Add this line
+  const [userFullName, setUserFullName] = useState("");
+
+  const [events, setEvents] = useState([]);
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
+
 
   const db = getFirestore();
 
-  const handleNavItemClick = useCallback((item) => {
-    setSecondaryNavigation((prevNavigation) =>
-      prevNavigation.map((nav) =>
-        nav.name === item.name
-          ? { ...nav, current: true }
-          : { ...nav, current: false }
-      )
-    );
-    setSelectedDepartment([item.dval]);
-  }, []);
+const handleNavItemClick = useCallback((item) => {
+  setSecondaryNavigation((prevNavigation) =>
+    prevNavigation.map((nav) =>
+      nav.name === item.name ? { ...nav, current: true } : { ...nav, current: false }
+    )
+  );
+  setSelectedDepartment(item.dval);
+}, []);
 
-  const fetchData = useCallback(async () => {
-    const dept = secondaryNavigation
-      .filter((item) => item.current === true)
-      .map((item) => item.dval);
-    setSelectedDepartment(dept);
 
-    const today = new Date();
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const lastDayOfMonth = new Date(
-      today.getFullYear(),
-      today.getMonth() + 1,
-      0
-    );
+useEffect(() => {
+  const fetchUserFullName = async () => {
+    const auth = getAuth();
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDocSnapshot = await getDoc(userDocRef);
+        if (userDocSnapshot.exists()) {
+          setUserFullName(userDocSnapshot.data().fullName);
+        } else {
+          console.log("User document does not exist");
+        }
+      } else {
+        console.log("No user is signed in");
+      }
+    });
+  };
+  fetchUserFullName();
+}, [db]);
 
-    const pastEventsQuery = query(
-      collection(db, "meetings"),
-      where("department", "in", [...dept, "All"]),
-      where("date", ">=", firstDayOfMonth.toISOString().slice(0, 10)),
-      where("date", "<=", lastDayOfMonth.toISOString().slice(0, 10))
-    );
 
-    const pastQuerySnapshot = await getDocs(pastEventsQuery);
-    const pastMeetings = pastQuerySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setPastEvents(pastMeetings);
+const fetchData = useCallback(async () => {
+  const dept = secondaryNavigation.find((item) => item.current)?.dval || "";
+  setSelectedDepartment(dept);
 
-    setFutureEvents([]); // Clear future events since we're only showing past events
-  }, [selectedDepartment, secondaryNavigation, db]);
+  const firstDay = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
+  const lastDay = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
+
+  const eventsQuery = query(
+    collection(db, "meetings"),
+    where("department", "in", [dept, "All"]),
+    where("date", ">=", firstDay.toISOString().slice(0, 10)),
+    where("date", "<=", lastDay.toISOString().slice(0, 10))
+  );
+
+  const querySnapshot = await getDocs(eventsQuery);
+  const eventsData = querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+  setEvents(eventsData);
+}, [db, secondaryNavigation, selectedMonth]);
+
 
   useEffect(() => {
     fetchData();
@@ -149,6 +173,19 @@ const EventChart = React.memo(() => {
     [pastEvents]
   );
 
+  const eventData = useMemo(() =>
+    events.map((event) => ({
+      name: event.name,
+      category: event.category,
+      location: event.location,
+      organizer: event.organizer,
+      attendees: event.attendees?.length || 0,
+      interested: event.interestedCount || 0,
+      notInterested: event.notInterestedUsers?.length || 0,
+    }))
+  , [events]);
+  
+
   const futureEventData = useMemo(
     () =>
       futureEvents.map((event) => ({
@@ -160,45 +197,46 @@ const EventChart = React.memo(() => {
     [futureEvents]
   );
 
-  const memoizedMyPDF = useMemo(
-    () => (
-      <Document>
-        <Page size="A4" style={styles.container}>
-          <Text style={styles.header}>Events and Attendants</Text>
-          <Text style={styles.subheader}>
-            Department: {selectedDepartment.join(", ")}
-          </Text>
-          <View style={styles.table}>
-            <View style={[styles.tableRow, styles.tableHeader]}>
-              <Text style={styles.tableCol}>Event Name</Text>
-              <Text style={styles.tableCol}>Category</Text>
-              <Text style={styles.tableCol}>Attendants</Text>
-            </View>
-            {[...pastEvents, ...futureEvents].map((event, index) => (
-              <View key={index} style={styles.tableRow}>
-                <Text style={styles.tableCol}>{event.name}</Text>
-                <Text style={styles.tableCol}>{event.category}</Text>
-                <Text style={styles.tableCol}>
-                  {event.attendees?.length || 0}
-                </Text>
-              </View>
-            ))}
+  const memoizedMyPDF = useMemo(() => (
+    <Document>
+      <Page size="A4" style={styles.container} orientation="landscape">
+        <Text style={styles.header}>Events and Attendants</Text>
+        <Text style={styles.subheader}>Department: {selectedDepartment}</Text>
+        <View style={styles.table}>
+          <View style={[styles.tableRow, styles.tableHeader]}>
+            <Text style={styles.tableCol}>Event Name</Text>
+            <Text style={styles.tableCol}>Category</Text>
+            <Text style={styles.tableCol}>Location</Text>
+            <Text style={styles.tableCol}>Organizer</Text>
+            <Text style={styles.tableCol}>Attendants</Text>
+            <Text style={styles.tableCol}>Interested</Text>
+            <Text style={styles.tableCol}>Not Interested</Text>
           </View>
-        </Page>
-      </Document>
-    ),
-    [pastEvents, futureEvents, selectedDepartment]
-  );
+          {eventData.map((event, index) => (
+            <View key={index} style={styles.tableRow}>
+              <Text style={styles.tableCol}>{event.name}</Text>
+              <Text style={styles.tableCol}>{event.category}</Text>
+              <Text style={styles.tableCol}>{event.location}</Text>
+              <Text style={styles.tableCol}>{event.organizer}</Text>
+              <Text style={styles.tableCol}>{event.attendees}</Text>
+              <Text style={styles.tableCol}>{event.interested}</Text>
+              <Text style={styles.tableCol}>{event.notInterested}</Text>
+            </View>
+          ))}
+        </View>
+        <Text style={{ marginTop: 20 }}>Prepared by: {userFullName}</Text>
+      </Page>
+    </Document>
+  ), [eventData, selectedDepartment, userFullName]);
 
-  const memoizedBlobProvider = useMemo(
-    () =>
-      memoize((doc) => (
-        <BlobProvider document={doc}>
-          {({ url }) => <iframe src={url} width="100%" height="600" />}
-        </BlobProvider>
-      )),
-    []
-  );
+  const memoizedBlobProvider = useMemo(() =>
+    memoize((doc) => (
+      <BlobProvider document={doc}>
+        {({ url }) => <iframe src={url} width="100%" height="600" />}
+      </BlobProvider>
+    ))
+  , []);
+  
 
   return (
     <Layout>
@@ -222,6 +260,33 @@ const EventChart = React.memo(() => {
             ))}
           </ul>
         </nav>
+        {/* Date range filter */}
+        <div className="mt-4 mx-4 sm:mx-6 lg:mx-8">
+          <label htmlFor="dateRange" className="sr-only">
+            Date range
+          </label>
+          <div className="flex space-x-4">
+            <div>
+              <label
+                htmlFor="month"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Select Month
+              </label>
+              <input
+                id="month"
+                type="month"
+                value={
+                  selectedMonth ? selectedMonth.toISOString().slice(0, 7) : ""
+                }
+                onChange={(e) =>
+                  setSelectedMonth(new Date(e.target.value + "-01"))
+                }
+                className="mt-1 block w-full rounded-md border-gray-300 py-2 px-3 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+              />
+            </div>
+          </div>
+        </div>
       </header>
       <div className="bg-white shadow-md rounded-lg p-6">
         <h2 className="text-2xl font-bold mb-4 pt-2">Event Chart</h2>

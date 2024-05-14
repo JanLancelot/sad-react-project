@@ -289,22 +289,14 @@ export default function Dashboard() {
           <h2 className="text-base font-semibold leading-7 text-gray-800">
             Activity feed
           </h2>
-          <a
-            href="#"
-            className="text-sm font-semibold leading-6 text-indigo-400"
-          >
-            View all
-          </a>
         </header>
         <ul role="list" className="divide-y divide-gray-300">
           {activityItems.map((item) => (
             <li key={item.id} className="px-4 py-4 sm:px-6 lg:px-8">
               <div className="flex items-center gap-x-3">
-                <img
-                  src={item.userImageUrl || "/default-profile.png"} // Default if no image
-                  alt=""
-                  className="h-6 w-6 flex-none rounded-full bg-gray-800"
-                />
+                <div className="bg-indigo-500 rounded-full h-8 w-8 flex items-center justify-center text-white text-base font-bold mr-2">
+                  {item.username?.charAt(0).toUpperCase()}
+                </div>
                 <h3 className="flex-auto truncate text-sm font-semibold leading-6 text-gray-800">
                   {item.username}
                 </h3>

@@ -46,6 +46,8 @@ export default function NewEvent({}) {
   const [markedLocation, setMarkedLocation] = useState(null);
   const [eventsForSelectedDate, setEventsForSelectedDate] = useState([]);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [meetingNames, setMeetingNames] = useState([]);
 
   const auth = getAuth();
   const db = getFirestore();
@@ -62,6 +64,42 @@ export default function NewEvent({}) {
     return unsubscribe;
   }, [auth]);
 
+  useEffect(() => {
+    const fetchMeetingNames = async () => {
+      try {
+        const meetingsCollection = collection(db, "meetings");
+        const querySnapshot = await getDocs(meetingsCollection);
+        const names = querySnapshot.docs.map((doc) => doc.data().name);
+        setMeetingNames(names);
+      } catch (error) {
+        console.error("Error fetching meeting names:", error);
+      }
+    };
+
+    fetchMeetingNames();
+  }, []);
+
+  const filterMeetingNames = (inputValue) => {
+    return meetingNames.filter((name) =>
+      name.toLowerCase().includes(inputValue.toLowerCase())
+    );
+  };
+
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const handleInputChange = (e) => {
+    setEventName(e.target.value);
+    const filteredNames = filterMeetingNames(e.target.value);
+    setSuggestions(filteredNames);
+    setShowSuggestions(filteredNames.length > 0);
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setEventName(suggestion);
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
   const fetchEventsForSelectedDate = async (date) => {
     try {
       const locationsQuery = query(
@@ -121,6 +159,7 @@ export default function NewEvent({}) {
   const handleImageChange = (event) => {
     if (event.target.files && event.target.files[0]) {
       setSelectedImage(event.target.files[0]);
+      setPreviewUrl(URL.createObjectURL(event.target.files[0]));
     }
   };
 
@@ -281,19 +320,34 @@ export default function NewEvent({}) {
                       >
                         Event Name
                       </label>
-                      <div className="mt-2">
+                      <div className="mt-2 relative">
                         <input
                           type="text"
                           name="eventname"
                           id="eventname"
                           value={eventName}
-                          onChange={(e) => setEventName(e.target.value)}
+                          onChange={handleInputChange}
                           className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
                             errors.eventName
                               ? "ring-red-300 focus:ring-red-500"
                               : "ring-gray-300 focus:ring-indigo-600"
                           } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
                         />
+                        {showSuggestions && (
+                          <div className="absolute z-10 w-full bg-white shadow-lg rounded-md mt-1">
+                            {suggestions.map((suggestion, index) => (
+                              <div
+                                key={index}
+                                className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+                                onClick={() =>
+                                  handleSuggestionClick(suggestion)
+                                }
+                              >
+                                {suggestion}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                         {errors.eventName && (
                           <div className="mt-2 text-sm text-red-600">
                             {errors.eventName}
@@ -751,24 +805,29 @@ export default function NewEvent({}) {
                       >
                         Photo
                       </label>
-                      <div className="mt-2 flex items-center gap-x-3">
-                        <UserCircleIcon
-                          className="h-12 w-12 text-gray-300"
-                          aria-hidden="true"
-                        />
-                        <button
-                          type="button"
-                          className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                          onClick={() => fileInputRef.current.click()} // Trigger file input
-                        >
-                          Change
-                        </button>
-                        <input
-                          type="file"
-                          ref={fileInputRef}
-                          onChange={handleImageChange}
-                          className="hidden"
-                        />
+                      <div className="mt-2 flex flex-col items-center gap-x-3">
+                        {previewUrl && (
+                          <img
+                            src={previewUrl}
+                            alt="Preview"
+                            className="mb-4 h-64 w-full object-contain"
+                          />
+                        )}
+                        <div className="flex items-center gap-x-3">
+                          <button
+                            type="button"
+                            className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                            onClick={() => fileInputRef.current.click()}
+                          >
+                            Change
+                          </button>
+                          <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleImageChange}
+                            className="hidden"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

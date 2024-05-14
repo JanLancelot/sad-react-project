@@ -28,31 +28,32 @@ const navigation = [
     name: "Dashboard",
     href: "/dashboard",
     icon: HomeIcon,
-    current: false,
-    current: window.location.pathname === "/",
+    current: window.location.pathname === "/dashboard",
+    path: "/dashboard",
   },
   {
     name: "Students",
     href: "/computer-studies",
     icon: UsersIcon,
-    current: false,
-    current: window.location.pathname === "/students",
+    current: window.location.pathname === "/computer-studies",
+    path: "/computer-studies",
   },
   {
     name: "Calendar",
     href: "/calendar",
     icon: CalendarIcon,
-    current: false,
     current: window.location.pathname === "/calendar",
+    path: "/calendar",
   },
   {
     name: "Reports",
     href: "/reports",
     icon: ChartPieIcon,
-    current: false,
     current: window.location.pathname === "/reports",
+    path: "/reports",
   },
 ];
+
 const teams = [
   { id: 1, name: "Heroicons", href: "#", initial: "H", current: false },
   { id: 2, name: "Tailwind Labs", href: "#", initial: "T", current: false },
@@ -69,7 +70,7 @@ function classNames(...classes) {
         if (navItem) {
           return cls.replace(
             "bg-gray-800",
-            "bg-gray-800 animate-pulse transition-colors duration-500"
+            "bg-gray-800 transition-colors duration-500"
           );
         }
       }
@@ -92,6 +93,7 @@ export default function Layout({ children }) {
     window.location.pathname === "/hospitality" ||
     window.location.pathname === "/reports#" ||
     window.location.pathname === "/dashboard" ||
+    window.location.pathname === "/reports" ||
     window.location.pathname.startsWith("/student/")
   );
 
