@@ -60,8 +60,6 @@ const Register = () => {
         adRole: role,
         ...(role === "College Dean" && { department }),
       });
-
-      navigate("/dashboard");
     } catch (err) {
       setError(err.message);
     }
