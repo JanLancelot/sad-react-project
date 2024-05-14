@@ -128,6 +128,7 @@ export default function Students() {
             stats={stats}
             secondaryNavigation={secondaryNavigation}
             departmentName={departmentName}
+            department={department}
             dean={deanName}
           />
         </header>

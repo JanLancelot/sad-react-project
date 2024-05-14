@@ -104,6 +104,7 @@ export default function Maritime() {
             stats={stats}
             secondaryNavigation={secondaryNavigation}
             departmentName={departmentName}
+            department={department}
             dean={deanName}
           />
         </header>

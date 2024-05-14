@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   tableCol: {
-    width: "14.28%", // Change the width to 14.28% for seven columns
+    width: "12.5%", // Adjusted width for eight columns
     borderStyle: "solid",
     borderWidth: 1,
     borderColor: "#dddddd",
@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
     color: "#333333",
   },
 });
+
 
 const EventChart = React.memo(() => {
   const [pastEvents, setPastEvents] = useState([]);
@@ -151,12 +152,24 @@ const fetchData = useCallback(async () => {
   );
 
   const querySnapshot = await getDocs(eventsQuery);
-  const eventsData = querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
+  const eventsData = await Promise.all(querySnapshot.docs.map(async (doc) => {
+    const evaluationsQuery = collection(doc.ref, "evaluations");
+    const evaluationsSnapshot = await getDocs(evaluationsQuery);
+    const evaluations = evaluationsSnapshot.docs.map((evaluationDoc) => evaluationDoc.data());
+    const averageRating = evaluations.length > 0
+      ? evaluations.reduce((acc, evaluation) => acc + evaluation.averageRating, 0) / evaluations.length
+      : "N/A";
+
+    return {
+      id: doc.id,
+      ...doc.data(),
+      averageRating,
+    };
   }));
   setEvents(eventsData);
 }, [db, secondaryNavigation, selectedMonth]);
+
+
 
 
   useEffect(() => {
@@ -182,6 +195,7 @@ const fetchData = useCallback(async () => {
       attendees: event.attendees?.length || 0,
       interested: event.interestedCount || 0,
       notInterested: event.notInterestedUsers?.length || 0,
+      averageRating: event.averageRating,
     }))
   , [events]);
   
@@ -199,7 +213,7 @@ const fetchData = useCallback(async () => {
 
   const memoizedMyPDF = useMemo(() => (
     <Document>
-      <Page size="A4" style={styles.container} orientation="landscape">
+      <Page size="A3" style={styles.container} orientation="landscape">
         <Text style={styles.header}>Events and Attendants</Text>
         <Text style={styles.subheader}>Department: {selectedDepartment}</Text>
         <View style={styles.table}>
@@ -211,6 +225,7 @@ const fetchData = useCallback(async () => {
             <Text style={styles.tableCol}>Attendants</Text>
             <Text style={styles.tableCol}>Interested</Text>
             <Text style={styles.tableCol}>Not Interested</Text>
+            <Text style={styles.tableCol}>Avg Rating</Text>
           </View>
           {eventData.map((event, index) => (
             <View key={index} style={styles.tableRow}>
@@ -221,6 +236,7 @@ const fetchData = useCallback(async () => {
               <Text style={styles.tableCol}>{event.attendees}</Text>
               <Text style={styles.tableCol}>{event.interested}</Text>
               <Text style={styles.tableCol}>{event.notInterested}</Text>
+              <Text style={styles.tableCol}>{event.averageRating}</Text>
             </View>
           ))}
         </View>
@@ -228,6 +244,8 @@ const fetchData = useCallback(async () => {
       </Page>
     </Document>
   ), [eventData, selectedDepartment, userFullName]);
+  
+  
 
   const memoizedBlobProvider = useMemo(() =>
     memoize((doc) => (

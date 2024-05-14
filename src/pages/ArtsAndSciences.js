@@ -32,7 +32,7 @@ export default function ArtsAndSciences() {
   const [meetingCount, setMeetingCount] = useState(0);
   const [departmentSettings, setDepartmentSettings] = useState(null);
 
-  const department = "Arts and Sciences Department";
+  const department = "Art and Sciences Deparment";
 
   const db = getFirestore();
 
@@ -123,6 +123,7 @@ export default function ArtsAndSciences() {
             stats={stats}
             secondaryNavigation={secondaryNavigation}
             departmentName={departmentName}
+            department={department}
             dean={deanName}
           />
         </header>

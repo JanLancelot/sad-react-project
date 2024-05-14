@@ -123,6 +123,7 @@ export default function Education() {
             stats={stats}
             secondaryNavigation={secondaryNavigation}
             departmentName={departmentName}
+            department={department}
             dean={deanName}
           />
         </header>
