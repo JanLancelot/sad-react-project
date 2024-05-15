@@ -6,6 +6,8 @@ import {
   MapPinIcon,
   ClockIcon,
 } from "@heroicons/react/24/solid";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { Fragment, useState, useRef, useEffect } from "react";
 import {
   collection,
@@ -274,48 +276,6 @@ export default function NewEvent({}) {
       return;
     }
 
-    const handleLocationChange = async (e) => {
-      const inputValue = e.target.value;
-      setLocation(inputValue);
-
-      if (locationType === "off-campus") {
-        try {
-          const response = await axios.get(
-            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-              inputValue
-            )}&format=json`
-          );
-
-          setLocationSuggestions(
-            response.data.map((result) => result.display_name)
-          );
-        } catch (error) {
-          console.error("Error fetching location suggestions:", error);
-          setLocationSuggestions([]);
-        }
-      }
-    };
-
-    const handleLocationSuggestionClick = async (suggestion) => {
-      setLocation(suggestion);
-      setLocationSuggestions([]);
-
-      try {
-        const response = await axios.get(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-            suggestion
-          )}&format=json&limit=1`
-        );
-
-        if (response.data.length > 0) {
-          const { lat, lon } = response.data[0];
-          handleMapMarker(lat, lon);
-        }
-      } catch (error) {
-        console.error("Error fetching location coordinates:", error);
-      }
-    };
-
     const newMeeting = {
       name: eventName,
       date: eventDate,
@@ -387,6 +347,7 @@ export default function NewEvent({}) {
       window.location.href = "/calendar";
     } catch (error) {
       console.error("Error adding meeting:", error);
+      toast.error("Error adding event. Please try again later.");
     }
   };
 
@@ -1048,6 +1009,17 @@ export default function NewEvent({}) {
             </form>
           </div>
         </div>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
       </Layout>
     </>
   );
