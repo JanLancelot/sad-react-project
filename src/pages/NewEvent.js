@@ -542,7 +542,7 @@ export default function NewEvent({}) {
                         </label>
                         <div className="relative mt-2 rounded-md shadow-sm">
                           {locationType === "in-campus" ? (
-                            <div className="flex items-center">
+                            <>
                               <select
                                 id="location"
                                 name="location"
@@ -561,14 +561,16 @@ export default function NewEvent({}) {
                                   </option>
                                 ))}
                               </select>
-                              <button
-                                type="button"
-                                className="ml-2 inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                                onClick={() => setShowLocationModal(true)}
-                              >
-                                Add Location
-                              </button>
-                            </div>
+                              <div className="mt-2">
+                                <button
+                                  type="button"
+                                  className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                  onClick={() => setShowLocationModal(true)}
+                                >
+                                  Add Location
+                                </button>
+                              </div>
+                            </>
                           ) : (
                             <input
                               type="text"
