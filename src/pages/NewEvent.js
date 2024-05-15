@@ -273,6 +273,7 @@ export default function NewEvent({}) {
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
+      toast.error("Error adding an event");
       return;
     }
 
@@ -347,7 +348,6 @@ export default function NewEvent({}) {
       window.location.href = "/calendar";
     } catch (error) {
       console.error("Error adding meeting:", error);
-      toast.error("Error adding event. Please try again later.");
     }
   };
 
