@@ -624,6 +624,14 @@ export default function NewEvent({}) {
                     </div>
 
                     <div className="sm:col-span-6">
+                      {mapVisible && (
+                        <div className="mt-6">
+                          <Map
+                            onMarkerDrag={handleMapMarker}
+                            markedLocation={markedLocation}
+                          />
+                        </div>
+                      )}
                       <div>
                         <label
                           htmlFor="location"
@@ -722,14 +730,6 @@ export default function NewEvent({}) {
                           Add Location
                         </button>
                       </div>
-                      {mapVisible && (
-                        <div className="mt-6">
-                          <Map
-                            onMarkerDrag={handleMapMarker}
-                            markedLocation={markedLocation}
-                          />
-                        </div>
-                      )}
                     </div>
 
                     <div className="sm:col-span-6">

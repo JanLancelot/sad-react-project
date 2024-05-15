@@ -1,19 +1,21 @@
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import pinIcon from './pin-icon.png'; // Import your custom pin icon
+import pinIcon from './pin-icon.png';
 
 const Map = ({ onMarkerDrag, markedLocation }) => {
   const mapRef = useRef(null);
   const markerRef = useRef(null);
 
   useEffect(() => {
+    let map; // Declare map outside initMap to access in cleanup
+
     const initMap = () => {
-      const map = L.map(mapRef.current).setView([14.800859, 120.921863], 15);
+      const initialView = markedLocation || [14.800859, 120.921863]; // Use markedLocation or default
+      map = L.map(mapRef.current).setView(initialView, 15); // Set view during initialization
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
 
       const pinMarkerIcon = L.icon({
@@ -38,12 +40,19 @@ const Map = ({ onMarkerDrag, markedLocation }) => {
       return map;
     };
 
-    const map = initMap();
+    map = initMap(); // Initialize the map
+
+    // Update view whenever markedLocation changes
+    if (markedLocation && map) {
+      map.setView(markedLocation, 15); // Adjust zoom level as needed
+    }
 
     return () => {
-      map.remove();
+      if (map) {
+        map.remove(); // Properly remove the map on cleanup
+      }
     };
-  }, [onMarkerDrag, markedLocation]);
+  }, [onMarkerDrag, markedLocation]); // Include markedLocation in dependency array
 
   return <div ref={mapRef} style={{ width: '100%', height: '400px' }} />;
 };
