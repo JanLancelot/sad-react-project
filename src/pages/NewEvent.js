@@ -721,15 +721,17 @@ export default function NewEvent({}) {
                           </div>
                         </div>
                       </div>
-                      <div className="mt-2">
-                        <button
-                          type="button"
-                          className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                          onClick={() => setShowLocationModal(true)}
-                        >
-                          Add Location
-                        </button>
-                      </div>
+                      {locationType === "off-campus" && (
+                        <div className="mt-2">
+                          <button
+                            type="button"
+                            className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                            onClick={() => setShowLocationModal(true)}
+                          >
+                            Add Location
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     <div className="sm:col-span-6">
@@ -959,7 +961,7 @@ export default function NewEvent({}) {
                         htmlFor="photo"
                         className="block text-sm font-medium leading-6 text-gray-900"
                       >
-                        Photo
+                        Photo <span className="text-red-500">*</span>
                       </label>
                       <div className="mt-2 flex flex-col items-center gap-x-3">
                         {previewUrl && (
