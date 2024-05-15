@@ -26,6 +26,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "./components/AuthContext";
 import Map from "./Map";
+import axios from "axios";
 
 export default function NewEvent({}) {
   const [eventName, setEventName] = useState("");
@@ -51,6 +52,9 @@ export default function NewEvent({}) {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [meetingNames, setMeetingNames] = useState([]);
+
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
+  const locationInputRef = useRef(null);
 
   const auth = getAuth();
   const db = getFirestore();
@@ -270,6 +274,48 @@ export default function NewEvent({}) {
       return;
     }
 
+    const handleLocationChange = async (e) => {
+      const inputValue = e.target.value;
+      setLocation(inputValue);
+
+      if (locationType === "off-campus") {
+        try {
+          const response = await axios.get(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+              inputValue
+            )}&format=json`
+          );
+
+          setLocationSuggestions(
+            response.data.map((result) => result.display_name)
+          );
+        } catch (error) {
+          console.error("Error fetching location suggestions:", error);
+          setLocationSuggestions([]);
+        }
+      }
+    };
+
+    const handleLocationSuggestionClick = async (suggestion) => {
+      setLocation(suggestion);
+      setLocationSuggestions([]);
+
+      try {
+        const response = await axios.get(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+            suggestion
+          )}&format=json&limit=1`
+        );
+
+        if (response.data.length > 0) {
+          const { lat, lon } = response.data[0];
+          handleMapMarker(lat, lon);
+        }
+      } catch (error) {
+        console.error("Error fetching location coordinates:", error);
+      }
+    };
+
     const newMeeting = {
       name: eventName,
       date: eventDate,
@@ -307,8 +353,8 @@ export default function NewEvent({}) {
             newMeeting.longitude = 120.92779066343971;
             break;
           default:
-            newMeeting.latitude = null;
-            newMeeting.longitude = null;
+            newMeeting.latitude = 14.80114618770356;
+            newMeeting.longitude = 120.92159439914742;
         }
       } else {
         newMeeting.latitude = markedLocation?.lat;
@@ -344,6 +390,48 @@ export default function NewEvent({}) {
     }
   };
 
+  const handleLocationChange = async (e) => {
+    const inputValue = e.target.value;
+    setLocation(inputValue);
+
+    if (locationType === "off-campus") {
+      try {
+        const response = await axios.get(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+            inputValue
+          )}&format=json`
+        );
+
+        setLocationSuggestions(
+          response.data.map((result) => result.display_name)
+        );
+      } catch (error) {
+        console.error("Error fetching location suggestions:", error);
+        setLocationSuggestions([]);
+      }
+    }
+  };
+
+  const handleLocationSuggestionClick = async (suggestion) => {
+    setLocation(suggestion);
+    setLocationSuggestions([]);
+
+    try {
+      const response = await axios.get(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+          suggestion
+        )}&format=json&limit=1`
+      );
+
+      if (response.data.length > 0) {
+        const { lat, lon } = response.data[0];
+        handleMapMarker(lat, lon);
+      }
+    } catch (error) {
+      console.error("Error fetching location coordinates:", error);
+    }
+  };
+
   return (
     <>
       <Layout>
@@ -361,7 +449,7 @@ export default function NewEvent({}) {
                         htmlFor="eventname"
                         className="block text-sm font-medium leading-6 text-gray-900"
                       >
-                        Event Name
+                        Event Name <span className="text-red-500">*</span>
                       </label>
                       <div className="mt-2 relative">
                         <input
@@ -404,7 +492,7 @@ export default function NewEvent({}) {
                         htmlFor="eventdate"
                         className="block text-sm font-medium leading-6 text-gray-900"
                       >
-                        Event Date
+                        Event Date <span className="text-red-500">*</span>
                       </label>
                       <div className="mt-2">
                         <input
@@ -484,7 +572,7 @@ export default function NewEvent({}) {
                         htmlFor="eventstarttime"
                         className="block text-sm font-medium leading-6 text-gray-900"
                       >
-                        Event Start Time
+                        Event Start Time <span className="text-red-500">*</span>
                       </label>
                       <div className="mt-2">
                         <input
@@ -512,7 +600,7 @@ export default function NewEvent({}) {
                         htmlFor="eventendtime"
                         className="block text-sm font-medium leading-6 text-gray-900"
                       >
-                        Event End Time
+                        Event End Time <span className="text-red-500">*</span>
                       </label>
                       <div className="mt-2">
                         <input
@@ -541,7 +629,8 @@ export default function NewEvent({}) {
                           htmlFor="location"
                           className="block text-sm font-medium leading-6 text-gray-900"
                         >
-                          {locationType === "in-campus" ? "Venue" : "Location"}
+                          {locationType === "in-campus" ? "Venue" : "Location"}{" "}
+                          <span className="text-red-500">*</span>
                         </label>
                         <div className="relative mt-2 rounded-md shadow-sm">
                           {locationType === "in-campus" ? (
@@ -566,19 +655,41 @@ export default function NewEvent({}) {
                               </select>
                             </>
                           ) : (
-                            <input
-                              type="text"
-                              name="location"
-                              id="location"
-                              className={`block w-full rounded-md border-0 py-1.5 pr-20 text-gray-900 ring-1 ring-inset ${
-                                errors.location
-                                  ? "ring-red-300 focus:ring-red-500"
-                                  : "ring-gray-300 focus:ring-indigo-600"
-                              } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
-                              placeholder="Enter a location"
-                              value={location}
-                              onChange={(e) => setLocation(e.target.value)}
-                            />
+                            <>
+                              <input
+                                type="text"
+                                name="location"
+                                id="location"
+                                ref={locationInputRef}
+                                value={location}
+                                onChange={handleLocationChange}
+                                className={`block w-full rounded-md border-0 py-1.5 pr-20 text-gray-900 ring-1 ring-inset ${
+                                  errors.location
+                                    ? "ring-red-300 focus:ring-red-500"
+                                    : "ring-gray-300 focus:ring-indigo-600"
+                                } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
+                                placeholder="Enter a location"
+                              />
+                              {locationSuggestions.length > 0 && (
+                                <div className="absolute z-10 w-full bg-white shadow-lg rounded-md mt-1">
+                                  {locationSuggestions.map(
+                                    (suggestion, index) => (
+                                      <div
+                                        key={index}
+                                        className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+                                        onClick={() =>
+                                          handleLocationSuggestionClick(
+                                            suggestion
+                                          )
+                                        }
+                                      >
+                                        {suggestion}
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              )}
+                            </>
                           )}
                           {errors.location && (
                             <div className="mt-2 text-sm text-red-600">
@@ -626,7 +737,7 @@ export default function NewEvent({}) {
                         htmlFor="description"
                         className="block text-sm font-medium leading-6 text-gray-900"
                       >
-                        Description
+                        Description <span className="text-red-500">*</span>
                       </label>
                       <div className="mt-2">
                         <textarea
@@ -654,7 +765,8 @@ export default function NewEvent({}) {
                         htmlFor="organizer"
                         className="block text-sm font-medium leading-6 text-gray-900"
                       >
-                        Organizer/Contact
+                        Organizer/Contact{" "}
+                        <span className="text-red-500">*</span>
                       </label>
                       <div className="mt-2">
                         <input
@@ -682,7 +794,7 @@ export default function NewEvent({}) {
                         htmlFor="category"
                         className="block text-sm font-medium leading-6 text-gray-900"
                       >
-                        Category
+                        Category <span className="text-red-500">*</span>
                       </label>
                       <div className="mt-2">
                         <select
@@ -714,7 +826,7 @@ export default function NewEvent({}) {
                         htmlFor="cost"
                         className="block text-sm font-medium leading-6 text-gray-900"
                       >
-                        Cost <span className="text-red-500">*</span>
+                        Cost
                       </label>
                       <div className="mt-2">
                         <input
@@ -770,7 +882,7 @@ export default function NewEvent({}) {
                           htmlFor="location"
                           className="block text-sm font-medium leading-6 text-gray-900"
                         >
-                          Department
+                          Department <span className="text-red-500">*</span>
                         </label>
                         <div className="relative mt-2 rounded-md shadow-sm">
                           <select
