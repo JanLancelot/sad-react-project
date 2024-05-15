@@ -9,8 +9,11 @@ import {
 import { Fragment, useState, useRef, useEffect } from "react";
 import {
   collection,
+  doc,
   addDoc,
   getDocs,
+  setDoc,
+  Timestamp,
   query,
   where,
   getFirestore,
@@ -63,6 +66,43 @@ export default function NewEvent({}) {
 
     return unsubscribe;
   }, [auth]);
+
+  const [inCampusLocations, setInCampusLocations] = useState([]);
+
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const locationsSnapshot = await getDocs(collection(db, "locations"));
+        const locations = locationsSnapshot.docs.map((doc) => doc.data().name);
+        setInCampusLocations(locations);
+      } catch (error) {
+        console.error("Error fetching locations:", error);
+      }
+    };
+
+    fetchLocations();
+  }, []);
+
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [newLocation, setNewLocation] = useState("");
+
+  const handleAddLocation = async () => {
+    if (newLocation.trim() === "") return;
+
+    try {
+      const locationsRef = collection(db, "locations");
+      await setDoc(doc(locationsRef), {
+        name: newLocation,
+        createdAt: Timestamp.now(),
+      });
+
+      setNewLocation("");
+      setShowLocationModal(false);
+      // You can optionally fetch the updated locations here
+    } catch (error) {
+      console.error("Error adding location:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchMeetingNames = async () => {
@@ -514,21 +554,11 @@ export default function NewEvent({}) {
                               } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
                             >
                               <option value="">Select a Location</option>
-                              <option
-                                value="Sapientia Building"
-                                key="Sapientia Building"
-                              >
-                                Sapientia Building
-                              </option>
-                              <option
-                                value="Elementary Court"
-                                key="Elementary Court"
-                              >
-                                Elementary Court
-                              </option>
-                              <option value="Main Court" key="Main Court">
-                                Main Court
-                              </option>
+                              {inCampusLocations.map((location) => (
+                                <option key={location} value={location}>
+                                  {location}
+                                </option>
+                              ))}
                             </select>
                           ) : (
                             <input
@@ -667,6 +697,34 @@ export default function NewEvent({}) {
 
                     <div className="sm:col-span-3">
                       <label
+                        htmlFor="cost"
+                        className="block text-sm font-medium leading-6 text-gray-900"
+                      >
+                        Cost <span className="text-red-500">*</span>
+                      </label>
+                      <div className="mt-2">
+                        <input
+                          type="text"
+                          name="cost"
+                          id="cost"
+                          value={cost || "0"} // Set the default value to 0
+                          onChange={(e) => setCost(e.target.value)}
+                          className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
+                            errors.cost
+                              ? "ring-red-300 focus:ring-red-500"
+                              : "ring-gray-300 focus:ring-indigo-600"
+                          } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
+                        />
+                        {errors.cost && (
+                          <div className="mt-2 text-sm text-red-600">
+                            {errors.cost}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="sm:col-span-3">
+                      <label
                         htmlFor="rsvpLink"
                         className="block text-sm font-medium leading-6 text-gray-900"
                       >
@@ -688,34 +746,6 @@ export default function NewEvent({}) {
                         {errors.rsvpLink && (
                           <div className="mt-2 text-sm text-red-600">
                             {errors.rsvpLink}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="sm:col-span-3">
-                      <label
-                        htmlFor="cost"
-                        className="block text-sm font-medium leading-6 text-gray-900"
-                      >
-                        Cost
-                      </label>
-                      <div className="mt-2">
-                        <input
-                          type="text"
-                          name="cost"
-                          id="cost"
-                          value={cost}
-                          onChange={(e) => setCost(e.target.value)}
-                          className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
-                            errors.cost
-                              ? "ring-red-300 focus:ring-red-500"
-                              : "ring-gray-300 focus:ring-indigo-600"
-                          } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
-                        />
-                        {errors.cost && (
-                          <div className="mt-2 text-sm text-red-600">
-                            {errors.cost}
                           </div>
                         )}
                       </div>
@@ -832,7 +862,6 @@ export default function NewEvent({}) {
                     </div>
                   </div>
                 </div>
-
                 {errors.general && (
                   <div className="mt-2 text-sm text-red-600">
                     {errors.general}
@@ -843,6 +872,7 @@ export default function NewEvent({}) {
                   <button
                     type="button"
                     className="text-sm font-semibold leading-6 text-gray-900"
+                    onClick={() => (window.location.href = "/calendar")}
                   >
                     Cancel
                   </button>
@@ -854,6 +884,39 @@ export default function NewEvent({}) {
                   </button>
                 </div>
               </div>
+              {showLocationModal && (
+                <div className="fixed inset-0 z-10 overflow-y-auto">
+                  <div className="flex min-h-screen items-center justify-center px-4 text-center">
+                    <div className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                      <div className="mt-2">
+                        <input
+                          type="text"
+                          value={newLocation}
+                          onChange={(e) => setNewLocation(e.target.value)}
+                          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          placeholder="Enter new location"
+                        />
+                      </div>
+                      <div className="mt-4 flex justify-end">
+                        <button
+                          type="button"
+                          className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+                          onClick={handleAddLocation}
+                        >
+                          Add Location
+                        </button>
+                        <button
+                          type="button"
+                          className="ml-2 inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                          onClick={() => setShowLocationModal(false)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </form>
           </div>
         </div>

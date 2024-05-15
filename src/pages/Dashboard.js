@@ -77,33 +77,52 @@ export default function Dashboard() {
 
   useEffect(() => {
     const meetingsCollectionRef = collection(db, "meetings");
-
+  
     const calculateNextWeekRange = () => {
       const now = new Date();
       const startOfWeek = new Date(now);
       startOfWeek.setDate(startOfWeek.getDate() + 1);
       startOfWeek.setHours(0, 0, 0, 0);
-
+  
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(endOfWeek.getDate() + 7);
       endOfWeek.setHours(23, 59, 59, 999);
-
+  
       return { startOfWeek, endOfWeek };
     };
-
+  
     const fetchMeetings = async () => {
       const { startOfWeek, endOfWeek } = calculateNextWeekRange();
-
-      const q = query(
+  
+      const nextWeekQuery = query(
         meetingsCollectionRef,
         where("date", ">=", startOfWeek.toISOString()),
         where("date", "<=", endOfWeek.toISOString())
       );
-
-      const data = await getDocs(q);
-      meetings = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+  
+      const currentDayQuery = query(
+        meetingsCollectionRef,
+        where("date", "==", new Date().toISOString().split("T")[0])
+      );
+  
+      const [nextWeekData, currentDayData] = await Promise.all([
+        getDocs(nextWeekQuery),
+        getDocs(currentDayQuery),
+      ]);
+  
+      const nextWeekMeetings = nextWeekData.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+  
+      const currentDayMeetings = currentDayData.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+  
+      meetings = [...nextWeekMeetings, ...currentDayMeetings];
     };
-
+  
     fetchActivityFeed();
     fetchMeetings().then(() => {
       setRetrievedMeetings(meetings);
@@ -111,9 +130,9 @@ export default function Dashboard() {
   }, []);
 
   function convertTo12Hour(time) {
-    if (!time) return '';  // Return an empty string if time is undefined or null
-    const [hours, minutes] = time.split(':');
-    const period = +hours < 12 ? 'AM' : 'PM';
+    if (!time) return "";
+    const [hours, minutes] = time.split(":");
+    const period = +hours < 12 ? "AM" : "PM";
     const hour = +hours % 12 || 12;
     return `${hour}:${minutes} ${period}`;
   }
@@ -206,7 +225,9 @@ export default function Dashboard() {
                           </dt>
                           <dd>
                             <time dateTime={meeting.datetime}>
-                            {meeting.date} at {convertTo12Hour(meeting.startTime)} - {convertTo12Hour(meeting.endTime)}
+                              {meeting.date} at{" "}
+                              {convertTo12Hour(meeting.startTime)} -{" "}
+                              {convertTo12Hour(meeting.endTime)}
                             </time>
                           </dd>
                         </div>
