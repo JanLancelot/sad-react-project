@@ -542,24 +542,33 @@ export default function NewEvent({}) {
                         </label>
                         <div className="relative mt-2 rounded-md shadow-sm">
                           {locationType === "in-campus" ? (
-                            <select
-                              id="location"
-                              name="location"
-                              value={location}
-                              onChange={(e) => setLocation(e.target.value)}
-                              className={`block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ${
-                                errors.location
-                                  ? "ring-red-300 focus:ring-red-500"
-                                  : "ring-gray-300 focus:ring-indigo-600"
-                              } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
-                            >
-                              <option value="">Select a Location</option>
-                              {inCampusLocations.map((location) => (
-                                <option key={location} value={location}>
-                                  {location}
-                                </option>
-                              ))}
-                            </select>
+                            <div className="flex items-center">
+                              <select
+                                id="location"
+                                name="location"
+                                value={location}
+                                onChange={(e) => setLocation(e.target.value)}
+                                className={`block w-full rounded-md border-0 py-1.5 pl-3 text-gray-900 ring-1 ring-inset ${
+                                  errors.location
+                                    ? "ring-red-300 focus:ring-red-500"
+                                    : "ring-gray-300 focus:ring-indigo-600"
+                                } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
+                              >
+                                <option value="">Select a Location</option>
+                                {inCampusLocations.map((location) => (
+                                  <option key={location} value={location}>
+                                    {location}
+                                  </option>
+                                ))}
+                              </select>
+                              <button
+                                type="button"
+                                className="ml-2 inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                onClick={() => setShowLocationModal(true)}
+                              >
+                                Add Location
+                              </button>
+                            </div>
                           ) : (
                             <input
                               type="text"
