@@ -91,14 +91,17 @@ export default function NewEvent({}) {
 
     try {
       const locationsRef = collection(db, "locations");
-      await setDoc(doc(locationsRef), {
-        name: newLocation,
-        createdAt: Timestamp.now(),
-      });
+      await addDoc(locationsRef, { name: newLocation });
 
+      // Fetch the updated list of locations
+      const locationsSnapshot = await getDocs(locationsRef);
+      const updatedLocations = locationsSnapshot.docs.map(
+        (doc) => doc.data().name
+      );
+
+      setInCampusLocations(updatedLocations);
       setNewLocation("");
       setShowLocationModal(false);
-      // You can optionally fetch the updated locations here
     } catch (error) {
       console.error("Error adding location:", error);
     }
@@ -561,15 +564,6 @@ export default function NewEvent({}) {
                                   </option>
                                 ))}
                               </select>
-                              <div className="mt-2">
-                                <button
-                                  type="button"
-                                  className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                                  onClick={() => setShowLocationModal(true)}
-                                >
-                                  Add Location
-                                </button>
-                              </div>
                             </>
                           ) : (
                             <input
@@ -607,6 +601,15 @@ export default function NewEvent({}) {
                             </select>
                           </div>
                         </div>
+                      </div>
+                      <div className="mt-2">
+                        <button
+                          type="button"
+                          className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                          onClick={() => setShowLocationModal(true)}
+                        >
+                          Add Location
+                        </button>
                       </div>
                       {mapVisible && (
                         <div className="mt-6">
