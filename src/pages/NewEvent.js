@@ -264,12 +264,6 @@ export default function NewEvent({}) {
     if (!department) {
       errors.department = "Department is required";
     }
-    if (!rsvpLink.trim()) {
-      errors.rsvpLink = "RSVP/Registration Link is required";
-    }
-    if (!cost.trim()) {
-      errors.cost = "Cost is required";
-    }
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
