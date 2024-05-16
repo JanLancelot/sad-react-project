@@ -682,7 +682,7 @@ export default function NewEvent({}) {
                           </div>
                         </div>
                       </div>
-                      {locationType === "off-campus" && (
+                      {locationType === "in-campus" && (
                         <div className="mt-2">
                           <button
                             type="button"
