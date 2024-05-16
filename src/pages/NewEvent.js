@@ -973,7 +973,7 @@ export default function NewEvent({}) {
                   </button>
                 </div>
               </div>
-              {!showLocationModal && (
+              {showLocationModal && (
                 <div className="fixed inset-0 z-10 overflow-y-auto">
                   <div className="flex min-h-screen items-center justify-center px-4 text-center">
                     <div className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
