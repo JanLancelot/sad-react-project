@@ -92,26 +92,26 @@ export default function NewEvent({}) {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [newLocation, setNewLocation] = useState("");
 
-  const handleAddLocation = async () => {
-    if (newLocation.trim() === "") return;
+const handleAddLocation = async () => {
+  if (newLocation.trim() === "") return;
 
-    try {
-      const locationsRef = collection(db, "locations");
-      await addDoc(locationsRef, { name: newLocation });
+  try {
+    const locationsRef = collection(db, "locations");
+    const docRef = await addDoc(locationsRef, { name: newLocation });
 
-      // Fetch the updated list of locations
-      const locationsSnapshot = await getDocs(locationsRef);
-      const updatedLocations = locationsSnapshot.docs.map(
-        (doc) => doc.data().name
-      );
+    // Fetch the updated list of locations
+    const locationsSnapshot = await getDocs(locationsRef);
+    const updatedLocations = locationsSnapshot.docs.map((doc) => doc.data().name);
 
-      setInCampusLocations(updatedLocations);
-      setNewLocation("");
-      setShowLocationModal(false);
-    } catch (error) {
-      console.error("Error adding location:", error);
-    }
-  };
+    setInCampusLocations(updatedLocations);
+    setLocation(newLocation); // Set the newly added location as the selected location
+    setNewLocation("");
+    setShowLocationModal(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to the top of the page
+  } catch (error) {
+    console.error("Error adding location:", error);
+  }
+};
 
   useEffect(() => {
     const fetchMeetingNames = async () => {
