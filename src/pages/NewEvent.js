@@ -80,7 +80,7 @@ export default function NewEvent({}) {
     const fetchEvaluations = async () => {
       try {
         const evaluationsSnapshot = await getDocs(
-          collection(db, "evaluations")
+          collection(db, "evaluationForms")
         );
         const evaluationsData = evaluationsSnapshot.docs.map((doc) => ({
           id: doc.id,
