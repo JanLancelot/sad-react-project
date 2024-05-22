@@ -88,7 +88,7 @@ const router = createBrowserRouter([
     element: <Protected><DepartmentSettings /></Protected>,
   },
   {
-    path: "/evualuation-form-manager",
+    path: "/evaluation-form-manager",
     element: <Protected><EvaluationFormManager /></Protected>,
   },
   {

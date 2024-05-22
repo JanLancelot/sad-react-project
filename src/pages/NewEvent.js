@@ -73,6 +73,28 @@ export default function NewEvent({}) {
     return unsubscribe;
   }, [auth]);
 
+  const [evaluations, setEvaluations] = useState([]);
+  const [selectedEvaluation, setSelectedEvaluation] = useState("");
+
+  useEffect(() => {
+    const fetchEvaluations = async () => {
+      try {
+        const evaluationsSnapshot = await getDocs(
+          collection(db, "evaluations")
+        );
+        const evaluationsData = evaluationsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setEvaluations(evaluationsData);
+      } catch (error) {
+        console.error("Error fetching evaluations:", error);
+      }
+    };
+
+    fetchEvaluations();
+  }, []);
+
   const [inCampusLocations, setInCampusLocations] = useState([]);
 
   useEffect(() => {
@@ -92,25 +114,27 @@ export default function NewEvent({}) {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [newLocation, setNewLocation] = useState("");
 
-const handleAddLocation = async () => {
-  if (newLocation.trim() === "") return;
+  const handleAddLocation = async () => {
+    if (newLocation.trim() === "") return;
 
-  try {
-    const locationsRef = collection(db, "locations");
-    const docRef = await addDoc(locationsRef, { name: newLocation });
+    try {
+      const locationsRef = collection(db, "locations");
+      const docRef = await addDoc(locationsRef, { name: newLocation });
 
-    const locationsSnapshot = await getDocs(locationsRef);
-    const updatedLocations = locationsSnapshot.docs.map((doc) => doc.data().name);
+      const locationsSnapshot = await getDocs(locationsRef);
+      const updatedLocations = locationsSnapshot.docs.map(
+        (doc) => doc.data().name
+      );
 
-    setInCampusLocations(updatedLocations);
-    setLocation(newLocation);
-    setNewLocation("");
-    setShowLocationModal(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  } catch (error) {
-    console.error("Error adding location:", error);
-  }
-};
+      setInCampusLocations(updatedLocations);
+      setLocation(newLocation);
+      setNewLocation("");
+      setShowLocationModal(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (error) {
+      console.error("Error adding location:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchMeetingNames = async () => {
@@ -283,6 +307,7 @@ const handleAddLocation = async () => {
       rsvpLink: rsvpLink,
       cost: cost,
       creatorID: currentUserId,
+      evaluationId: selectedEvaluation,
     };
 
     try {
@@ -908,6 +933,34 @@ const handleAddLocation = async () => {
                             </div>
                           )}
                         </div>
+                      </div>
+                    </div>
+                    <div className="sm:col-span-3">
+                      <label
+                        htmlFor="evaluation"
+                        className="block text-sm font-medium leading-6 text-gray-900"
+                      >
+                        Evaluation
+                      </label>
+                      <div className="mt-2">
+                        <select
+                          id="evaluation"
+                          name="evaluation"
+                          value={selectedEvaluation}
+                          onChange={(e) =>
+                            setSelectedEvaluation(e.target.value)
+                          }
+                          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        >
+                          <option value="">
+                            Select an Evaluation (Optional)
+                          </option>
+                          {evaluations.map((evaluation) => (
+                            <option key={evaluation.id} value={evaluation.id}>
+                              {evaluation.title}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                     <div className="col-span-full">
