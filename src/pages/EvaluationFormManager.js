@@ -4,15 +4,24 @@ import { db } from '../firebaseConfig';
 
 const EvaluationFormManager = () => {
   const [formData, setFormData] = useState({
+    name: '',
     questions: [],
     values: [],
     essayQuestions: [],
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     setIsLoading(false);
   }, []);
+
+  const handleNameChange = (e) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      name: e.target.value,
+    }));
+  };
 
   const handleQuestionChange = (index, value) => {
     setFormData((prevData) => ({
@@ -82,11 +91,18 @@ const EvaluationFormManager = () => {
   };
 
   const handleSaveForm = async () => {
+    if (!formData.name) {
+      setError('Evaluation name is required');
+      return;
+    }
+
     try {
       const formCollectionRef = collection(db, 'evaluationForms');
       await addDoc(formCollectionRef, formData);
+      setError(null);
     } catch (error) {
       console.error('Error saving form:', error);
+      setError('Error saving form');
     }
   };
 
@@ -97,6 +113,16 @@ const EvaluationFormManager = () => {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
       <h2 className="text-2xl font-semibold mb-4">Create New Evaluation Form</h2>
+      <div className="mb-6">
+        <label className="block text-lg font-medium mb-2">Evaluation Name</label>
+        <input
+          type="text"
+          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={formData.name}
+          onChange={handleNameChange}
+        />
+      </div>
+      {error && <div className="mb-4 text-red-500">{error}</div>}
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-2">Questions</h3>
         {formData.questions.map((question, index) => (
