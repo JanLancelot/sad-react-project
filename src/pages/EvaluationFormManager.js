@@ -99,51 +99,74 @@ const EvaluationFormManager = () => {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
   return (
-    <div>
-      <h2>{formId ? 'Update Evaluation Form' : 'Create New Evaluation Form'}</h2>
-      <div>
-        <h3>Questions</h3>
+    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
+      <h2 className="text-2xl font-semibold mb-4">{formId ? 'Update Evaluation Form' : 'Create New Evaluation Form'}</h2>
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold mb-2">Questions</h3>
         {formData.questions.map((question, index) => (
-          <div key={index}>
+          <div key={index} className="mb-4">
             <input
               type="text"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={question}
               onChange={(e) => handleQuestionChange(index, e.target.value)}
             />
           </div>
         ))}
-        <button onClick={handleAddQuestion}>Add Question</button>
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
+          onClick={handleAddQuestion}
+        >
+          Add Question
+        </button>
       </div>
-      <div>
-        <h3>Values</h3>
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold mb-2">Values</h3>
         {formData.values.map((value, index) => (
-          <div key={index}>
+          <div key={index} className="mb-4">
             <input
               type="text"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={value}
               onChange={(e) => handleValueChange(index, e.target.value)}
             />
           </div>
         ))}
-        <button onClick={handleAddValue}>Add Value</button>
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
+          onClick={handleAddValue}
+        >
+          Add Value
+        </button>
       </div>
-      <div>
-        <h3>Essay Questions</h3>
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold mb-2">Essay Questions</h3>
         {formData.essayQuestions.map((question, index) => (
-          <div key={index}>
+          <div key={index} className="mb-4">
             <textarea
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={question}
               onChange={(e) => handleEssayQuestionChange(index, e.target.value)}
             />
           </div>
         ))}
-        <button onClick={handleAddEssayQuestion}>Add Essay Question</button>
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
+          onClick={handleAddEssayQuestion}
+        >
+          Add Essay Question
+        </button>
       </div>
-      <button onClick={handleSaveForm}>Save Form</button>
+      <button
+        className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none"
+        onClick={handleSaveForm}
+      >
+        Save Form
+      </button>
     </div>
   );
 };
