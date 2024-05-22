@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Fragment } from "react";
-import { db } from "../../firebaseConfig"; // Make sure to configure Firebase
+import { db } from "../../firebaseConfig";
 import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
 import { CogIcon } from '@heroicons/react/24/outline';
 
@@ -12,7 +12,6 @@ const DepartmentHeader = ({ departmentName, department, course, dean, stats, sec
   const [requiredEvents, setRequiredEvents] = useState(0);
   const [docId, setDocId] = useState(null);
 
-  // Function to fetch current requiredEvents from Firestore
   const fetchRequiredEvents = async () => {
     const q = query(collection(db, "department-settings"), where("department", "==", department));
     const querySnapshot = await getDocs(q);
@@ -20,7 +19,7 @@ const DepartmentHeader = ({ departmentName, department, course, dean, stats, sec
     if (!querySnapshot.empty) {
       const docData = querySnapshot.docs[0];
       setRequiredEvents(docData.data().requiredEvents);
-      setDocId(docData.id); // Save the document ID for updating later
+      setDocId(docData.id);
     } else {
       console.error("No matching documents found!");
     }
@@ -32,20 +31,18 @@ const DepartmentHeader = ({ departmentName, department, course, dean, stats, sec
       await updateDoc(docRef, {
         requiredEvents: requiredEvents
       });
-      setIsOpen(false); // Close the modal after updating
-      window.location.reload(); // Refresh the page
+      setIsOpen(false);
+      window.location.reload();
     } else {
       console.error("Document ID is not set!");
     }
   };
   
-  // Open modal and fetch data
   const openModal = () => {
     setIsOpen(true);
     fetchRequiredEvents();
   };
 
-  // Close modal
   const closeModal = () => setIsOpen(false);
 
   return (

@@ -59,7 +59,6 @@ const Register = () => {
       };
       await setDoc(doc(db, "users", user.uid), userData);
   
-      // Update state with the created user information
       setCreatedUser(userData);
       setIsRegistered(true);
     } catch (err) {

@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   tableCol: {
-    width: "12.5%", // Adjusted width for eight columns
+    width: "12.5%",
     borderStyle: "solid",
     borderWidth: 1,
     borderColor: "#dddddd",
@@ -94,9 +94,9 @@ const EventChart = React.memo(() => {
       current: false,
     },
   ]);
-  const [dateRange, setDateRange] = useState("month"); // Add this line
-  // const [selectedMonth, setSelectedMonth] = useState(null); // Add this line
-  const [selectedWeek, setSelectedWeek] = useState(null); // Add this line
+  const [dateRange, setDateRange] = useState("month");
+  // const [selectedMonth, setSelectedMonth] = useState(null);
+  const [selectedWeek, setSelectedWeek] = useState(null);
   const [userFullName, setUserFullName] = useState("");
 
   const [events, setEvents] = useState([]);

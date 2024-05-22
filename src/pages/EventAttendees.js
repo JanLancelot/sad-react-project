@@ -64,7 +64,6 @@ const calculateAverageRating = (ratings) => {
   return sum / ratings.length;
 };
 
-// Helper function to count the number of each rating
 const countRatings = (ratings) => {
   const counts = [0, 0, 0, 0, 0];
   ratings.forEach((rating) => {
@@ -74,7 +73,7 @@ const countRatings = (ratings) => {
 };
 
 function RatingChart({ ratings }) {
-  const counts = countRatings(ratings); // Get counts of each rating (1-5 stars)
+  const counts = countRatings(ratings);
   const data = [
     { name: "1 Star", value: counts[0] },
     { name: "2 Stars", value: counts[1] },
@@ -87,7 +86,6 @@ function RatingChart({ ratings }) {
   return (
     <PieChart width={200} height={200}>
       {" "}
-      {/* Adjust size as needed */}
       <Pie
         data={data}
         dataKey="value"
@@ -102,7 +100,6 @@ function RatingChart({ ratings }) {
         ))}
       </Pie>
       <Tooltip />
-      {/* <Legend />  Remove legend if it clutters the display */}
     </PieChart>
   );
 }
@@ -122,14 +119,12 @@ function EventAttendees() {
 
   const navigate = useNavigate();
 
-  // Helper function to count core values (updated to sort by count)
   const countCoreValues = (coreValues) => {
     const counts = {};
     coreValues.forEach((value) => {
       counts[value] = (counts[value] || 0) + 1;
     });
 
-    // Sort core values by count in descending order
     const sortedValues = Object.entries(counts)
       .sort(([, countA], [, countB]) => countB - countA)
       .map(([name, value]) => ({ name, value }));
@@ -137,7 +132,6 @@ function EventAttendees() {
     return sortedValues;
   };
 
-  // Render the CoreValuesChart component (updated to use BarChart)
   function CoreValuesChart({ evaluations }) {
     const coreValues = evaluations.flatMap(
       (evaluation) => evaluation.coreValues
@@ -209,10 +203,8 @@ function EventAttendees() {
   };
 
   useEffect(() => {
-    // Sort mergedAttendeesData by averageRating in ascending order
     const sortedData = sortAttendees(mergedAttendeesData);
 
-    // Set filteredAttendeesData with the sorted data for the current page
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
@@ -247,12 +239,10 @@ function EventAttendees() {
           setFilteredAttendeesData([]);
         }
 
-        // Query the evaluations sub-collection
         const evaluationsCollectionRef = collection(docRef, "evaluations");
         const evaluationsDocs = await getDocs(evaluationsCollectionRef);
         const evaluationsData = evaluationsDocs.docs.map((doc) => doc.data());
 
-        // Prepare the ratings data for each question
         const ratingsPerQuestion = Array.from({ length: 10 }, () => []);
         evaluationsData.forEach((evaluation) => {
           evaluation.ratings.forEach((rating, index) => {
@@ -267,7 +257,6 @@ function EventAttendees() {
         setEvaluations(evaluationsData);
         setAverageRatings(averageRatings);
       } else {
-        // Handle the case where the document doesn't exist
       }
     };
     fetchEventData();
@@ -350,20 +339,16 @@ function EventAttendees() {
     return (
       <StarRatings
         rating={rating}
-        starRatedColor="#FFC107" // Change this to your desired color for filled stars
-        starEmptyColor="#E0E0E0" // Change this to your desired color for empty stars
-        starDimension="20px" // Adjust the size of the stars
-        starSpacing="2px" // Adjust the spacing between stars
+        starRatedColor="#FFC107" 
+        starEmptyColor="#E0E0E0" 
+        starDimension="20px" 
+        starSpacing="2px" 
       />
     );
   }
 
-  // Helper function to sort attendees based on averageRating and sortOrder
-
-  // Handler for sort button clicks
   const handleSortRating = (order) => {
     setSortOrder(order);
-    // Sort the attendeesData and update filteredAttendeesData
     const sortedData = sortAttendees(mergedAttendeesData);
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;

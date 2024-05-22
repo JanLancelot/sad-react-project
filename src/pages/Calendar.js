@@ -206,12 +206,11 @@ export default function Calendar() {
   const days = generateDays();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortByDate, setSortByDate] = useState("asc"); // "asc" or "desc"
+  const [sortByDate, setSortByDate] = useState("asc"); 
 
-  // Filter events based on search and sort
   const filteredEvents = retrievedMeetings
     .filter((meeting) => {
-      if (!selectedDate) return true; // If no date is selected, show all events
+      if (!selectedDate) return true; 
       const meetingDate = new Date(meeting.date);
       return (
         meetingDate.getDate() === selectedDate.getDate() &&
@@ -237,7 +236,7 @@ export default function Calendar() {
     });
 
     function convertTo12Hour(time) {
-      if (!time) return '';  // Return an empty string if time is undefined or null
+      if (!time) return ''; 
       const [hours, minutes] = time.split(':');
       const period = +hours < 12 ? 'AM' : 'PM';
       const hour = +hours % 12 || 12;
@@ -291,7 +290,7 @@ export default function Calendar() {
                   key={dayIdx}
                   type="button"
                   className={classNames(
-                    "py-1.5 hover:bg-gray-100 focus:z-10 relative", // Add 'relative' class for positioning the events count
+                    "py-1.5 hover:bg-gray-100 focus:z-10 relative",
                     day.date ? "bg-white" : "bg-gray-50",
                     (day.isSelected || day.isToday) && "font-semibold",
                     day.isSelected && "text-white",
@@ -317,7 +316,7 @@ export default function Calendar() {
                       day.date.getMonth() === selectedDate.getMonth() &&
                       day.date.getDate() === selectedDate.getDate()
                     ) {
-                      setSelectedDate(null); // Remove filtering if the same date is clicked again
+                      setSelectedDate(null);
                     } else {
                       setSelectedDate(
                         day.date

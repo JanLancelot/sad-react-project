@@ -8,11 +8,11 @@ const Map = ({ onMarkerDrag, markedLocation }) => {
   const markerRef = useRef(null);
 
   useEffect(() => {
-    let map; // Declare map outside initMap to access in cleanup
+    let map;
 
     const initMap = () => {
-      const initialView = markedLocation || [14.800859, 120.921863]; // Use markedLocation or default
-      map = L.map(mapRef.current).setView(initialView, 15); // Set view during initialization
+      const initialView = markedLocation || [14.800859, 120.921863]; 
+      map = L.map(mapRef.current).setView(initialView, 15);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -40,19 +40,18 @@ const Map = ({ onMarkerDrag, markedLocation }) => {
       return map;
     };
 
-    map = initMap(); // Initialize the map
+    map = initMap();
 
-    // Update view whenever markedLocation changes
     if (markedLocation && map) {
-      map.setView(markedLocation, 15); // Adjust zoom level as needed
+      map.setView(markedLocation, 15);
     }
 
     return () => {
       if (map) {
-        map.remove(); // Properly remove the map on cleanup
+        map.remove();
       }
     };
-  }, [onMarkerDrag, markedLocation]); // Include markedLocation in dependency array
+  }, [onMarkerDrag, markedLocation]);
 
   return <div ref={mapRef} style={{ width: '100%', height: '400px' }} />;
 };

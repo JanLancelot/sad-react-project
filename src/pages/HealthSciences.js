@@ -50,7 +50,6 @@ export default function HealthSciences() {
       }));
       setStudents(fetchedStudents);
 
-      // Create a compound query to fetch meetings for both "Maritime department" and "All"
       const maritimeDepartmentMeetingsQuery = query(
         collection(db, "meetings"),
         where("department", "in", ["Health Sciences Department", "All"])
@@ -59,7 +58,6 @@ export default function HealthSciences() {
       const meetingSnapshot = await getDocs(maritimeDepartmentMeetingsQuery);
       setMeetingCount(meetingSnapshot.docs.length);
 
-      // Fetch department settings
       const departmentSettingsRef = collection(db, "department-settings");
       const departmentSettingsQuery = query(
         departmentSettingsRef,

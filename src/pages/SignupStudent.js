@@ -76,7 +76,7 @@ export default function SignupStudent() {
   const handleLogout = async () => {
     try {
       await auth.signOut();
-      navigate("/"); // Navigate to the '/' page after logout
+      navigate("/");
     } catch (error) {
       console.error("Error logging out:", error);
     }
@@ -110,7 +110,6 @@ export default function SignupStudent() {
   };
 
   const createNewStudent = () => {
-    // Reset form fields and hide success message
     setFirstName("");
     setLastName("");
     setYearSection("");

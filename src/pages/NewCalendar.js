@@ -31,7 +31,7 @@ import { useAuth } from "../context/AuthContext";
 let meetings = [];
 const months = [
   { name: "January", days: 31 },
-  { name: "February", days: 28 }, // Update for leap years
+  { name: "February", days: 28 },
   { name: "March", days: 31 },
   { name: "April", days: 30 },
   { name: "May", days: 31 },

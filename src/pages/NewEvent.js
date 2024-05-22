@@ -99,15 +99,14 @@ const handleAddLocation = async () => {
     const locationsRef = collection(db, "locations");
     const docRef = await addDoc(locationsRef, { name: newLocation });
 
-    // Fetch the updated list of locations
     const locationsSnapshot = await getDocs(locationsRef);
     const updatedLocations = locationsSnapshot.docs.map((doc) => doc.data().name);
 
     setInCampusLocations(updatedLocations);
-    setLocation(newLocation); // Set the newly added location as the selected location
+    setLocation(newLocation);
     setNewLocation("");
     setShowLocationModal(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to the top of the page
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (error) {
     console.error("Error adding location:", error);
   }
@@ -790,7 +789,7 @@ const handleAddLocation = async () => {
                           type="text"
                           name="cost"
                           id="cost"
-                          value={cost || "0"} // Set the default value to 0
+                          value={cost || "0"}
                           onChange={(e) => setCost(e.target.value)}
                           className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
                             errors.cost

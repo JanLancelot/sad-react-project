@@ -17,7 +17,7 @@ const ConflictingEventsDisplay = ({ conflictingEvents, eventDate, location, even
   
     const getAlternativeDates = () => {
       const today = new Date();
-      const oneDayInMs = 86400000; // One day in milliseconds
+      const oneDayInMs = 86400000;
       const alternativeDates = [];
   
       for (let i = 1; i <= 7; i++) {

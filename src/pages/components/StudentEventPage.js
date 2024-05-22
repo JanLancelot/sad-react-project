@@ -28,7 +28,6 @@ const StudentEventsPage = () => {
         const studentData = studentDocSnapshot.data();
         setStudent(studentData);
 
-        // Fetch event details and remove non-existent eventIds
         const eventIds = studentData.eventsAttended || [];
         const eventDetails = [];
         const nonExistentEventIds = [];
@@ -45,7 +44,6 @@ const StudentEventsPage = () => {
 
         await Promise.all(eventPromises);
 
-        // Remove non-existent eventIds from the eventAttendees array
         if (nonExistentEventIds.length > 0) {
           const userRef = doc(db, "users", id);
           await updateDoc(userRef, {

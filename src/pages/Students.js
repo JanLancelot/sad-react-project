@@ -58,7 +58,6 @@ export default function Students() {
       const meetingSnapshot = await getDocs(meetingsRef);
       setMeetingCount(meetingSnapshot.docs.length);
 
-      // Fetch department settings
       const departmentSettingsRef = collection(db, "department-settings");
       const departmentSettingsQuery = query(
         departmentSettingsRef,
