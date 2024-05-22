@@ -20,6 +20,7 @@ import StudentEventPage from "./pages/components/StudentEventPage"
 import ViewEvalForm from "./pages/ViewEvalForm";
 import Register from "./pages/Register";
 import SignupStudent from "./pages/SignupStudent";
+import EvaluationFormManager from "./pages/EvaluationFormManager";
 import { ProtectedRoute } from "./pages/components/ProtectedRoute";
 import { Protected } from "./pages/components/Protected";
 import { AuthContext } from "./pages/components/AuthContext";
@@ -85,6 +86,10 @@ const router = createBrowserRouter([
   {
     path: "/department-settings",
     element: <Protected><DepartmentSettings /></Protected>,
+  },
+  {
+    path: "/evualuation-form-manager",
+    element: <Protected><EvaluationFormManager /></Protected>,
   },
   {
     path: "/insert",
