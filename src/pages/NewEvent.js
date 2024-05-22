@@ -957,7 +957,7 @@ export default function NewEvent({}) {
                           </option>
                           {evaluations.map((evaluation) => (
                             <option key={evaluation.id} value={evaluation.id}>
-                              {evaluation.title}
+                              {evaluation.name}
                             </option>
                           ))}
                         </select>
