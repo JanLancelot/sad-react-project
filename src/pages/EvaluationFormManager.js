@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, doc, getDoc, updateDoc, addDoc } from 'firebase/firestore';
+import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
 const EvaluationFormManager = () => {
@@ -9,34 +9,10 @@ const EvaluationFormManager = () => {
     essayQuestions: [],
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [formId, setFormId] = useState(null);
 
   useEffect(() => {
-    const fetchFormData = async () => {
-      try {
-        const formCollectionRef = collection(db, 'evaluationForms');
-        const formDoc = formId
-          ? await getDoc(doc(formCollectionRef, formId))
-          : null;
-
-        if (formDoc && formDoc.exists()) {
-          setFormData(formDoc.data());
-        } else {
-          setFormData({
-            questions: [],
-            values: [],
-            essayQuestions: [],
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching form data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchFormData();
-  }, [formId]);
+    setIsLoading(false);
+  }, []);
 
   const handleQuestionChange = (index, value) => {
     setFormData((prevData) => ({
@@ -84,15 +60,31 @@ const EvaluationFormManager = () => {
     }));
   };
 
+  const handleDeleteQuestion = (index) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      questions: prevData.questions.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleDeleteValue = (index) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      values: prevData.values.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleDeleteEssayQuestion = (index) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      essayQuestions: prevData.essayQuestions.filter((_, i) => i !== index),
+    }));
+  };
+
   const handleSaveForm = async () => {
     try {
       const formCollectionRef = collection(db, 'evaluationForms');
-      if (formId) {
-        await updateDoc(doc(formCollectionRef, formId), formData);
-      } else {
-        const newFormDocRef = await addDoc(formCollectionRef, formData);
-        setFormId(newFormDocRef.id);
-      }
+      await addDoc(formCollectionRef, formData);
     } catch (error) {
       console.error('Error saving form:', error);
     }
@@ -104,17 +96,23 @@ const EvaluationFormManager = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
-      <h2 className="text-2xl font-semibold mb-4">{formId ? 'Update Evaluation Form' : 'Create New Evaluation Form'}</h2>
+      <h2 className="text-2xl font-semibold mb-4">Create New Evaluation Form</h2>
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-2">Questions</h3>
         {formData.questions.map((question, index) => (
-          <div key={index} className="mb-4">
+          <div key={index} className="flex items-center mb-4">
             <input
               type="text"
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={question}
               onChange={(e) => handleQuestionChange(index, e.target.value)}
             />
+            <button
+              className="ml-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none"
+              onClick={() => handleDeleteQuestion(index)}
+            >
+              Delete
+            </button>
           </div>
         ))}
         <button
@@ -127,13 +125,19 @@ const EvaluationFormManager = () => {
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-2">Values</h3>
         {formData.values.map((value, index) => (
-          <div key={index} className="mb-4">
+          <div key={index} className="flex items-center mb-4">
             <input
               type="text"
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={value}
               onChange={(e) => handleValueChange(index, e.target.value)}
             />
+            <button
+              className="ml-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none"
+              onClick={() => handleDeleteValue(index)}
+            >
+              Delete
+            </button>
           </div>
         ))}
         <button
@@ -146,12 +150,18 @@ const EvaluationFormManager = () => {
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-2">Essay Questions</h3>
         {formData.essayQuestions.map((question, index) => (
-          <div key={index} className="mb-4">
+          <div key={index} className="flex items-center mb-4">
             <textarea
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={question}
               onChange={(e) => handleEssayQuestionChange(index, e.target.value)}
             />
+            <button
+              className="ml-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none"
+              onClick={() => handleDeleteEssayQuestion(index)}
+            >
+              Delete
+            </button>
           </div>
         ))}
         <button
