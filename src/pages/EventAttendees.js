@@ -350,7 +350,7 @@ function EventAttendees() {
     "The date and time was appropriate for the activity.",
     "The venue was appropriate for the activity.",
     "The school resources were properly managed.",
-    "The activity was well organized and well planned.",
+    // "The activity was well organized and well planned.",
     "The activity was well attended by the participants.",
   ];
 
