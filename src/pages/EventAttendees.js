@@ -261,7 +261,7 @@ function EventAttendees() {
         const evaluationsDocs = await getDocs(evaluationsCollectionRef);
         const evaluationsData = evaluationsDocs.docs.map((doc) => doc.data());
   
-        const ratingsPerQuestion = Array.from({ length: 10 }, () => []);
+        const ratingsPerQuestion = Array.from({ length: 3 }, () => []);
         evaluationsData.forEach((evaluation) => {
           evaluation.ratings.forEach((rating, index) => {
             ratingsPerQuestion[index].push(rating);
