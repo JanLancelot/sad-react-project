@@ -91,8 +91,12 @@ const ViewEvalForm = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
           </div>
-          <div className="mb-4"><b>LEGEND</b>:	Excellent <b>( 5 )</b>	Very Good <b>( 4 )</b>	Good <b>( 3 )</b>	Needs Improvement <b>( 2 )</b> Poor <b>( 1 )</b></div>
-          {ratingLabels.length > 0 &&
+          <div className="mb-4">
+            <b>LEGEND</b>: Excellent <b>( 5 )</b> Very Good <b>( 4 )</b> Good{" "}
+            <b>( 3 )</b> Needs Improvement <b>( 2 )</b> Poor <b>( 1 )</b>
+          </div>
+          {ratingLabels &&
+            ratingLabels.length > 0 &&
             ratingLabels.map((label, index) => (
               <div key={index} className="mb-4">
                 <label className="block text-gray-700 font-bold mb-2">{`${
@@ -100,7 +104,10 @@ const ViewEvalForm = () => {
                 }. ${label}`}</label>
                 <div className="flex justify-between">
                   {[5, 4, 3, 2, 1].map((rating) => (
-                    <span key={rating} className="inline-flex items-center mr-4">
+                    <span
+                      key={rating}
+                      className="inline-flex items-center mr-4"
+                    >
                       <input
                         type="radio"
                         name={`ratings[${index}]`}
@@ -115,7 +122,8 @@ const ViewEvalForm = () => {
                 </div>
               </div>
             ))}
-          {essayQuestions.length > 0 &&
+          {essayQuestions &&
+            essayQuestions.length > 0 &&
             essayQuestions.map((question, index) => (
               <div key={index} className="mb-4">
                 <textarea
@@ -132,7 +140,8 @@ const ViewEvalForm = () => {
               CORE VALUES APPLIED
             </label>
             <div className="flex flex-wrap">
-              {values.length > 0 &&
+              {values &&
+                values.length > 0 &&
                 values.map((value, index) => (
                   <div key={index} className="mr-4 mb-2">
                     <input
@@ -144,7 +153,10 @@ const ViewEvalForm = () => {
                       id={`value-${index}`}
                       className="form-checkbox h-4 w-4 text-indigo-600"
                     />
-                    <label htmlFor={`value-${index}`} className="ml-2 text-gray-700">
+                    <label
+                      htmlFor={`value-${index}`}
+                      className="ml-2 text-gray-700"
+                    >
                       {value}
                     </label>
                   </div>
