@@ -15,6 +15,7 @@ const ViewEvalForm = () => {
     otherComments: "",
     coreValues: [],
     averageRating: null,
+    essayAnswers: [],
   });
   const [ratingLabels, setRatingLabels] = useState([]);
   const [essayQuestions, setEssayQuestions] = useState([]);
@@ -31,15 +32,15 @@ const ViewEvalForm = () => {
 
           if (meetingSnapshot.exists()) {
             const meetingData = meetingSnapshot.data();
-            const formEvalId = meetingData.evaluationId;
+            const formEvalId = meetingData.evaluationFormId;
             const formEvalRef = doc(db, "evaluationForms", formEvalId);
             const formEvalSnapshot = await getDoc(formEvalRef);
 
             if (formEvalSnapshot.exists()) {
               const formEvalData = formEvalSnapshot.data();
-              setRatingLabels(formEvalData.questions);
-              setEssayQuestions(formEvalData.essayQuestions);
-              setValues(formEvalData.values);
+              setRatingLabels(formEvalData.ratingLabels || []);
+              setEssayQuestions(formEvalData.essayQuestions || []);
+              setValues(formEvalData.values || []);
             } else {
               console.log("Evaluation form document does not exist");
             }
