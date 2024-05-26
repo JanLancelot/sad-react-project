@@ -138,8 +138,6 @@ function EventAttendees() {
       (evaluation) => evaluation.coreValues
     );
     const data = countCoreValues(coreValues);
-    console.log("Counted core values", data);
-
     return (
       <div className="bg-white rounded-lg shadow-md p-6">
         <table className="w-full table-auto">
@@ -174,7 +172,6 @@ function EventAttendees() {
         );
         const evaluationSnapshot = await getDoc(evaluationRef);
         if (evaluationSnapshot.exists()) {
-          console.log("Evaluation: ", evaluationSnapshot.data());
           return { id: attendee.id, ...evaluationSnapshot.data() };
         }
         return { id: attendee.id, averageRating: 0 };
@@ -232,7 +229,6 @@ function EventAttendees() {
           const questions = evaluationFormData.questions;
           setQuestions(questions);
           // Use the questions array in your component
-          console.log("Questions:", questions);
         } else {
           console.log(
             "No evaluationForm document found for the given evaluationId."
@@ -350,7 +346,6 @@ function EventAttendees() {
   ];
 
   const questions = questionsR;
-  console.log(questions);
 
   function RatingDisplay({ rating }) {
     return (
