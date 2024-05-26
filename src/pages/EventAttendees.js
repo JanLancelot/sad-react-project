@@ -460,22 +460,28 @@ function EventAttendees() {
                 </tr>
               </thead>
               <tbody>
-                {/* Iterate over the filteredAttendeesData */}
-                {filteredAttendeesData.map(
-                  ({ fullName, department, id, averageRating }, index) => (
+                {questions.length > 0 ? ( // Check if questions array is not empty
+                  questions.map((question, index) => (
                     <tr key={index} className="border-b border-gray-200">
+                      <td className="px-4 py-3">{question}</td>
                       <td className="px-4 py-3">
-                        <Link
-                          to={`/events/${eventId}/attendees/evalform/${id}`}
-                          onClick={() => handleAttendeeClick(id)}
-                        >
-                          {fullName}
-                        </Link>
+                        <RatingDisplay rating={averageRatings[index]} />
                       </td>
-                      <td className="px-4 py-3">{department}</td>
-                      <td className="px-4 py-3">{averageRating}</td>
+                      <td className="px-4 py-3">
+                        <RatingChart
+                          ratings={evaluations.map(
+                            (evaluation) => evaluation.ratings[index]
+                          )}
+                        />
+                      </td>
                     </tr>
-                  )
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="3" className="px-4 py-3 text-center">
+                      No questions found.
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
