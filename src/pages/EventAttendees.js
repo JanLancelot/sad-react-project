@@ -374,7 +374,6 @@ function EventAttendees() {
       filteredData.slice(indexOfFirstItem, indexOfLastItem)
     );
   };
-  console.log(averageRatings);
 
   return (
     <Layout>
