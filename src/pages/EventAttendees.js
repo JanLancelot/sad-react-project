@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { db } from "../firebaseConfig";
-import { doc, getDoc, collection, getDocs, average } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 import Layout from "./Layout";
 import QRCode from "react-qr-code";
 import {
@@ -116,7 +116,6 @@ function EventAttendees() {
   const [averageRatings, setAverageRatings] = useState([]);
   const [sortOrder, setSortOrder] = useState("asc");
   const [evaluationData, setEvaluationData] = useState({});
-  const [questionsR, setQuestions] = useState([]);
 
   const navigate = useNavigate();
 
@@ -138,6 +137,8 @@ function EventAttendees() {
       (evaluation) => evaluation.coreValues
     );
     const data = countCoreValues(coreValues);
+    console.log("Counted core values", data);
+
     return (
       <div className="bg-white rounded-lg shadow-md p-6">
         <table className="w-full table-auto">
@@ -172,6 +173,7 @@ function EventAttendees() {
         );
         const evaluationSnapshot = await getDoc(evaluationRef);
         if (evaluationSnapshot.exists()) {
+          console.log("Evaluation: ", evaluationSnapshot.data());
           return { id: attendee.id, ...evaluationSnapshot.data() };
         }
         return { id: attendee.id, averageRating: 0 };
@@ -216,27 +218,9 @@ function EventAttendees() {
       const docRef = doc(db, "meetings", eventId);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        const eventData = docSnap.data();
-        setEventData(eventData);
-
-        // Fetch the evaluationForm document based on the evaluationId
-        const evaluationId = eventData.evaluationId;
-        const evaluationFormDocRef = doc(db, "evaluationForms", evaluationId);
-        const evaluationFormDoc = await getDoc(evaluationFormDocRef);
-
-        if (evaluationFormDoc.exists()) {
-          const evaluationFormData = evaluationFormDoc.data();
-          const questions = evaluationFormData.questions;
-          setQuestions(questions);
-          // Use the questions array in your component
-        } else {
-          console.log(
-            "No evaluationForm document found for the given evaluationId."
-          );
-        }
-
-        if (eventData.attendees && eventData.attendees.length > 0) {
-          const attendeeIds = eventData.attendees;
+        setEventData(docSnap.data());
+        if (docSnap.data().attendees && docSnap.data().attendees.length > 0) {
+          const attendeeIds = docSnap.data().attendees;
           const usersCollectionRef = collection(db, "users");
           const attendeeDocs = await Promise.all(
             attendeeIds.map((id) => getDoc(doc(usersCollectionRef, id)))
@@ -259,18 +243,12 @@ function EventAttendees() {
         const evaluationsDocs = await getDocs(evaluationsCollectionRef);
         const evaluationsData = evaluationsDocs.docs.map((doc) => doc.data());
 
-        const ratingsPerQuestion = Array.from(
-          { length: questions.length },
-          () => []
-        );
+        const ratingsPerQuestion = Array.from({ length: 10 }, () => []);
         evaluationsData.forEach((evaluation) => {
           evaluation.ratings.forEach((rating, index) => {
-            if (index < questions.length) {
-              ratingsPerQuestion[index].push(rating);
-            }
+            ratingsPerQuestion[index].push(rating);
           });
         });
-        console.log("Ratings per question: ", ratingsPerQuestion);
 
         const averageRatings = ratingsPerQuestion.map((ratings) =>
           calculateAverageRating(ratings)
@@ -279,7 +257,6 @@ function EventAttendees() {
         setEvaluations(evaluationsData);
         setAverageRatings(averageRatings);
       } else {
-        console.log("No event document found for the given eventId.");
       }
     };
     fetchEventData();
@@ -345,16 +322,27 @@ function EventAttendees() {
     ...new Set(attendeesData.map((attendee) => attendee.department)),
   ];
 
-  const questions = questionsR;
+  const questions = [
+    "The activity was in-line with the DYCI Vision-Mission and core values.",
+    "The activity achieved its goals/objectives (or theme).",
+    "The activity met the need of the students.",
+    "The committees performed their service.",
+    "The activity was well-participated by the students.",
+    "The date and time was appropriate for the activity.",
+    "The venue was appropriate for the activity.",
+    "The school resources were properly managed.",
+    "The activity was well organized and well planned.",
+    "The activity was well attended by the participants.",
+  ];
 
   function RatingDisplay({ rating }) {
     return (
       <StarRatings
         rating={rating}
-        starRatedColor="#FFC107"
-        starEmptyColor="#E0E0E0"
-        starDimension="20px"
-        starSpacing="2px"
+        starRatedColor="#FFC107" 
+        starEmptyColor="#E0E0E0" 
+        starDimension="20px" 
+        starSpacing="2px" 
       />
     );
   }
@@ -553,29 +541,21 @@ function EventAttendees() {
                   </tr>
                 </thead>
                 <tbody>
-                  {questions.length > 0 ? (
-                    questions.map((question, index) => (
-                      <tr key={index} className="border-b border-gray-200">
-                        <td className="px-4 py-3">{question}</td>
-                        <td className="px-4 py-3">
-                          <RatingDisplay rating={averageRatings[index]} />
-                        </td>
-                        <td className="px-4 py-3">
-                          <RatingChart
-                            ratings={evaluations.map(
-                              (evaluation) => evaluation.ratings[index]
-                            )}
-                          />
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="3" className="px-4 py-3 text-center">
-                        No questions found.
+                  {averageRatings.map((rating, index) => (
+                    <tr key={index} className="border-b border-gray-200">
+                      <td className="px-4 py-3">{questions[index]}</td>
+                      <td className="px-4 py-3">
+                        <RatingDisplay rating={rating} />
+                      </td>
+                      <td className="px-4 py-3">
+                        <RatingChart
+                          ratings={evaluations.map(
+                            (evaluation) => evaluation.ratings[index]
+                          )}
+                        />
                       </td>
                     </tr>
-                  )}
+                  ))}
                 </tbody>
               </table>
             </div>
