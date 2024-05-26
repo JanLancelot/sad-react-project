@@ -264,7 +264,7 @@ function EventAttendees() {
         const evaluationsDocs = await getDocs(evaluationsCollectionRef);
         const evaluationsData = evaluationsDocs.docs.map((doc) => doc.data());
 
-        console.log("Questions Length", questions.length)
+        console.log("Questions Length", questions.length);
         const ratingsPerQuestion = Array.from({ length: 10 }, () => []);
         evaluationsData.forEach((evaluation) => {
           evaluation.ratings.forEach((rating, index) => {
@@ -344,22 +344,10 @@ function EventAttendees() {
     ...new Set(attendeesData.map((attendee) => attendee.department)),
   ];
 
-  // const questions = [
-  //   "The activity was in-line with the DYCI Vision-Mission and core values.",
-  //   "The activity achieved its goals/objectives (or theme).",
-  //   "The activity met the need of the students.",
-  //   "The committees performed their service.",
-  //   "The activity was well-participated by the students.",
-  //   "The date and time was appropriate for the activity.",
-  //   "The venue was appropriate for the activity.",
-  //   "The school resources were properly managed.",
-  //   "The activity was well organized and well planned.",
-  //   "The activity was well attended by the participants.",
-  // ];
-
   function RatingDisplay({ rating }) {
-    const validRating = typeof rating === 'number' && !isNaN(rating) ? rating : 0;
-  
+    const validRating =
+      typeof rating === "number" && !isNaN(rating) ? rating : 0;
+
     return (
       <StarRatings
         rating={validRating}
@@ -565,11 +553,11 @@ function EventAttendees() {
                   </tr>
                 </thead>
                 <tbody>
-                  {averageRatings.map((rating, index) => (
+                  {questions.map((question, index) => (
                     <tr key={index} className="border-b border-gray-200">
-                      <td className="px-4 py-3">{questions[index]}</td>
+                      <td className="px-4 py-3">{question}</td>
                       <td className="px-4 py-3">
-                        <RatingDisplay rating={rating} />
+                        <RatingDisplay rating={averageRatings[index]} />
                       </td>
                       <td className="px-4 py-3">
                         <RatingChart
