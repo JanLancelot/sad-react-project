@@ -66,6 +66,7 @@ const ViewEvalForm = () => {
     };
 
     fetchEvalData();
+    console.log(formData.essayAnswers);
   }, [eventId, evalId]);
 
   return (
