@@ -37,7 +37,7 @@ const ViewEvalForm = () => {
 
             if (formEvalSnapshot.exists()) {
               const formEvalData = formEvalSnapshot.data();
-              setRatingLabels(formEvalData.ratingLabels);
+              setRatingLabels(formEvalData.questions);
               setEssayQuestions(formEvalData.essayQuestions);
               setValues(formEvalData.values);
             } else {
