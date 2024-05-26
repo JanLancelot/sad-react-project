@@ -558,7 +558,7 @@ function EventAttendees() {
                   </tr>
                 </thead>
                 <tbody>
-                  {questions.length > 0 ? ( // Check if questions array is not empty
+                  {questions.length > 0 ? (
                     questions.map((question, index) => (
                       <tr key={index} className="border-b border-gray-200">
                         <td className="px-4 py-3">{question}</td>
