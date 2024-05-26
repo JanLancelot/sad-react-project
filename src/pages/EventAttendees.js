@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { db } from "../firebaseConfig";
-import { doc, getDoc, collection, getDocs } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs, average } from "firebase/firestore";
 import Layout from "./Layout";
 import QRCode from "react-qr-code";
 import {
@@ -378,6 +378,7 @@ function EventAttendees() {
       filteredData.slice(indexOfFirstItem, indexOfLastItem)
     );
   };
+  console.log(averageRatings);
 
   return (
     <Layout>
