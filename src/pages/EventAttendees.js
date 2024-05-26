@@ -85,6 +85,7 @@ function RatingChart({ ratings }) {
 
   return (
     <PieChart width={200} height={200}>
+      {" "}
       <Pie
         data={data}
         dataKey="value"
@@ -218,9 +219,26 @@ function EventAttendees() {
       const docRef = doc(db, "meetings", eventId);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        setEventData(docSnap.data());
-        if (docSnap.data().attendees && docSnap.data().attendees.length > 0) {
-          const attendeeIds = docSnap.data().attendees;
+        const eventData = docSnap.data();
+        setEventData(eventData);
+  
+        // Fetch the evaluationForm document based on the evaluationId
+        const evaluationId = eventData.evaluationId;
+        const evaluationFormDocRef = doc(db, "evaluationForms", evaluationId);
+        const evaluationFormDoc = await getDoc(evaluationFormDocRef);
+  
+        if (evaluationFormDoc.exists()) {
+          const evaluationFormData = evaluationFormDoc.data();
+          const questions = evaluationFormData.questions;
+          setQuestions(questions);
+          // Use the questions array in your component
+          console.log("Questions:", questions);
+        } else {
+          console.log("No evaluationForm document found for the given evaluationId.");
+        }
+  
+        if (eventData.attendees && eventData.attendees.length > 0) {
+          const attendeeIds = eventData.attendees;
           const usersCollectionRef = collection(db, "users");
           const attendeeDocs = await Promise.all(
             attendeeIds.map((id) => getDoc(doc(usersCollectionRef, id)))
@@ -238,197 +256,367 @@ function EventAttendees() {
           setAttendeesData([]);
           setFilteredAttendeesData([]);
         }
-
+  
         const evaluationsCollectionRef = collection(docRef, "evaluations");
         const evaluationsDocs = await getDocs(evaluationsCollectionRef);
         const evaluationsData = evaluationsDocs.docs.map((doc) => doc.data());
-
-        const ratingsPerQuestion = Array.from({ length: questions.length }, () => []);
+  
+        const ratingsPerQuestion = Array.from({ length: 10 }, () => []);
         evaluationsData.forEach((evaluation) => {
           evaluation.ratings.forEach((rating, index) => {
             ratingsPerQuestion[index].push(rating);
           });
         });
-
-        const averageRatingsPerQuestion = ratingsPerQuestion.map(
-          (ratings) => {
-            return ratings.length > 0
-              ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length
-              : 0;
-          }
+  
+        const averageRatings = ratingsPerQuestion.map((ratings) =>
+          calculateAverageRating(ratings)
         );
-        setAverageRatings(averageRatingsPerQuestion);
+  
+        setEvaluations(evaluationsData);
+        setAverageRatings(averageRatings);
+      } else {
+        console.log("No event document found for the given eventId.");
       }
     };
-
     fetchEventData();
   }, [eventId]);
 
   useEffect(() => {
-    if (eventData && eventData.evaluationId) {
-      const fetchQuestions = async () => {
-        const evaluationFormRef = doc(db, "evaluationForms", eventData.evaluationId);
-        const evaluationFormSnap = await getDoc(evaluationFormRef);
-        if (evaluationFormSnap.exists()) {
-          setQuestions(evaluationFormSnap.data().questions);
-        }
-      };
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
-      fetchQuestions();
+    if (attendeesData && attendeesData.length > 0) {
+      const filteredData =
+        selectedDepartment === "All"
+          ? attendeesData
+          : attendeesData.filter(
+              (attendee) => attendee.department === selectedDepartment
+            );
+      setFilteredAttendeesData(
+        filteredData.slice(indexOfFirstItem, indexOfLastItem)
+      );
+    } else {
+      setFilteredAttendeesData([]);
     }
-  }, [eventData]);
+  }, [currentPage, itemsPerPage, attendeesData, selectedDepartment]);
 
-  const departments = [
-    ...new Set(attendeesData.map((attendee) => attendee.department)),
-  ];
+  const handleAttendeeClick = (evalId) => {
+    navigate(`/events/${eventId}/attendees/evalform/${evalId}`);
+  };
 
-  const filteredAttendees =
-    selectedDepartment === "All"
-      ? filteredAttendeesData
-      : filteredAttendeesData.filter(
-          (attendee) => attendee.department === selectedDepartment
-        );
+  const onImageDownload = () => {
+    const svg = document.getElementById("QRCode");
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      const pngFile = canvas.toDataURL("image/png");
+      const downloadLink = document.createElement("a");
+      downloadLink.download = `${eventData.name}-qrcode`;
+      downloadLink.href = `${pngFile}`;
+      downloadLink.click();
+    };
+    img.src = `data:image/svg+xml;base64,${btoa(svgData)}`;
+  };
 
-  const handleDepartmentChange = (event) => {
-    setSelectedDepartment(event.target.value);
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handleDepartmentFilter = (department) => {
+    setSelectedDepartment(department);
     setCurrentPage(1);
   };
 
-  const handleSortOrderChange = (order) => {
+  if (!eventData) {
+    return <div>Loading...</div>;
+  }
+
+  const departments = [
+    "All",
+    ...new Set(attendeesData.map((attendee) => attendee.department)),
+  ];
+
+  // const questions = [
+  //   "The activity was in-line with the DYCI Vision-Mission and core values.",
+  //   "The activity achieved its goals/objectives (or theme).",
+  //   "The activity met the need of the students.",
+  //   "The committees performed their service.",
+  //   "The activity was well-participated by the students.",
+  //   "The date and time was appropriate for the activity.",
+  //   "The venue was appropriate for the activity.",
+  //   "The school resources were properly managed.",
+  //   "The activity was well organized and well planned.",
+  //   "The activity was well attended by the participants.",
+  // ];
+
+  function RatingDisplay({ rating }) {
+    return (
+      <StarRatings
+        rating={rating}
+        starRatedColor="#FFC107" 
+        starEmptyColor="#E0E0E0" 
+        starDimension="20px" 
+        starSpacing="2px" 
+      />
+    );
+  }
+
+  const handleSortRating = (order) => {
     setSortOrder(order);
     const sortedData = sortAttendees(mergedAttendeesData);
-    setFilteredAttendeesData(sortedData);
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const filteredData =
+      selectedDepartment === "All"
+        ? sortedData
+        : sortedData.filter(
+            (attendee) => attendee.department === selectedDepartment
+          );
+    setFilteredAttendeesData(
+      filteredData.slice(indexOfFirstItem, indexOfLastItem)
+    );
   };
 
   return (
     <Layout>
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold mb-6">
-          {eventData ? eventData.name : "Event"} - Attendees
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          {eventData.name}
         </h1>
-        <Link to="/events">
-          <button className="px-4 py-2 bg-blue-500 text-white rounded">
-            Back to Events
-          </button>
-        </Link>
-      </div>
-
-      <div className="mb-4">
-        <label htmlFor="departmentFilter" className="mr-2">
-          Filter by Department:
-        </label>
-        <select
-          id="departmentFilter"
-          value={selectedDepartment}
-          onChange={handleDepartmentChange}
-        >
-          <option value="All">All</option>
-          {departments.map((department, index) => (
-            <option key={index} value={department}>
-              {department}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="flex mb-4">
-        <button
-          onClick={() => handleSortOrderChange("asc")}
-          className={`px-4 py-2 mr-2 ${
-            sortOrder === "asc" ? "bg-blue-500 text-white" : "bg-gray-200"
-          } rounded`}
-        >
-          Sort by Rating (Asc)
-        </button>
-        <button
-          onClick={() => handleSortOrderChange("desc")}
-          className={`px-4 py-2 ${
-            sortOrder === "desc" ? "bg-blue-500 text-white" : "bg-gray-200"
-          } rounded`}
-        >
-          Sort by Rating (Desc)
-        </button>
-      </div>
-
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold mb-2">Average Ratings</h2>
-        {questions.map((question, index) => (
-          <div key={index} className="mb-2">
-            <p>{question}</p>
-            <StarRatings
-              rating={averageRatings[index]}
-              starRatedColor="gold"
-              numberOfStars={5}
-              starDimension="20px"
-              starSpacing="2px"
-            />
+        <h2 className="text-xl font-semibold text-gray-700 mb-6">Attendees</h2>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center">
+            <FaFilter className="mr-2 text-gray-500" />
+            <select
+              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={selectedDepartment}
+              onChange={(e) => handleDepartmentFilter(e.target.value)}
+              style={{
+                paddingRight: "30px",
+              }}
+            >
+              {departments.map((department, index) => (
+                <option key={index} value={department}>
+                  {department}
+                </option>
+              ))}
+            </select>
           </div>
-        ))}
+          <div>
+            <label htmlFor="itemsPerPage" className="mr-2">
+              Items per page:
+            </label>
+            <select
+              id="itemsPerPage"
+              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={itemsPerPage}
+              onChange={(e) => setItemsPerPage(parseInt(e.target.value))}
+              style={{
+                width: "100px",
+                paddingRight: "20px",
+              }}
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={30}>50</option>
+            </select>
+          </div>
+          <div className="flex items-center">
+            <span className="mr-2">Sort by Rating:</span>
+            {/* Ascending button */}
+            <button
+              className={`px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                sortOrder === "asc"
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-gray-700"
+              }`}
+              onClick={() => handleSortRating("asc")}
+            >
+              Ascending
+            </button>
+            {/* Descending button */}
+            <button
+              className={`px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                sortOrder === "desc"
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-gray-700"
+              } ml-2`}
+              onClick={() => handleSortRating("desc")}
+            >
+              Descending
+            </button>
+          </div>
+        </div>
+        {filteredAttendeesData.length > 0 ? (
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <table className="w-full table-auto">
+              <thead>
+                <tr className="bg-gray-100 text-gray-700 font-medium">
+                  <th className="px-4 py-3 text-left">Name</th>
+                  <th className="px-4 py-3 text-left">Department</th>
+                  <th className="px-4 py-3 text-left">Average Rating</th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* Iterate over the filteredAttendeesData */}
+                {filteredAttendeesData.map(
+                  ({ fullName, department, id, averageRating }, index) => (
+                    <tr key={index} className="border-b border-gray-200">
+                      <td className="px-4 py-3">
+                        <Link
+                          to={`/events/${eventId}/attendees/evalform/${id}`}
+                          onClick={() => handleAttendeeClick(id)}
+                        >
+                          {fullName}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3">{department}</td>
+                      <td className="px-4 py-3">{averageRating}</td>
+                    </tr>
+                  )
+                )}
+              </tbody>
+            </table>
+            <div className="flex justify-center mt-6">
+              <nav>
+                <ul className="inline-flex -space-x-px">
+                  {Array.from(
+                    { length: Math.ceil(attendeesData.length / itemsPerPage) },
+                    (_, i) => i + 1
+                  ).map((page) => (
+                    <li key={page}>
+                      <button
+                        className={`px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 ${
+                          currentPage === page ? "bg-blue-500 text-white" : ""
+                        }`}
+                        onClick={() => handlePageChange(page)}
+                      >
+                        {page}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </div>
+          </div>
+        ) : (
+          <p className="text-gray-600">No attendees yet.</p>
+        )}
       </div>
+      <div className="container mx-auto px-4 py-8 flex flex-col items-center justify-center">
+        <div className="flex flex-col md:flex-row items-center justify-center mb-8">
+          <div className="bg-white rounded-lg shadow-md p-6 border-2 border-blue-500 mr-4 mb-4">
+            <QRCode
+              size={256}
+              id="QRCode"
+              style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+              value={`${eventId}-checkin`}
+              viewBox={`0 0 256 256`}
+            />
+            <button
+              className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full"
+              onClick={() => onImageDownload("checkin")}
+            >
+              Download Check-in QR Code
+            </button>
+          </div>
 
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold mb-2">Core Values Chart</h2>
-        <CoreValuesChart evaluations={evaluationData} />
-      </div>
-
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold mb-2">Attendance Chart</h2>
-        <AttendanceChart attendeesData={attendeesData} />
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 border-b border-gray-200">Name</th>
-              <th className="py-2 px-4 border-b border-gray-200">Department</th>
-              <th className="py-2 px-4 border-b border-gray-200">Rating</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredAttendees.map((attendee) => (
-              <tr key={attendee.id}>
-                <td className="py-2 px-4 border-b border-gray-200">
-                  {attendee.fullName}
-                </td>
-                <td className="py-2 px-4 border-b border-gray-200">
-                  {attendee.department}
-                </td>
-                <td className="py-2 px-4 border-b border-gray-200">
-                  <StarRatings
-                    rating={attendee.averageRating}
-                    starRatedColor="gold"
-                    numberOfStars={5}
-                    starDimension="20px"
-                    starSpacing="2px"
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="flex justify-between mt-4">
-        <button
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          className="px-4 py-2 bg-blue-500 text-white rounded"
-        >
-          Previous
-        </button>
-        <button
-          onClick={() =>
-            setCurrentPage((prev) =>
-              Math.min(prev + 1, Math.ceil(attendeesData.length / itemsPerPage))
-            )
-          }
-          className="px-4 py-2 bg-blue-500 text-white rounded"
-        >
-          Next
-        </button>
+          <div className="bg-white rounded-lg shadow-md p-6 border-2 border-green-500 mb-4">
+            <QRCode
+              size={256}
+              id="QRCode"
+              style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+              value={`${eventId}-checkout`}
+              viewBox={`0 0 256 256`}
+            />
+            <button
+              className="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full"
+              onClick={() => onImageDownload("checkout")}
+            >
+              Download Check-out QR Code
+            </button>
+          </div>
+        </div>
+        {attendeesData.length > 0 && (
+          <AttendanceChart attendeesData={attendeesData} />
+        )}
+        {evaluationData.length > 0 && (
+          <div className="mt-8 overflow-x-auto w-full">
+            <h2 className="text-xl font-semibold text-gray-700 mb-4">
+              Evaluation Ratings
+            </h2>
+            <div className="md:w-auto">
+              <table className="w-full table-auto">
+                <thead>
+                  <tr className="bg-gray-100 text-gray-700 font-medium">
+                    <th className="px-4 py-3 text-left">Question</th>
+                    <th className="px-4 py-3 text-left">Average Rating</th>
+                    <th className="px-4 py-3 text-left">Rating Distribution</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {averageRatings.map((rating, index) => (
+                    <tr key={index} className="border-b border-gray-200">
+                      <td className="px-4 py-3">{questions[index]}</td>
+                      <td className="px-4 py-3">
+                        <RatingDisplay rating={rating} />
+                      </td>
+                      <td className="px-4 py-3">
+                        <RatingChart
+                          ratings={evaluations.map(
+                            (evaluation) => evaluation.ratings[index]
+                          )}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="container mx-auto px-4 py-8 overflow-x-auto w-full">
+              {evaluationData.length > 0 && (
+                <div className="mt-8 overflow-x-auto w-full">
+                  {/* ... Evaluation Ratings table ... */}
+                  <div className="container mx-auto px-4 py-8 overflow-x-auto w-full">
+                    <h2 className="text-xl font-semibold text-gray-700 mb-4">
+                      Most Common Core Values
+                    </h2>
+                    <CoreValuesChart evaluations={evaluations} />{" "}
+                    {/* Render the chart */}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        <div className="flex justify-center">
+          <nav>
+            <ul className="inline-flex -space-x-px">
+              {Array.from(
+                { length: Math.ceil(attendeesData.length / itemsPerPage) },
+                (_, i) => i + 1
+              ).map((page) => (
+                <li key={page}>
+                  <button
+                    className={`px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 ${
+                      currentPage === page ? "bg-blue-500 text-white" : ""
+                    }`}
+                    onClick={() => handlePageChange(page)}
+                  >
+                    {page}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
       </div>
     </Layout>
   );
 }
-
 export default EventAttendees;
