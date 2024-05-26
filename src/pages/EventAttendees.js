@@ -274,6 +274,7 @@ function EventAttendees() {
             }
           });
         });
+        console.log("Ratings per question: ", ratingsPerQuestion);
 
         const averageRatings = ratingsPerQuestion.map((ratings) =>
           calculateAverageRating(ratings)
