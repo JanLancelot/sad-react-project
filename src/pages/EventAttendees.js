@@ -116,6 +116,7 @@ function EventAttendees() {
   const [averageRatings, setAverageRatings] = useState([]);
   const [sortOrder, setSortOrder] = useState("asc");
   const [evaluationData, setEvaluationData] = useState({});
+  const [questions, setQuestions] = useState([]); // State for the questions
 
   const navigate = useNavigate();
 
@@ -219,6 +220,16 @@ function EventAttendees() {
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         setEventData(docSnap.data());
+
+        const evaluationFormsRef = collection(db, "evaluationForms");
+        const evaluationFormSnapshot = await getDocs(evaluationFormsRef);
+        const evaluationForm = evaluationFormSnapshot.docs.find(
+          (doc) => doc.id === docSnap.data().evaluationFormId
+        );
+        if (evaluationForm) {
+          setQuestions(evaluationForm.data().questions);
+        }
+
         if (docSnap.data().attendees && docSnap.data().attendees.length > 0) {
           const attendeeIds = docSnap.data().attendees;
           const usersCollectionRef = collection(db, "users");
@@ -322,27 +333,27 @@ function EventAttendees() {
     ...new Set(attendeesData.map((attendee) => attendee.department)),
   ];
 
-  const questions = [
-    "The activity was in-line with the DYCI Vision-Mission and core values.",
-    "The activity achieved its goals/objectives (or theme).",
-    "The activity met the need of the students.",
-    "The committees performed their service.",
-    "The activity was well-participated by the students.",
-    "The date and time was appropriate for the activity.",
-    "The venue was appropriate for the activity.",
-    "The school resources were properly managed.",
-    "The activity was well organized and well planned.",
-    "The activity was well attended by the participants.",
-  ];
+  // const questions = [
+  //   "The activity was in-line with the DYCI Vision-Mission and core values.",
+  //   "The activity achieved its goals/objectives (or theme).",
+  //   "The activity met the need of the students.",
+  //   "The committees performed their service.",
+  //   "The activity was well-participated by the students.",
+  //   "The date and time was appropriate for the activity.",
+  //   "The venue was appropriate for the activity.",
+  //   "The school resources were properly managed.",
+  //   "The activity was well organized and well planned.",
+  //   "The activity was well attended by the participants.",
+  // ];
 
   function RatingDisplay({ rating }) {
     return (
       <StarRatings
         rating={rating}
-        starRatedColor="#FFC107" 
-        starEmptyColor="#E0E0E0" 
-        starDimension="20px" 
-        starSpacing="2px" 
+        starRatedColor="#FFC107"
+        starEmptyColor="#E0E0E0"
+        starDimension="20px"
+        starSpacing="2px"
       />
     );
   }
@@ -543,7 +554,9 @@ function EventAttendees() {
                 <tbody>
                   {averageRatings.map((rating, index) => (
                     <tr key={index} className="border-b border-gray-200">
-                      <td className="px-4 py-3">{questions[index]}</td>
+                      <td className="px-4 py-3">
+                        {questions[index] || "Question not found"}
+                      </td>
                       <td className="px-4 py-3">
                         <RatingDisplay rating={rating} />
                       </td>
