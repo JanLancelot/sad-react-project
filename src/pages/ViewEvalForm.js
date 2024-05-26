@@ -92,60 +92,63 @@ const ViewEvalForm = () => {
             />
           </div>
           <div className="mb-4"><b>LEGEND</b>:	Excellent <b>( 5 )</b>	Very Good <b>( 4 )</b>	Good <b>( 3 )</b>	Needs Improvement <b>( 2 )</b> Poor <b>( 1 )</b></div>
-          {ratingLabels.map((label, index) => (
-            <div key={index} className="mb-4">
-              <label className="block text-gray-700 font-bold mb-2">{`${
-                index + 1
-              }. ${label}`}</label>
-              <div className="flex justify-between">
-                {[5, 4, 3, 2, 1].map((rating) => (
-                  <span key={rating} className="inline-flex items-center mr-4">
-                    <input
-                      type="radio"
-                      name={`ratings[${index}]`}
-                      value={rating}
-                      checked={formData.ratings[index] === rating}
-                      disabled
-                      className="form-radio h-5 w-5 text-indigo-600"
-                    />
-                    <span className="ml-2 text-gray-700">{rating}</span>
-                  </span>
-                ))}
+          {ratingLabels.length > 0 &&
+            ratingLabels.map((label, index) => (
+              <div key={index} className="mb-4">
+                <label className="block text-gray-700 font-bold mb-2">{`${
+                  index + 1
+                }. ${label}`}</label>
+                <div className="flex justify-between">
+                  {[5, 4, 3, 2, 1].map((rating) => (
+                    <span key={rating} className="inline-flex items-center mr-4">
+                      <input
+                        type="radio"
+                        name={`ratings[${index}]`}
+                        value={rating}
+                        checked={formData.ratings[index] === rating}
+                        disabled
+                        className="form-radio h-5 w-5 text-indigo-600"
+                      />
+                      <span className="ml-2 text-gray-700">{rating}</span>
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-          {essayQuestions.map((question, index) => (
-            <div key={index} className="mb-4">
-              <textarea
-                name={`essayQuestion${index}`}
-                placeholder={question}
-                value={formData[`essayQuestion${index}`]}
-                disabled
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
-            </div>
-          ))}
+            ))}
+          {essayQuestions.length > 0 &&
+            essayQuestions.map((question, index) => (
+              <div key={index} className="mb-4">
+                <textarea
+                  name={`essayQuestion${index}`}
+                  placeholder={question}
+                  value={formData[`essayQuestion${index}`]}
+                  disabled
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+              </div>
+            ))}
           <div className="mb-6">
             <label className="block text-gray-700 font-bold mb-2">
               CORE VALUES APPLIED
             </label>
             <div className="flex flex-wrap">
-              {values.map((value, index) => (
-                <div key={index} className="mr-4 mb-2">
-                  <input
-                    type="checkbox"
-                    name="coreValues"
-                    value={value}
-                    checked={formData.coreValues.includes(value)}
-                    disabled
-                    id={`value-${index}`}
-                    className="form-checkbox h-4 w-4 text-indigo-600"
-                  />
-                  <label htmlFor={`value-${index}`} className="ml-2 text-gray-700">
-                    {value}
-                  </label>
-                </div>
-              ))}
+              {values.length > 0 &&
+                values.map((value, index) => (
+                  <div key={index} className="mr-4 mb-2">
+                    <input
+                      type="checkbox"
+                      name="coreValues"
+                      value={value}
+                      checked={formData.coreValues.includes(value)}
+                      disabled
+                      id={`value-${index}`}
+                      className="form-checkbox h-4 w-4 text-indigo-600"
+                    />
+                    <label htmlFor={`value-${index}`} className="ml-2 text-gray-700">
+                      {value}
+                    </label>
+                  </div>
+                ))}
             </div>
           </div>
           <div className="mb-4">
