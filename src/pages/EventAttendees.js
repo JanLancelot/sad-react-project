@@ -357,9 +357,11 @@ function EventAttendees() {
   // ];
 
   function RatingDisplay({ rating }) {
+    const validRating = typeof rating === 'number' && !isNaN(rating) ? rating : 0;
+  
     return (
       <StarRatings
-        rating={rating}
+        rating={validRating}
         starRatedColor="#FFC107"
         starEmptyColor="#E0E0E0"
         starDimension="20px"
