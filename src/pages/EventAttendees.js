@@ -116,7 +116,7 @@ function EventAttendees() {
   const [averageRatings, setAverageRatings] = useState([]);
   const [sortOrder, setSortOrder] = useState("asc");
   const [evaluationData, setEvaluationData] = useState({});
-  const [questions, setQuestions] = useState([]);
+  const [questionsR, setQuestions] = useState([]);
 
   const navigate = useNavigate();
 
@@ -261,7 +261,7 @@ function EventAttendees() {
         const evaluationsDocs = await getDocs(evaluationsCollectionRef);
         const evaluationsData = evaluationsDocs.docs.map((doc) => doc.data());
   
-        const ratingsPerQuestion = Array.from({ length: questions.length }, () => []);
+        const ratingsPerQuestion = Array.from({ length: questionsR.length }, () => []);
         evaluationsData.forEach((evaluation) => {
           evaluation.ratings.forEach((rating, index) => {
             ratingsPerQuestion[index].push(rating);
@@ -341,18 +341,7 @@ function EventAttendees() {
     ...new Set(attendeesData.map((attendee) => attendee.department)),
   ];
 
-  // const questions = [
-  //   "The activity was in-line with the DYCI Vision-Mission and core values.",
-  //   "The activity achieved its goals/objectives (or theme).",
-  //   "The activity met the need of the students.",
-  //   "The committees performed their service.",
-  //   "The activity was well-participated by the students.",
-  //   "The date and time was appropriate for the activity.",
-  //   "The venue was appropriate for the activity.",
-  //   "The school resources were properly managed.",
-  //   "The activity was well organized and well planned.",
-  //   "The activity was well attended by the participants.",
-  // ];
+  const questions = questionsR;
 
   function RatingDisplay({ rating }) {
     return (
