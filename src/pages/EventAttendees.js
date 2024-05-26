@@ -133,8 +133,9 @@ function EventAttendees() {
   };
 
   function CoreValuesChart({ evaluations }) {
-    const coreValues = evaluations.flatMap(
-      (evaluation) => evaluation.coreValues
+    const coreValues = evaluations.reduce(
+      (acc, evaluation) => acc.concat(evaluation.coreValues || []),
+      []
     );
     const data = countCoreValues(coreValues);
     console.log("Counted core values", data);
@@ -243,20 +244,21 @@ function EventAttendees() {
         const evaluationsDocs = await getDocs(evaluationsCollectionRef);
         const evaluationsData = evaluationsDocs.docs.map((doc) => doc.data());
 
-        const ratingsPerQuestion = Array.from({ length: questions.length }, () => []);
+        const ratingsPerQuestion = Array.from(
+          { length: questions.length },
+          () => []
+        );
         evaluationsData.forEach((evaluation) => {
           evaluation.ratings.forEach((rating, index) => {
             ratingsPerQuestion[index].push(rating);
           });
         });
 
-        const averageRatingsPerQuestion = ratingsPerQuestion.map(
-          (ratings) => {
-            return ratings.length > 0
-              ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length
-              : 0;
-          }
-        );
+        const averageRatingsPerQuestion = ratingsPerQuestion.map((ratings) => {
+          return ratings.length > 0
+            ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length
+            : 0;
+        });
         setAverageRatings(averageRatingsPerQuestion);
       }
     };
@@ -267,7 +269,11 @@ function EventAttendees() {
   useEffect(() => {
     if (eventData && eventData.evaluationId) {
       const fetchQuestions = async () => {
-        const evaluationFormRef = doc(db, "evaluationForms", eventData.evaluationId);
+        const evaluationFormRef = doc(
+          db,
+          "evaluationForms",
+          eventData.evaluationId
+        );
         const evaluationFormSnap = await getDoc(evaluationFormRef);
         if (evaluationFormSnap.exists()) {
           setQuestions(evaluationFormSnap.data().questions);
