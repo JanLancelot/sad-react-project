@@ -204,15 +204,15 @@ function EventAttendees() {
   };
 
   useEffect(() => {
-    const sortedData = sortAttendees(mergedAttendeesData);
-
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-
-    setFilteredAttendeesData(
-      sortedData.slice(indexOfFirstItem, indexOfLastItem)
-    );
-  }, [mergedAttendeesData, currentPage, itemsPerPage, evaluationData]);
+    if (mergedAttendeesData) {
+      const sortedData = sortAttendees(mergedAttendeesData);
+  
+      const indexOfLastItem = currentPage * itemsPerPage;
+      const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  
+      setFilteredAttendeesData(sortedData.slice(indexOfFirstItem, indexOfLastItem));
+    }
+  }, [mergedAttendeesData, currentPage, itemsPerPage, evaluationData]); 
 
   useEffect(() => {
     const fetchEventData = async () => {
@@ -270,6 +270,7 @@ function EventAttendees() {
       } else {
       }
     };
+    console.log(questions);
     fetchEventData();
   }, [eventId]);
 
