@@ -264,22 +264,20 @@ function EventAttendees() {
         const evaluationsDocs = await getDocs(evaluationsCollectionRef);
         const evaluationsData = evaluationsDocs.docs.map((doc) => doc.data());
 
-        if (questions && questions.length > 0) {
-          console.log("Questions Length", questions.length);
-          const ratingsPerQuestion = Array.from({ length: questions.length }, () => []);
-          evaluationsData.forEach((evaluation) => {
-            evaluation.ratings.forEach((rating, index) => {
-              ratingsPerQuestion[index].push(rating);
-            });
+        console.log("Questions Length", questions.length)
+        const ratingsPerQuestion = Array.from({ length: 10 }, () => []);
+        evaluationsData.forEach((evaluation) => {
+          evaluation.ratings.forEach((rating, index) => {
+            ratingsPerQuestion[index].push(rating);
           });
+        });
 
-          const averageRatings = ratingsPerQuestion.map((ratings) =>
-            calculateAverageRating(ratings)
-          );
+        const averageRatings = ratingsPerQuestion.map((ratings) =>
+          calculateAverageRating(ratings)
+        );
 
-          setEvaluations(evaluationsData);
-          setAverageRatings(averageRatings);
-        }
+        setEvaluations(evaluationsData);
+        setAverageRatings(averageRatings);
       } else {
       }
     };
@@ -360,9 +358,8 @@ function EventAttendees() {
   // ];
 
   function RatingDisplay({ rating }) {
-    const validRating =
-      typeof rating === "number" && !isNaN(rating) ? rating : 0;
-
+    const validRating = typeof rating === 'number' && !isNaN(rating) ? rating : 0;
+  
     return (
       <StarRatings
         rating={validRating}
