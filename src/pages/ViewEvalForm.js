@@ -5,7 +5,6 @@ import { useParams } from "react-router-dom";
 import Layout from "./Layout";
 
 const ViewEvalForm = () => {
-  const git = "";
   const { eventId, evalId } = useParams();
   const [formData, setFormData] = useState({
     fullName: "",
@@ -17,6 +16,9 @@ const ViewEvalForm = () => {
     coreValues: [],
     averageRating: null,
   });
+  const [ratingLabels, setRatingLabels] = useState([]);
+  const [essayQuestions, setEssayQuestions] = useState([]);
+  const [values, setValues] = useState([]);
 
   useEffect(() => {
     const fetchEvalData = async () => {
@@ -25,16 +27,36 @@ const ViewEvalForm = () => {
         if (currentUser) {
           const userUid = currentUser.uid;
           const meetingRef = doc(db, "meetings", eventId);
-          const evalRef = doc(collection(meetingRef, "evaluations"), evalId);
-          const evalSnapshot = await getDoc(evalRef);
+          const meetingSnapshot = await getDoc(meetingRef);
 
-          if (evalSnapshot.exists()) {
-            const evalData = evalSnapshot.data();
-            setFormData({
-              ...evalData,
-            });
+          if (meetingSnapshot.exists()) {
+            const meetingData = meetingSnapshot.data();
+            const formEvalId = meetingData.evaluationId;
+            const formEvalRef = doc(db, "evaluationForms", formEvalId);
+            const formEvalSnapshot = await getDoc(formEvalRef);
+
+            if (formEvalSnapshot.exists()) {
+              const formEvalData = formEvalSnapshot.data();
+              setRatingLabels(formEvalData.ratingLabels);
+              setEssayQuestions(formEvalData.essayQuestions);
+              setValues(formEvalData.values);
+            } else {
+              console.log("Evaluation form document does not exist");
+            }
+
+            const evalRef = doc(collection(meetingRef, "evaluations"), evalId);
+            const evalSnapshot = await getDoc(evalRef);
+
+            if (evalSnapshot.exists()) {
+              const evalData = evalSnapshot.data();
+              setFormData({
+                ...evalData,
+              });
+            } else {
+              console.log("Evaluation document does not exist");
+            }
           } else {
-            console.log("Evaluation document does not exist");
+            console.log("Meeting document does not exist");
           }
         }
       } catch (error) {
@@ -44,19 +66,6 @@ const ViewEvalForm = () => {
 
     fetchEvalData();
   }, [eventId, evalId]);
-
-  const ratingLabels = [
-    "The activity was in-line with the DYCI Vision-Mission and core values",
-    "The activity achieved its goals/objectives (or theme)",
-    "The activity met the needs of the students",
-    "The committees performed their service",
-    "The activity was well-participated by the students",
-    "The date and time was appropriate for the activity",
-    "The venue was appropriate for the activity",
-    "The school resources were properly managed",
-    "The activity was well organized and well planned",
-    "The activity was well attended by the participants",
-  ];
 
   return (
     <Layout>
@@ -105,124 +114,38 @@ const ViewEvalForm = () => {
               </div>
             </div>
           ))}
-          <div className="mb-4">
-            <textarea
-              name="bestFeatures"
-              placeholder="A. Best features of the activity and good values promoted and inculcated."
-              value={formData.bestFeatures}
-              disabled
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
-          <div className="mb-4">
-            <textarea
-              name="suggestions"
-              placeholder="B. Suggestions for further improvements of the activity."
-              value={formData.suggestions}
-              disabled
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
-          <div className="mb-4">
-            <textarea
-              name="otherComments"
-              placeholder="C. Other comments and reaction."
-              value={formData.otherComments}
-              disabled
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
+          {essayQuestions.map((question, index) => (
+            <div key={index} className="mb-4">
+              <textarea
+                name={`essayQuestion${index}`}
+                placeholder={question}
+                value={formData[`essayQuestion${index}`]}
+                disabled
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              />
+            </div>
+          ))}
           <div className="mb-6">
             <label className="block text-gray-700 font-bold mb-2">
               CORE VALUES APPLIED
             </label>
             <div className="flex flex-wrap">
-              <div className="mr-4 mb-2">
-                <input
-                  type="checkbox"
-                  name="coreValues"
-                  value="CARITAS(Charity)"
-                  checked={formData.coreValues.includes("CARITAS(Charity)")}
-                  disabled
-                  id="caritas"
-                  className="form-checkbox h-4 w-4 text-indigo-600"
-                />
-                <label htmlFor="caritas" className="ml-2 text-gray-700">
-                  CARITAS (Charity)
-                </label>
-              </div>
-              <div className="mr-4 mb-2">
-                <input
-                  type="checkbox"
-                  name="coreValues"
-                  value="SAPIENTIA(Wisdom)"
-                  checked={formData.coreValues.includes("SAPIENTIA(Wisdom)")}
-                  disabled
-                  id="sapientia"
-                  className="form-checkbox h-4 w-4 text-indigo-600"
-                />
-                <label htmlFor="sapientia" className="ml-2 text-gray-700">
-                  SAPIENTIA (Wisdom)
-                </label>
-              </div>
-              <div className="mr-4 mb-2">
-                <input
-                  type="checkbox"
-                  name="coreValues"
-                  value="VERITAS(Truth)"
-                  checked={formData.coreValues.includes("VERITAS(Truth)")}
-                  disabled
-                  id="veritas"
-                  className="form-checkbox h-4 w-4 text-indigo-600"
-                />
-                <label htmlFor="veritas" className="ml-2 text-gray-700">
-                  VERITAS (Truth)
-                </label>
-              </div>
-              <div className="mr-4 mb-2">
-                <input
-                  type="checkbox"
-                  name="coreValues"
-                  value="PATRIA(Patriotism)"
-                  checked={formData.coreValues.includes("PATRIA(Patriotism)")}
-                  disabled
-                  id="patria"
-                  className="form-checkbox h-4 w-4 text-indigo-600"
-                />
-                <label htmlFor="patria" className="ml-2 text-gray-700">
-                  PATRIA (Patriotism)
-                </label>
-              </div>
-              <div className="mr-4 mb-2">
-                <input
-                  type="checkbox"
-                  name="coreValues"
-                  value="EXCELLENTIA(Excellence)"
-                  checked={formData.coreValues.includes(
-                    "EXCELLENTIA(Excellence)"
-                  )}
-                  disabled
-                  id="excellentia"
-                  className="form-checkbox h-4 w-4 text-indigo-600"
-                />
-                <label htmlFor="excellentia" className="ml-2 text-gray-700">
-                  EXCELLENTIA (Excellence)
-                </label>
-              </div>
-              <div className="mr-4 mb-2">
-                <input
-                  type="checkbox"
-                  name="coreValues"
-                  value="FIDES(Faith)"
-                  checked={formData.coreValues.includes("FIDES(Faith)")}
-                  disabled
-                  id="fides"
-                  className="form-checkbox h-4 w-4 text-indigo-600"
-                />
-                <label htmlFor="fides" className="ml-2 text-gray-700">
-                  FIDES (Faith)
-                </label>
-              </div>
+              {values.map((value, index) => (
+                <div key={index} className="mr-4 mb-2">
+                  <input
+                    type="checkbox"
+                    name="coreValues"
+                    value={value}
+                    checked={formData.coreValues.includes(value)}
+                    disabled
+                    id={`value-${index}`}
+                    className="form-checkbox h-4 w-4 text-indigo-600"
+                  />
+                  <label htmlFor={`value-${index}`} className="ml-2 text-gray-700">
+                    {value}
+                  </label>
+                </div>
+              ))}
             </div>
           </div>
           <div className="mb-4">
