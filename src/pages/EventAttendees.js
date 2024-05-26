@@ -221,22 +221,24 @@ function EventAttendees() {
       if (docSnap.exists()) {
         const eventData = docSnap.data();
         setEventData(eventData);
-  
+
         // Fetch the evaluationForm document based on the evaluationId
         const evaluationId = eventData.evaluationId;
         const evaluationFormDocRef = doc(db, "evaluationForms", evaluationId);
         const evaluationFormDoc = await getDoc(evaluationFormDocRef);
-  
+
         if (evaluationFormDoc.exists()) {
           const evaluationFormData = evaluationFormDoc.data();
           const questions = evaluationFormData.questions;
-          setQuestions(questions)
+          setQuestions(questions);
           // Use the questions array in your component
           console.log("Questions:", questions);
         } else {
-          console.log("No evaluationForm document found for the given evaluationId.");
+          console.log(
+            "No evaluationForm document found for the given evaluationId."
+          );
         }
-  
+
         if (eventData.attendees && eventData.attendees.length > 0) {
           const attendeeIds = eventData.attendees;
           const usersCollectionRef = collection(db, "users");
@@ -256,22 +258,27 @@ function EventAttendees() {
           setAttendeesData([]);
           setFilteredAttendeesData([]);
         }
-  
+
         const evaluationsCollectionRef = collection(docRef, "evaluations");
         const evaluationsDocs = await getDocs(evaluationsCollectionRef);
         const evaluationsData = evaluationsDocs.docs.map((doc) => doc.data());
-  
-        const ratingsPerQuestion = Array.from({ length: 10 }, () => []);
+
+        const ratingsPerQuestion = Array.from(
+          { length: questions.length },
+          () => []
+        );
         evaluationsData.forEach((evaluation) => {
           evaluation.ratings.forEach((rating, index) => {
-            ratingsPerQuestion[index].push(rating);
+            if (index < questions.length) {
+              ratingsPerQuestion[index].push(rating);
+            }
           });
         });
-  
+
         const averageRatings = ratingsPerQuestion.map((ratings) =>
           calculateAverageRating(ratings)
         );
-  
+
         setEvaluations(evaluationsData);
         setAverageRatings(averageRatings);
       } else {
@@ -348,10 +355,10 @@ function EventAttendees() {
     return (
       <StarRatings
         rating={rating}
-        starRatedColor="#FFC107" 
-        starEmptyColor="#E0E0E0" 
-        starDimension="20px" 
-        starSpacing="2px" 
+        starRatedColor="#FFC107"
+        starEmptyColor="#E0E0E0"
+        starDimension="20px"
+        starSpacing="2px"
       />
     );
   }
