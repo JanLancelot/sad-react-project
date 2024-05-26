@@ -32,15 +32,15 @@ const ViewEvalForm = () => {
 
           if (meetingSnapshot.exists()) {
             const meetingData = meetingSnapshot.data();
-            const formEvalId = meetingData.evaluationFormId;
+            const formEvalId = meetingData.evaluationId;
             const formEvalRef = doc(db, "evaluationForms", formEvalId);
             const formEvalSnapshot = await getDoc(formEvalRef);
 
             if (formEvalSnapshot.exists()) {
               const formEvalData = formEvalSnapshot.data();
-              setRatingLabels(formEvalData.ratingLabels || []);
-              setEssayQuestions(formEvalData.essayQuestions || []);
-              setValues(formEvalData.values || []);
+              setRatingLabels(formEvalData.questions);
+              setEssayQuestions(formEvalData.essayQuestions);
+              setValues(formEvalData.values);
             } else {
               console.log("Evaluation form document does not exist");
             }
@@ -127,9 +127,7 @@ const ViewEvalForm = () => {
             essayQuestions.length > 0 &&
             essayQuestions.map((question, index) => (
               <div key={index} className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">
-                  {question}
-                </label>
+                <label className="block text-gray-700 font-bold mb-2">{question}</label>
                 <textarea
                   name={`essayAnswers[${index}]`}
                   value={formData.essayAnswers[index] || ""}
