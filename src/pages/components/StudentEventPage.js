@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Layout from "../Layout";
 import LoadingSpinner from './LoadingSpinner';
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   doc,
   getDoc,
@@ -12,6 +12,7 @@ import {
   getDocs,
   query,
   where,
+  deleteDoc,
 } from "firebase/firestore";
 
 const StudentEventsPage = () => {
@@ -19,6 +20,7 @@ const StudentEventsPage = () => {
   const [student, setStudent] = useState(null);
   const [events, setEvents] = useState([]);
   const db = getFirestore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchStudentData = async () => {
@@ -61,6 +63,40 @@ const StudentEventsPage = () => {
     return <LoadingSpinner />;
   }
 
+  const handleEdit = () => {
+    navigate(`/edit-student/${id}`);
+  };
+
+  const handleArchive = async () => {
+    if (window.confirm("Are you sure you want to archive this student? This will remove them from the list of active students.")) {
+      try {
+        const userDocRef = doc(db, "users", id);
+        await updateDoc(userDocRef, {
+          archived: true,
+        });
+        alert("Student archived successfully.");
+        navigate("/students"); // Redirect to student list after archiving
+      } catch (error) {
+        console.error("Error archiving student:", error);
+        alert("An error occurred while archiving student.");
+      }
+    }
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to delete this student? This action cannot be undone.")) {
+      try {
+        const userDocRef = doc(db, "users", id);
+        await deleteDoc(userDocRef);
+        alert("Student deleted successfully.");
+        navigate("/students"); // Redirect to student list after deleting
+      } catch (error) {
+        console.error("Error deleting student:", error);
+        alert("An error occurred while deleting student.");
+      }
+    }
+  };
+
   return (
     <Layout>
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 py-12">
@@ -68,6 +104,17 @@ const StudentEventsPage = () => {
           <h1 className="text-4xl font-bold text-center mb-8">
             Events Attended by {student.fullName}
           </h1>
+          <div className="flex justify-end mb-4">
+            <button onClick={handleEdit} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">
+              Edit
+            </button>
+            <button onClick={handleArchive} className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mr-2">
+              Archive
+            </button>
+            <button onClick={handleDelete} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+              Delete
+            </button>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full table-auto">
               <thead>

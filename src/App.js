@@ -21,6 +21,7 @@ import ViewEvalForm from "./pages/ViewEvalForm";
 import Register from "./pages/Register";
 import SignupStudent from "./pages/SignupStudent";
 import EvaluationFormManager from "./pages/EvaluationFormManager";
+import EditStudentPage from "./pages/EditStudentPage";
 import { ProtectedRoute } from "./pages/components/ProtectedRoute";
 import { Protected } from "./pages/components/Protected";
 import { AuthContext } from "./pages/components/AuthContext";
@@ -114,6 +115,10 @@ const router = createBrowserRouter([
   {
     path: "/events/:eventId/attendees/evalform/:evalId",
     element: <Protected><ViewEvalForm /></Protected>
+  },
+  {
+    path: "/edit-student/:id",
+    element: <Protected><EditStudentPage /></Protected>
   }
 ]);
 
