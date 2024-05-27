@@ -2,16 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db, auth } from '../firebaseConfig'; 
 import { updatePassword } from 'firebase/auth'; 
-import Modal from 'react-modal'; 
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+
+// Import MUI styles
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+const theme = createTheme();
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [userIdToUpdate, setUserIdToUpdate] = useState(null);
   const [newPassword, setNewPassword] = useState('');
-  const [modalError, setModalError] = useState(null); // Modal error state
+  const [dialogError, setDialogError] = useState(null); // Dialog error state
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -69,13 +80,13 @@ const UserManagement = () => {
 
   const handleResetPassword = async (userId) => {
     setUserIdToUpdate(userId);
-    setIsModalOpen(true);
+    setIsDialogOpen(true);
   };
 
-  const handleModalClose = () => {
-    setIsModalOpen(false);
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
     setNewPassword('');
-    setModalError(null); // Clear the modal error
+    setDialogError(null); // Clear the dialog error
   };
 
   const handleNewPasswordChange = (e) => {
@@ -85,19 +96,18 @@ const UserManagement = () => {
   const handleConfirmPasswordReset = async () => {
     try {
       // Get the user object from Firebase Authentication using the UID
-      const userRef = await auth.getUser(userIdToUpdate);
-      const user = userRef.get();
-  
+      const user = await auth.getUser(userIdToUpdate); 
+
       // Update the user's password
       await updatePassword(user, newPassword);
-  
-      // Close the modal
-      handleModalClose();
+
+      // Close the dialog
+      handleDialogClose();
       // Handle successful password reset (e.g., display a success message)
-      console.log("Password reset for user:", userIdToUpdate);
+      console.log("Password reset for user:", userIdToUpdate); 
     } catch (error) {
       console.error('Error resetting password:', error);
-      setModalError(error.message); // Set the error message from Firebase
+      setDialogError(error.message); // Set the error message from Firebase
     }
   };
 
@@ -119,99 +129,104 @@ const UserManagement = () => {
   const normalUsers = users.filter((user) => !user.locked);
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
-      <h2 className="text-2xl font-semibold mb-4">User Management</h2>
+    <ThemeProvider theme={theme}>
+      <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
+        <h2 className="text-2xl font-semibold mb-4">User Management</h2>
 
-      {/* Locked Accounts */}
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">Locked Accounts</h3>
-        <ul className="list-disc">
-          {lockedUsers.map((user) => (
-            <li key={user.id} className="mb-3">
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-medium">{user.fullName}</span>
-                <div>
-                  <button
-                    className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none"
-                    onClick={() => handleUnlockAccount(user.id)}
-                  >
-                    Unlock
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none ml-2"
-                    onClick={() => handleResetPassword(user.id)}
-                  >
-                    Reset Password
-                  </button>
+        {/* Locked Accounts */}
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold mb-2">Locked Accounts</h3>
+          <ul className="list-disc">
+            {lockedUsers.map((user) => (
+              <li key={user.id} className="mb-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-medium">{user.name}</span>
+                  <div>
+                    <Button
+                      variant="contained"
+                      color="success"
+                      onClick={() => handleUnlockAccount(user.id)}
+                    >
+                      Unlock
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={() => handleResetPassword(user.id)}
+                      className="ml-2"
+                    >
+                      Reset Password
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-      {/* Normal Accounts */}
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">Normal Accounts</h3>
-        <ul className="list-disc">
-          {normalUsers.map((user) => (
-            <li key={user.id} className="mb-3">
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-medium">{user.fullName}</span>
-                <div>
-                  <button
-                    className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none"
-                    onClick={() => handleLockAccount(user.id)}
-                  >
-                    Lock
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none ml-2"
-                    onClick={() => handleResetPassword(user.id)}
-                  >
-                    Reset Password
-                  </button>
+        {/* Normal Accounts */}
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold mb-2">Normal Accounts</h3>
+          <ul className="list-disc">
+            {normalUsers.map((user) => (
+              <li key={user.id} className="mb-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-medium">{user.name}</span>
+                  <div>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={() => handleLockAccount(user.id)}
+                    >
+                      Lock
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => handleResetPassword(user.id)}
+                      className="ml-2"
+                    >
+                      Reset Password
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-      <Modal
-        isOpen={isModalOpen}
-        onRequestClose={handleModalClose}
-        contentLabel="Reset Password"
-        className="modal"
-        overlayClassName="modal-overlay"
-      >
-        <h2 className="text-xl font-semibold mb-4">Reset Password</h2>
-        {modalError && <div className="mb-4 text-red-500">{modalError}</div>}
-        <div className="mb-4">
-          <label className="block text-lg font-medium mb-2">New Password</label>
-          <input
-            type="password"
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={newPassword}
-            onChange={handleNewPasswordChange}
-          />
-        </div>
-        <div className="flex justify-end">
-          <button
-            className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none mr-2"
-            onClick={handleModalClose}
-          >
-            Cancel
-          </button>
-          <button
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
-            onClick={handleConfirmPasswordReset}
-          >
-            Confirm
-          </button>
-        </div>
-      </Modal>
-    </div>
+        <Dialog
+          open={isDialogOpen}
+          onClose={handleDialogClose}
+          aria-labelledby="reset-password-dialog-title"
+          aria-describedby="reset-password-dialog-description"
+        >
+          <DialogTitle id="reset-password-dialog-title">Reset Password</DialogTitle>
+          <DialogContent>
+            {dialogError && (
+              <DialogContentText color="error">{dialogError}</DialogContentText>
+            )}
+            <TextField
+              autoFocus
+              margin="dense"
+              id="new-password"
+              label="New Password"
+              type="password"
+              fullWidth
+              variant="standard"
+              value={newPassword}
+              onChange={handleNewPasswordChange}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDialogClose}>Cancel</Button>
+            <Button onClick={handleConfirmPasswordReset} color="primary">
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    </ThemeProvider>
   );
 };
 
