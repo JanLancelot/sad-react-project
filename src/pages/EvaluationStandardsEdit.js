@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebaseConfig'; // Make sure to import firebaseConfig
+import { db } from '../firebaseConfig';
 
 const EvaluationStandardsEdit = () => {
-  const { standardId } = useParams(); // Get the standardId from the URL
+  const { standardId } = useParams();
   const [formData, setFormData] = useState({
     name: '',
     questions: [],
