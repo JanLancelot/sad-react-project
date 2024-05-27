@@ -13,6 +13,7 @@ import {
   PlusIcon,
   BriefcaseIcon,
 } from "@heroicons/react/20/solid";
+import { ThumbtackIcon } from "@heroicons/react/20/solid";
 import { Menu, Transition, Dialog } from "@headlessui/react";
 import React, { useEffect } from "react";
 import { db } from "../firebaseConfig";
@@ -21,6 +22,7 @@ import {
   collection,
   getDoc,
   getDocs,
+  updateDoc,
   getFirestore,
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -137,6 +139,16 @@ export default function Calendar() {
     return unsubscribe;
   }, [auth, db]);
 
+  const togglePin = async (meetingId, isPinned) => {
+    const meetingRef = doc(db, "meetings", meetingId);
+    await updateDoc(meetingRef, { pinned: !isPinned });
+    setRetrievedMeetings((prevMeetings) =>
+      prevMeetings.map((meeting) =>
+        meeting.id === meetingId ? { ...meeting, pinned: !isPinned } : meeting
+      )
+    );
+  };
+
   const getDaysInMonth = (month, year) => {
     return new Date(year, month + 1, 0).getDate();
   };
@@ -206,26 +218,26 @@ export default function Calendar() {
   const days = generateDays();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortByDate, setSortByDate] = useState("asc"); 
+  const [sortByDate, setSortByDate] = useState("asc");
 
   const filteredEvents = retrievedMeetings
     .filter((meeting) => {
-      if (!selectedDate) return true; 
+      if (!selectedDate) return true;
+
       const meetingDate = new Date(meeting.date);
       return (
         meetingDate.getDate() === selectedDate.getDate() &&
         meetingDate.getMonth() === selectedDate.getMonth() &&
-        meetingDate.getFullYear() === currentYear
+        meetingDate.getFullYear() === selectedDate.getFullYear()
       );
     })
     .filter((meeting) =>
       meeting.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
-    .filter(
-      (meeting) =>
-        selectedDepartment === "" || meeting.department === selectedDepartment
-    )
     .sort((a, b) => {
+      if (a.pinned && !b.pinned) return -1;
+      if (!a.pinned && b.pinned) return 1;
+
       const dateA = new Date(a.date);
       const dateB = new Date(b.date);
       if (sortByDate === "asc") {
@@ -235,14 +247,13 @@ export default function Calendar() {
       }
     });
 
-    function convertTo12Hour(time) {
-      if (!time) return ''; 
-      const [hours, minutes] = time.split(':');
-      const period = +hours < 12 ? 'AM' : 'PM';
-      const hour = +hours % 12 || 12;
-      return `${hour}:${minutes} ${period}`;
-    }
-    
+  function convertTo12Hour(time) {
+    if (!time) return "";
+    const [hours, minutes] = time.split(":");
+    const period = +hours < 12 ? "AM" : "PM";
+    const hour = +hours % 12 || 12;
+    return `${hour}:${minutes} ${period}`;
+  }
 
   return (
     <Layout>
@@ -395,58 +406,12 @@ export default function Calendar() {
                   className="h-14 w-14 flex-none rounded-full"
                 />
                 <div className="flex-auto">
-                  <div className="flex justify-between">
-                    <Link to={`/events/${meeting.id}/attendees`}>
-                      <h3 className="pr-10 font-semibold text-gray-900 xl:pr-0">
-                        {meeting.name}
-                      </h3>
-                    </Link>
-                    {(userRole === "admin" ||
-                      (meeting.creatorId &&
-                        currentUserId === meeting.creatorId)) && (
-                      <Menu as="div" className="relative">
-                        <div>
-                          <Menu.Button className="-m-2 flex items-center rounded-full p-2 text-gray-500 hover:text-gray-600">
-                            <span className="sr-only">Open options</span>
-                            <EllipsisHorizontalIcon
-                              className="h-5 w-5"
-                              aria-hidden="true"
-                            />
-                          </Menu.Button>
-                        </div>
-                        <Transition
-                          as={Fragment}
-                          enter="transition ease-out duration-100"
-                          enterFrom="transform opacity-0 scale-95"
-                          enterTo="transform opacity-100 scale-100"
-                          leave="transition ease-in duration-75"
-                          leaveFrom="transform opacity-100 scale-100"
-                          leaveTo="transform opacity-0 scale-95"
-                        >
-                          <Menu.Items className="absolute right-0 z-10 mt-2 w-36 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                            <div className="py-1">
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <a
-                                    href={`/events/${meeting.id}/edit`}
-                                    className={classNames(
-                                      active
-                                        ? "bg-gray-100 text-gray-900"
-                                        : "text-gray-700",
-                                      "block px-4 py-2 text-sm"
-                                    )}
-                                  >
-                                    Edit
-                                  </a>
-                                )}
-                              </Menu.Item>
-                            </div>
-                          </Menu.Items>
-                        </Transition>
-                      </Menu>
-                    )}
-                  </div>
-                  <dl className="mt-2 flex flex-col text-gray-500">
+                  <Link to={`/events/${meeting.id}`}>
+                    <h3 className="pr-10 font-semibold text-gray-900 xl:pr-0">
+                      {meeting.name}
+                    </h3>
+                  </Link>
+                  <dl className="mt-2 flex flex-col text-gray-500 xl:flex-row">
                     <div className="flex items-start space-x-3">
                       <dt className="mt-0.5">
                         <span className="sr-only">Date</span>
@@ -457,11 +422,12 @@ export default function Calendar() {
                       </dt>
                       <dd>
                         <time dateTime={meeting.datetime}>
-                        {meeting.date} at {convertTo12Hour(meeting.startTime)} - {convertTo12Hour(meeting.endTime)}
+                          {meeting.date} at {convertTo12Hour(meeting.startTime)}{" "}
+                          - {convertTo12Hour(meeting.endTime)}
                         </time>
                       </dd>
                     </div>
-                    <div className="mt-2 flex items-start space-x-3">
+                    <div className="mt-2 flex items-start space-x-3 xl:ml-3.5 xl:mt-0 xl:border-l xl:border-gray-400 xl:border-opacity-50 xl:pl-3.5">
                       <dt className="mt-0.5">
                         <span className="sr-only">Location</span>
                         <MapPinIcon
@@ -471,18 +437,21 @@ export default function Calendar() {
                       </dt>
                       <dd>{meeting.location}</dd>
                     </div>
-                    <div className="mt-2 flex items-start space-x-3">
-                      <dt className="mt-0.5">
-                        <span className="sr-only">Department</span>
-                        <BriefcaseIcon
-                          className="h-5 w-5 text-gray-400"
-                          aria-hidden="true"
-                        />
-                      </dt>
-                      <dd>{meeting.department}</dd>
-                    </div>
                   </dl>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => togglePin(meeting.id, meeting.pinned)}
+                  className="absolute top-0 right-0 mt-2 mr-2"
+                >
+                  <ThumbtackIcon
+                    className={classNames(
+                      "h-5 w-5",
+                      meeting.pinned ? "text-yellow-500" : "text-gray-400"
+                    )}
+                    aria-hidden="true"
+                  />
+                </button>
               </li>
             ))}
           </ol>
