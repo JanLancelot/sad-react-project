@@ -24,6 +24,7 @@ import EvaluationFormManager from "./pages/EvaluationFormManager";
 import EditStudentPage from "./pages/EditStudentPage";
 import EvaluationStandardsView from "./pages/EvaluationStandardsView";
 import EvaluationStandardsEdit from "./pages/EvaluationStandardsEdit";
+import UserManagement from "./pages/UserManagement";
 import { ProtectedRoute } from "./pages/components/ProtectedRoute";
 import { Protected } from "./pages/components/Protected";
 import { AuthContext } from "./pages/components/AuthContext";
@@ -129,6 +130,10 @@ const router = createBrowserRouter([
   {
     path: "/evaluation-standards/edit/:standardId",
     element: <Protected><EvaluationStandardsEdit /></Protected>
+  },
+  {
+    path: "/user-management",
+    element: <Protected><UserManagement /></Protected>
   }
 ]);
 
