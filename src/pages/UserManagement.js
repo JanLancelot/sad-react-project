@@ -87,7 +87,7 @@ const UserManagement = () => {
           {lockedUsers.map((user) => (
             <li key={user.id} className="mb-3">
               <div className="flex items-center justify-between">
-                <span className="text-lg font-medium">{user.name}</span>
+                <span className="text-lg font-medium">{user.fullName}</span>
                 <div>
                   <button
                     className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none"
