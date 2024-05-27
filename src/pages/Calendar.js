@@ -13,7 +13,7 @@ import {
   PlusIcon,
   BriefcaseIcon,
 } from "@heroicons/react/20/solid";
-import { ThumbtackIcon } from "@heroicons/react/20/solid";
+import { BookmarkIcon } from "@heroicons/react/20/solid";
 import { Menu, Transition, Dialog } from "@headlessui/react";
 import React, { useEffect } from "react";
 import { db } from "../firebaseConfig";
@@ -444,7 +444,7 @@ export default function Calendar() {
                   onClick={() => togglePin(meeting.id, meeting.pinned)}
                   className="absolute top-0 right-0 mt-2 mr-2"
                 >
-                  <ThumbtackIcon
+                  <BookmarkIcon
                     className={classNames(
                       "h-5 w-5",
                       meeting.pinned ? "text-yellow-500" : "text-gray-400"
