@@ -493,20 +493,20 @@ export default function Calendar() {
                       </dt>
                       <dd>{meeting.department}</dd>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => togglePin(meeting.id, meeting.pinned)}
-                      className="absolute top-0 right-0 mt-2 mr-2"
-                    >
-                      <BookmarkIcon
-                        className={classNames(
-                          "h-5 w-5",
-                          meeting.pinned ? "text-yellow-500" : "text-gray-400"
-                        )}
-                        aria-hidden="true"
-                      />
-                    </button>
                   </dl>
+                  <button
+                    type="button"
+                    onClick={() => togglePin(meeting.id, meeting.pinned)}
+                    className="absolute top-2 right-2"
+                  >
+                    <BookmarkIcon
+                      className={classNames(
+                        "h-5 w-5",
+                        meeting.pinned ? "text-yellow-500" : "text-gray-400"
+                      )}
+                      aria-hidden="true"
+                    />
+                  </button>
                 </div>
               </li>
             ))}
