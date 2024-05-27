@@ -451,6 +451,35 @@ export default function Calendar() {
                                   </a>
                                 )}
                               </Menu.Item>
+                              <Menu.Item>
+                                {({ active }) => (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      togglePin(meeting.id, meeting.pinned)
+                                    }
+                                    className={classNames(
+                                      active
+                                        ? "bg-gray-100 text-gray-900"
+                                        : "text-gray-700",
+                                      "block px-4 py-2 text-sm"
+                                    )}
+                                  >
+                                    <BookmarkIcon
+                                      className={classNames(
+                                        "h-5 w-5",
+                                        meeting.pinned
+                                          ? "text-yellow-500"
+                                          : "text-gray-400"
+                                      )}
+                                      aria-hidden="true"
+                                    />
+                                    {meeting.pinned
+                                      ? "Unpin"
+                                      : "Pin"}
+                                  </button>
+                                )}
+                              </Menu.Item>
                             </div>
                           </Menu.Items>
                         </Transition>
@@ -494,19 +523,6 @@ export default function Calendar() {
                       <dd>{meeting.department}</dd>
                     </div>
                   </dl>
-                  <button
-                    type="button"
-                    onClick={() => togglePin(meeting.id, meeting.pinned)}
-                    className="absolute top-2 right-2"
-                  >
-                    <BookmarkIcon
-                      className={classNames(
-                        "h-5 w-5",
-                        meeting.pinned ? "text-yellow-500" : "text-gray-400"
-                      )}
-                      aria-hidden="true"
-                    />
-                  </button>
                 </div>
               </li>
             ))}
