@@ -121,7 +121,7 @@ export default function Calendar() {
             const userDocRef = doc(db, "users", currentUser.uid);
             const userDocSnap = await getDoc(userDocRef);
             if (userDocSnap.exists()) {
-              setUserRole(userDocSnap.data().role);
+              setUserRole(userDocSnap.data().role.toLowerCase()); 
             } else {
               setUserRole(null);
             }
