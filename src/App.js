@@ -22,6 +22,7 @@ import Register from "./pages/Register";
 import SignupStudent from "./pages/SignupStudent";
 import EvaluationFormManager from "./pages/EvaluationFormManager";
 import EditStudentPage from "./pages/EditStudentPage";
+import EvaluationStandardsView from "./pages/EvaluationStandardsView";
 import { ProtectedRoute } from "./pages/components/ProtectedRoute";
 import { Protected } from "./pages/components/Protected";
 import { AuthContext } from "./pages/components/AuthContext";
@@ -119,6 +120,10 @@ const router = createBrowserRouter([
   {
     path: "/edit-student/:id",
     element: <Protected><EditStudentPage /></Protected>
+  },
+  {
+    path: "/evaluations-view",
+    element: <Protected><EvaluationStandardsView /></Protected>
   }
 ]);
 
