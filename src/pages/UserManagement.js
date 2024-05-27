@@ -1,11 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebaseConfig'; // Assuming you have firebaseConfig set up
+import React, { useState, useEffect } from "react";
+import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
+import { db, auth } from "../firebaseConfig";
+import { updatePassword } from "firebase/auth";
+import Modal from "react-modal";
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userIdToUpdate, setUserIdToUpdate] = useState(null);
+  const [newPassword, setNewPassword] = useState("");
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -27,10 +32,32 @@ const UserManagement = () => {
     fetchUsers();
   }, []);
 
+  const handleResetPassword = async (userId) => {
+    setUserIdToUpdate(userId);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setNewPassword("");
+    setError(null);
+  };
+
+  const handleNewPasswordChange = (e) => {
+    setNewPassword(e.target.value);
+  };
+
   const handleLockAccount = async (userId) => {
     try {
       const userDocRef = doc(db, 'users', userId);
       await updateDoc(userDocRef, { locked: true });
+
+      // Update the user state locally to reflect the change
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.id === userId ? { ...user, locked: true } : user
+        )
+      );
     } catch (error) {
       console.error('Error locking account:', error);
       // Handle the error appropriately, e.g., display an error message
@@ -41,27 +68,42 @@ const UserManagement = () => {
     try {
       const userDocRef = doc(db, 'users', userId);
       await updateDoc(userDocRef, { locked: false });
+
+      // Update the user state locally to reflect the change
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.id === userId ? { ...user, locked: false } : user
+        )
+      );
     } catch (error) {
       console.error('Error unlocking account:', error);
       // Handle the error appropriately, e.g., display an error message
     }
   };
 
-  const handleResetPassword = async (userId) => {
+  const handleConfirmPasswordReset = async () => {
     try {
-      // Implement logic to reset the password for the user
-      // This might involve sending an email with a password reset link
-      // or using Firebase Authentication's password reset functionality.
-      // ...
+      // Get the user object from Firebase Authentication using the UID
+      const user = await auth.getUser(userIdToUpdate);
+
+      // Update the user's password
+      await updatePassword(user, newPassword);
+
+      // Close the modal
+      handleModalClose();
+      // Handle successful password reset (e.g., display a success message)
+      console.log("Password reset for user:", userIdToUpdate);
     } catch (error) {
-      console.error('Error resetting password:', error);
-      // Handle the error appropriately, e.g., display an error message
+      console.error("Error resetting password:", error);
+      setError(error.message); // Set the error message from Firebase
     }
   };
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">Loading...</div>
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
     );
   }
 
@@ -135,6 +177,39 @@ const UserManagement = () => {
           ))}
         </ul>
       </div>
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={handleModalClose}
+        contentLabel="Reset Password"
+        className="modal"
+        overlayClassName="modal-overlay"
+      >
+        <h2 className="text-xl font-semibold mb-4">Reset Password</h2>
+        {error && <div className="mb-4 text-red-500">{error}</div>}
+        <div className="mb-4">
+          <label className="block text-lg font-medium mb-2">New Password</label>
+          <input
+            type="password"
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={newPassword}
+            onChange={handleNewPasswordChange}
+          />
+        </div>
+        <div className="flex justify-end">
+          <button
+            className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none mr-2"
+            onClick={handleModalClose}
+          >
+            Cancel
+          </button>
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
+            onClick={handleConfirmPasswordReset}
+          >
+            Confirm
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 };
