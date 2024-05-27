@@ -462,21 +462,19 @@ export default function Calendar() {
                                       active
                                         ? "bg-gray-100 text-gray-900"
                                         : "text-gray-700",
-                                      "block px-4 py-2 text-sm"
+                                      "block px-4 py-2 text-sm flex items-center"
                                     )}
                                   >
+                                    {meeting.pinned ? "Unpin" : "Pin"}
                                     <BookmarkIcon
                                       className={classNames(
-                                        "h-5 w-5",
+                                        "h-5 w-5 ml-2", // Added ml-2 for spacing
                                         meeting.pinned
                                           ? "text-yellow-500"
                                           : "text-gray-400"
                                       )}
                                       aria-hidden="true"
                                     />
-                                    {meeting.pinned
-                                      ? "Unpin"
-                                      : "Pin"}
                                   </button>
                                 )}
                               </Menu.Item>
