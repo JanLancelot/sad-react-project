@@ -85,15 +85,16 @@ const UserManagement = () => {
   const handleConfirmPasswordReset = async () => {
     try {
       // Get the user object from Firebase Authentication using the UID
-      const user = await auth.getUser(userIdToUpdate); 
-
+      const userRef = await auth.getUser(userIdToUpdate);
+      const user = userRef.get();
+  
       // Update the user's password
       await updatePassword(user, newPassword);
-
+  
       // Close the modal
       handleModalClose();
       // Handle successful password reset (e.g., display a success message)
-      console.log("Password reset for user:", userIdToUpdate); 
+      console.log("Password reset for user:", userIdToUpdate);
     } catch (error) {
       console.error('Error resetting password:', error);
       setModalError(error.message); // Set the error message from Firebase
