@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { collection, getDocs, doc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import Layout from "./Layout";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const EvaluationStandardsView = () => {
   const [standards, setStandards] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchStandards = async () => {

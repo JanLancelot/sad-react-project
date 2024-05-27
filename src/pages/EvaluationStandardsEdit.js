@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
+import { useNavigate } from "react-router-dom";
+
 
 const EvaluationStandardsEdit = () => {
   const { standardId } = useParams();
@@ -13,6 +15,7 @@ const EvaluationStandardsEdit = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchStandard = async () => {
@@ -118,6 +121,7 @@ const EvaluationStandardsEdit = () => {
       const standardDocRef = doc(db, 'evaluationForms', standardId);
       await updateDoc(standardDocRef, formData);
       setError(null);
+      navigate('/evaluations-view')
     } catch (error) {
       console.error('Error saving form:', error);
       setError('Error saving form');
