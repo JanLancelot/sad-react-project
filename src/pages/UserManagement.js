@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
-import { db, auth } from "../firebaseConfig";
-import { updatePassword } from "firebase/auth";
-import Modal from "react-modal";
+import React, { useState, useEffect } from 'react';
+import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { db, auth } from '../firebaseConfig'; 
+import { updatePassword } from 'firebase/auth'; 
+import Modal from 'react-modal'; 
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -10,7 +10,8 @@ const UserManagement = () => {
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userIdToUpdate, setUserIdToUpdate] = useState(null);
-  const [newPassword, setNewPassword] = useState("");
+  const [newPassword, setNewPassword] = useState('');
+  const [modalError, setModalError] = useState(null); // Modal error state
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -31,21 +32,6 @@ const UserManagement = () => {
     };
     fetchUsers();
   }, []);
-
-  const handleResetPassword = async (userId) => {
-    setUserIdToUpdate(userId);
-    setIsModalOpen(true);
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setNewPassword("");
-    setError(null);
-  };
-
-  const handleNewPasswordChange = (e) => {
-    setNewPassword(e.target.value);
-  };
 
   const handleLockAccount = async (userId) => {
     try {
@@ -81,10 +67,25 @@ const UserManagement = () => {
     }
   };
 
+  const handleResetPassword = async (userId) => {
+    setUserIdToUpdate(userId);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setNewPassword('');
+    setModalError(null); // Clear the modal error
+  };
+
+  const handleNewPasswordChange = (e) => {
+    setNewPassword(e.target.value);
+  };
+
   const handleConfirmPasswordReset = async () => {
     try {
       // Get the user object from Firebase Authentication using the UID
-      const user = await auth.getUser(userIdToUpdate);
+      const user = await auth.getUser(userIdToUpdate); 
 
       // Update the user's password
       await updatePassword(user, newPassword);
@@ -92,18 +93,16 @@ const UserManagement = () => {
       // Close the modal
       handleModalClose();
       // Handle successful password reset (e.g., display a success message)
-      console.log("Password reset for user:", userIdToUpdate);
+      console.log("Password reset for user:", userIdToUpdate); 
     } catch (error) {
-      console.error("Error resetting password:", error);
-      setError(error.message); // Set the error message from Firebase
+      console.error('Error resetting password:', error);
+      setModalError(error.message); // Set the error message from Firebase
     }
   };
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
-      </div>
+      <div className="flex justify-center items-center h-screen">Loading...</div>
     );
   }
 
@@ -177,6 +176,7 @@ const UserManagement = () => {
           ))}
         </ul>
       </div>
+
       <Modal
         isOpen={isModalOpen}
         onRequestClose={handleModalClose}
@@ -185,7 +185,7 @@ const UserManagement = () => {
         overlayClassName="modal-overlay"
       >
         <h2 className="text-xl font-semibold mb-4">Reset Password</h2>
-        {error && <div className="mb-4 text-red-500">{error}</div>}
+        {modalError && <div className="mb-4 text-red-500">{modalError}</div>}
         <div className="mb-4">
           <label className="block text-lg font-medium mb-2">New Password</label>
           <input
