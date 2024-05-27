@@ -133,9 +133,15 @@ export default function Layout({ children }) {
   const isAdmin = userRole?.toLowerCase() === "admin"; 
   
   const userNavigation = [
-    ...(isAdmin ? [{ name: "Add New User", href: "/register" }] : []),
+    ...(isAdmin ? [
+        { name: "Add New User", href: "/register" },
+        { name: "View Evaluation Forms", href: "/evaluation-forms" },
+        { name: "User Management", href: "/user-management" }
+    ] : []),
     { name: "Sign out", href: "#", onClick: handleSignOut },
-  ];
+];
+
+
 
   const isReportsVisible = userRole === "admin" || userRole === "osas";
 

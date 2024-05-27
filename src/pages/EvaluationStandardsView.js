@@ -82,7 +82,15 @@ const EvaluationStandardsView = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
-        <h2 className="text-2xl font-semibold mb-4">Evaluation Standards</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-semibold">Evaluation Standards</h2>
+          <Link
+            to="/evaluation-form-manager"
+            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none"
+          >
+            Add New Evaluation
+          </Link>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {standards.map((standard) => (
             <div key={standard.id} className="bg-gray-100 rounded-md p-4 shadow-sm hover:shadow-lg transition-shadow duration-200">
