@@ -21,7 +21,7 @@ const EditStudentPage = () => {
           setStudent(studentDocSnapshot.data());
         } else {
           alert("Student not found.");
-          navigate("/students"); // Redirect to student list
+          navigate("/computer-studies");
         }
       } catch (error) {
         console.error("Error fetching student data:", error);
@@ -65,7 +65,7 @@ const EditStudentPage = () => {
       const userDocRef = doc(db, "users", id);
       await updateDoc(userDocRef, student);
       alert("Student updated successfully.");
-      navigate("/students"); // Redirect to student list
+      navigate("/computer-studies"); // Redirect to student list
     } catch (error) {
       console.error("Error updating student:", error);
       alert("An error occurred while updating student.");
