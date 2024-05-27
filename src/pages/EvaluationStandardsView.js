@@ -49,11 +49,14 @@ const EvaluationStandardsView = () => {
     <Layout>
       <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
         <h2 className="text-2xl font-semibold mb-4">Evaluation Standards</h2>
-        {standards.map((standard) => (
-          <li key={standard.id} className="mb-3">
-            <div className="flex items-center justify-between">
-              <span className="text-lg font-medium">{standard.name}</span>
-              <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {standards.map((standard) => (
+            <div
+              key={standard.id}
+              className="bg-gray-100 rounded-md p-4 shadow-sm hover:shadow-lg transition-shadow duration-200"
+            >
+              <h3 className="text-lg font-semibold mb-2">{standard.name}</h3>
+              <div className="mt-2">
                 <Link
                   to={`/evaluation-standards/edit/${standard.id}`}
                   className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
@@ -68,8 +71,8 @@ const EvaluationStandardsView = () => {
                 </button>
               </div>
             </div>
-          </li>
-        ))}
+          ))}
+        </div>
       </div>
     </Layout>
   );
