@@ -409,7 +409,22 @@ export default function Calendar() {
                   <div className="flex justify-between">
                     <Link to={`/events/${meeting.id}/attendees`}>
                       <h3 className="pr-10 font-semibold text-gray-900 xl:pr-0">
-                        {meeting.name}
+                        {meeting.name}{" "}
+                        <button
+                          type="button"
+                          onClick={() => togglePin(meeting.id, meeting.pinned)}
+                          className="absolute top-2 right-2"
+                        >
+                          <BookmarkIcon
+                            className={classNames(
+                              "h-5 w-5",
+                              meeting.pinned
+                                ? "text-yellow-500"
+                                : "text-gray-400"
+                            )}
+                            aria-hidden="true"
+                          />
+                        </button>
                       </h3>
                     </Link>
                     {(userRole === "admin" ||
@@ -494,19 +509,6 @@ export default function Calendar() {
                       <dd>{meeting.department}</dd>
                     </div>
                   </dl>
-                  <button
-                    type="button"
-                    onClick={() => togglePin(meeting.id, meeting.pinned)}
-                    className="absolute top-2 right-2"
-                  >
-                    <BookmarkIcon
-                      className={classNames(
-                        "h-5 w-5",
-                        meeting.pinned ? "text-yellow-500" : "text-gray-400"
-                      )}
-                      aria-hidden="true"
-                    />
-                  </button>
                 </div>
               </li>
             ))}
