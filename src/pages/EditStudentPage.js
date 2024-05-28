@@ -35,13 +35,12 @@ const EditStudentPage = () => {
 
   const handleChange = (e) => {
     setStudent({ ...student, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" }); // Clear error on input change
+    setErrors({ ...errors, [e.target.name]: "" });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic validation (you can add more robust validation here)
     const newErrors = {};
     if (!student.fullName) {
       newErrors.fullName = "Full Name is required";
@@ -65,7 +64,7 @@ const EditStudentPage = () => {
       const userDocRef = doc(db, "users", id);
       await updateDoc(userDocRef, student);
       alert("Student updated successfully.");
-      navigate("/computer-studies"); // Redirect to student list
+      navigate("/computer-studies");
     } catch (error) {
       console.error("Error updating student:", error);
       alert("An error occurred while updating student.");
