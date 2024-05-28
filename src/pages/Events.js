@@ -73,7 +73,7 @@ function Events() {
       const filtered = events.filter(
         (event) => {
           const eventDate = new Date(event.date.split('/').reverse().join('-'));
-          return eventDate >= new Date(startDate.split('-').reverse().join('-')) && eventDate <= new Date(endDate.split('-').reverse().join('-'));
+          return eventDate >= new Date(startDate.split('/').reverse().join('-')) && eventDate <= new Date(endDate.split('/').reverse().join('-'));
         }
       );
       setFilteredEvents(filtered);
