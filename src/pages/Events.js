@@ -41,7 +41,7 @@ function Events() {
   const handleDepartmentChange = (e) => {
     const selectedDepartment = e.target.value;
     setDepartment(selectedDepartment);
-
+  
     if (selectedDepartment === 'Select Department') {
       setFilteredEvents(events);
     } else {
