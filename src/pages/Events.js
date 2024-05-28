@@ -1,31 +1,66 @@
-import React, { useState, useEffect } from 'react';
-import { collection, query, getDocs, where } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
-import ReactToPrint from 'react-to-print';
+import React, { useState, useEffect } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebaseConfig";
+import ReactToPrint from "react-to-print";
 
 const departmentOptions = [
-  { id: 0, name: 'Select Department', color: '', dbl: '' },
-  { id: 1, name: 'Computer Studies', color: 'bg-blue-400', dbl: 'CS department' },
-  { id: 2, name: 'Education', color: 'bg-green-400', dbl: 'Education Department' },
-  { id: 3, name: 'Accountancy', color: 'bg-yellow-400', dbl: 'Accountancy Department' },
-  { id: 4, name: 'Business Administration', color: 'bg-purple-400', dbl: 'Business Administration Department' },
-  { id: 5, name: 'Arts and Sciences', color: 'bg-pink-400', dbl: 'Arts and Sciences Department' },
-  { id: 6, name: 'Maritime', color: 'bg-teal-400', dbl: 'Maritime department' },
-  { id: 7, name: 'Health Sciences', color: 'bg-red-400', dbl: 'Health Sciences Department' },
-  { id: 8, name: 'Hospitality', color: 'bg-orange-400', dbl: 'Hospitality Management and Tourism Department' },
+  { id: 0, name: "Select Department", color: "", dbl: "" },
+  {
+    id: 1,
+    name: "Computer Studies",
+    color: "bg-blue-400",
+    dbl: "CS department",
+  },
+  {
+    id: 2,
+    name: "Education",
+    color: "bg-green-400",
+    dbl: "Education Department",
+  },
+  {
+    id: 3,
+    name: "Accountancy",
+    color: "bg-yellow-400",
+    dbl: "Accountancy Department",
+  },
+  {
+    id: 4,
+    name: "Business Administration",
+    color: "bg-purple-400",
+    dbl: "Business Administration Department",
+  },
+  {
+    id: 5,
+    name: "Arts and Sciences",
+    color: "bg-pink-400",
+    dbl: "Arts and Sciences Department",
+  },
+  { id: 6, name: "Maritime", color: "bg-teal-400", dbl: "Maritime department" },
+  {
+    id: 7,
+    name: "Health Sciences",
+    color: "bg-red-400",
+    dbl: "Health Sciences Department",
+  },
+  {
+    id: 8,
+    name: "Hospitality",
+    color: "bg-orange-400",
+    dbl: "Hospitality Management and Tourism Department",
+  },
 ];
 
 function Events() {
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const [department, setDepartment] = useState('');
-  const [eventFilter, setEventFilter] = useState('all');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [department, setDepartment] = useState("");
+  const [eventFilter, setEventFilter] = useState("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
     const fetchEvents = async () => {
-      const q = collection(db, 'meetings');
+      const q = collection(db, "meetings");
       const querySnapshot = await getDocs(q);
       const eventsData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -41,8 +76,8 @@ function Events() {
   const handleDepartmentChange = (e) => {
     const selectedDepartment = e.target.value;
     setDepartment(selectedDepartment);
-  
-    if (selectedDepartment === 'Select Department') {
+
+    if (selectedDepartment === "") {
       setFilteredEvents(events);
     } else {
       const filtered = events.filter(
@@ -56,37 +91,40 @@ function Events() {
     const filterValue = e.target.value;
     setEventFilter(filterValue);
 
-    if (filterValue === 'all') {
+    if (filterValue === "all") {
       setFilteredEvents(events);
-    } else if (filterValue === 'finished') {
-      const filtered = events.filter(
-        (event) => new Date(event.date.split('/').reverse().join('-')) < new Date()
-      );
-      setFilteredEvents(filtered);
-    } else if (filterValue === 'upcoming') {
-      const filtered = events.filter(
-        (event) => new Date(event.date.split('/').reverse().join('-')) > new Date()
-      );
-      setFilteredEvents(filtered);
-    } else if (filterValue === 'between') {
-      // Filter events between start and end dates
+    } else if (filterValue === "finished") {
       const filtered = events.filter(
         (event) =>
-          new Date(event.date.split('/').reverse().join('-')) >= new Date(startDate) &&
-          new Date(event.date.split('/').reverse().join('-')) <= new Date(endDate)
+          new Date(event.date.split("/").reverse().join("-")) < new Date()
       );
+      setFilteredEvents(filtered);
+    } else if (filterValue === "upcoming") {
+      const filtered = events.filter(
+        (event) =>
+          new Date(event.date.split("/").reverse().join("-")) > new Date()
+      );
+      setFilteredEvents(filtered);
+    } else if (filterValue === "between") {
+      // Filter events between start and end dates
+      const filtered = events.filter((event) => {
+        const eventDate = new Date(event.date.split("/").reverse().join("-"));
+        return (
+          eventDate >= new Date(startDate) && eventDate <= new Date(endDate)
+        );
+      });
       setFilteredEvents(filtered);
     }
   };
 
   const handleStartDateChange = (e) => {
     setStartDate(e.target.value);
-    handleEventFilterChange({ target: { value: 'between' } });
+    handleEventFilterChange({ target: { value: "between" } });
   };
 
   const handleEndDateChange = (e) => {
     setEndDate(e.target.value);
-    handleEventFilterChange({ target: { value: 'between' } });
+    handleEventFilterChange({ target: { value: "between" } });
   };
 
   const componentRef = React.createRef();
@@ -101,11 +139,7 @@ function Events() {
           className="border border-gray-300 rounded px-2 py-1 mr-4"
         >
           {departmentOptions.map((option) => (
-            <option
-              key={option.id}
-              value={option.dbl}
-              className={option.color}
-            >
+            <option key={option.id} value={option.dbl} className={option.color}>
               {option.name}
             </option>
           ))}
@@ -123,7 +157,7 @@ function Events() {
           <option value="between">Events Between Dates</option>
         </select>
 
-        {eventFilter === 'between' && (
+        {eventFilter === "between" && (
           <div>
             <label className="mr-2">Start Date:</label>
             <input
