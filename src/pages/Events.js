@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, getDocs, where, orderBy, startAt, endAt } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import { collection, query, getDocs, where } from 'firebase/firestore';
+import { db } from './firebase';
 import ReactToPrint from 'react-to-print';
 
 const departmentOptions = [
@@ -60,20 +60,20 @@ function Events() {
       setFilteredEvents(events);
     } else if (filterValue === 'finished') {
       const filtered = events.filter(
-        (event) => new Date(event.endTime) < new Date()
+        (event) => new Date(event.date) < new Date()
       );
       setFilteredEvents(filtered);
     } else if (filterValue === 'upcoming') {
       const filtered = events.filter(
-        (event) => new Date(event.startTime) > new Date()
+        (event) => new Date(event.date) > new Date()
       );
       setFilteredEvents(filtered);
     } else if (filterValue === 'between') {
       // Filter events between start and end dates
       const filtered = events.filter(
         (event) =>
-          new Date(event.startTime) >= new Date(startDate) &&
-          new Date(event.endTime) <= new Date(endDate)
+          new Date(event.date) >= new Date(startDate) &&
+          new Date(event.date) <= new Date(endDate)
       );
       setFilteredEvents(filtered);
     }
@@ -155,8 +155,8 @@ function Events() {
             <tr>
               <th className="px-4 py-2 border">Event Name</th>
               <th className="px-4 py-2 border">Description</th>
-              <th className="px-4 py-2 border">Start Time</th>
-              <th className="px-4 py-2 border">End Time</th>
+              <th className="px-4 py-2 border">Date</th>
+              <th className="px-4 py-2 border">Category</th>
               <th className="px-4 py-2 border">Department</th>
             </tr>
           </thead>
@@ -166,11 +166,9 @@ function Events() {
                 <td className="border px-4 py-2">{event.name}</td>
                 <td className="border px-4 py-2">{event.description}</td>
                 <td className="border px-4 py-2">
-                  {new Date(event.startTime).toLocaleString()}
+                  {new Date(event.date).toLocaleDateString()}
                 </td>
-                <td className="border px-4 py-2">
-                  {new Date(event.endTime).toLocaleString()}
-                </td>
+                <td className="border px-4 py-2">{event.category}</td>
                 <td className="border px-4 py-2">{event.department}</td>
               </tr>
             ))}
