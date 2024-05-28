@@ -18,8 +18,10 @@ const departmentOptions = [
 function Events() {
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
+  const [sortedEvents, setSortedEvents] = useState([]);
   const [department, setDepartment] = useState('');
   const [eventFilter, setEventFilter] = useState('all');
+  const [scoreFilter, setScoreFilter] = useState('none');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
@@ -35,11 +37,12 @@ function Events() {
         return {
           id: doc.id,
           ...doc.data(),
-          averageScore,
+          averageScore: parseFloat(averageScore)
         };
       }));
       setEvents(eventsData);
       setFilteredEvents(eventsData);
+      setSortedEvents(eventsData);
     };
 
     fetchEvents();
@@ -49,41 +52,40 @@ function Events() {
     const selectedDepartment = e.target.value;
     setDepartment(selectedDepartment);
 
-    if (selectedDepartment === '') {
-      setFilteredEvents(events);
-    } else {
-      const filtered = events.filter(
-        (event) => event.department === selectedDepartment
-      );
-      setFilteredEvents(filtered);
-    }
+    const updatedFilteredEvents = selectedDepartment === '' 
+      ? events 
+      : events.filter(event => event.department === selectedDepartment);
+
+    setFilteredEvents(updatedFilteredEvents);
+    setSortedEvents(sortEvents(updatedFilteredEvents, scoreFilter));
   };
 
   const handleEventFilterChange = (e) => {
     const filterValue = e.target.value;
     setEventFilter(filterValue);
 
+    let updatedFilteredEvents;
     if (filterValue === 'all') {
-      setFilteredEvents(events);
+      updatedFilteredEvents = events;
     } else if (filterValue === 'finished') {
-      const filtered = events.filter(
+      updatedFilteredEvents = events.filter(
         (event) => new Date(event.date.split('/').reverse().join('-')) < new Date()
       );
-      setFilteredEvents(filtered);
     } else if (filterValue === 'upcoming') {
-      const filtered = events.filter(
+      updatedFilteredEvents = events.filter(
         (event) => new Date(event.date.split('/').reverse().join('-')) > new Date()
       );
-      setFilteredEvents(filtered);
     } else if (filterValue === 'between') {
       const start = new Date(startDate);
       const end = new Date(endDate);
-      const filtered = events.filter((event) => {
+      updatedFilteredEvents = events.filter((event) => {
         const eventDate = new Date(event.date.split('/').reverse().join('-'));
         return eventDate >= start && eventDate <= end;
       });
-      setFilteredEvents(filtered);
     }
+
+    setFilteredEvents(updatedFilteredEvents);
+    setSortedEvents(sortEvents(updatedFilteredEvents, scoreFilter));
   };
 
   const handleStartDateChange = (e) => {
@@ -94,6 +96,23 @@ function Events() {
   const handleEndDateChange = (e) => {
     setEndDate(e.target.value);
     handleEventFilterChange({ target: { value: 'between' } });
+  };
+
+  const handleScoreFilterChange = (e) => {
+    const scoreFilterValue = e.target.value;
+    setScoreFilter(scoreFilterValue);
+    setSortedEvents(sortEvents(filteredEvents, scoreFilterValue));
+  };
+
+  const sortEvents = (events, scoreFilterValue) => {
+    if (scoreFilterValue === 'none') {
+      return events;
+    } else if (scoreFilterValue === 'asc') {
+      return [...events].sort((a, b) => a.averageScore - b.averageScore);
+    } else if (scoreFilterValue === 'desc') {
+      return [...events].sort((a, b) => b.averageScore - a.averageScore);
+    }
+    return events;
   };
 
   const componentRef = React.createRef();
@@ -149,6 +168,17 @@ function Events() {
             />
           </div>
         )}
+
+        <label className="mr-2">Sort by Score:</label>
+        <select
+          value={scoreFilter}
+          onChange={handleScoreFilterChange}
+          className="border border-gray-300 rounded px-2 py-1"
+        >
+          <option value="none">None</option>
+          <option value="asc">Lowest to Highest</option>
+          <option value="desc">Highest to Lowest</option>
+        </select>
       </div>
 
       <ReactToPrint
@@ -173,7 +203,7 @@ function Events() {
             </tr>
           </thead>
           <tbody>
-            {filteredEvents.map((event) => (
+            {sortedEvents.map((event) => (
               <tr key={event.id}>
                 <td className="border px-4 py-2">{event.name}</td>
                 <td className="border px-4 py-2">{event.description}</td>
