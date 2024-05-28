@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, getDocs, doc, getDoc, collectionGroup } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import ReactToPrint from 'react-to-print';
 
@@ -24,26 +24,12 @@ function StudentMasterlist() {
     const fetchStudents = async () => {
       const q = collection(db, 'users');
       const querySnapshot = await getDocs(q);
-      const studentsData = await Promise.all(
-        querySnapshot.docs
-          .map(async (doc) => {
-            const studentData = doc.data();
-            const evaluationsRef = collection(db, 'users', doc.id, 'evaluations');
-            const evaluationsSnapshot = await getDocs(evaluationsRef);
-            const averageScore =
-              evaluationsSnapshot.docs.length > 0
-                ? evaluationsSnapshot.docs
-                    .map((evaluationDoc) => evaluationDoc.data().averageRating)
-                    .reduce((sum, rating) => sum + rating, 0) / evaluationsSnapshot.docs.length
-                : null;
-            return {
-              id: doc.id,
-              ...studentData,
-              averageScore,
-            };
-          })
-          .filter((student) => student.department)
-      );
+      const studentsData = querySnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter((student) => student.department);
       setStudents(studentsData);
       setFilteredStudents(studentsData);
     };
@@ -105,7 +91,6 @@ function StudentMasterlist() {
               <th className="px-4 py-2 border">Full Name</th>
               <th className="px-4 py-2 border">Department</th>
               <th className="px-4 py-2 border">Year Section</th>
-              <th className="px-4 py-2 border">Average Score</th>
             </tr>
           </thead>
           <tbody>
@@ -115,7 +100,6 @@ function StudentMasterlist() {
                 <td className="border px-4 py-2">{student.fullName}</td>
                 <td className="border px-4 py-2">{student.department}</td>
                 <td className="border px-4 py-2">{student.yearSection}</td>
-                <td className="border px-4 py-2">{student.averageScore !== null ? student.averageScore.toFixed(2) : 'N/A'}</td>
               </tr>
             ))}
           </tbody>

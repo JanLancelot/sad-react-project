@@ -27,9 +27,16 @@ function Events() {
     const fetchEvents = async () => {
       const q = collection(db, 'meetings');
       const querySnapshot = await getDocs(q);
-      const eventsData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
+      const eventsData = await Promise.all(querySnapshot.docs.map(async (doc) => {
+        const evaluationsRef = collection(db, 'meetings', doc.id, 'evaluations');
+        const evaluationsSnapshot = await getDocs(evaluationsRef);
+        const ratings = evaluationsSnapshot.docs.map(evaluation => evaluation.data().averageRating);
+        const averageScore = ratings.length ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(2) : 'N/A';
+        return {
+          id: doc.id,
+          ...doc.data(),
+          averageScore,
+        };
       }));
       setEvents(eventsData);
       setFilteredEvents(eventsData);
@@ -41,7 +48,7 @@ function Events() {
   const handleDepartmentChange = (e) => {
     const selectedDepartment = e.target.value;
     setDepartment(selectedDepartment);
-  
+
     if (selectedDepartment === '') {
       setFilteredEvents(events);
     } else {
@@ -162,6 +169,7 @@ function Events() {
               <th className="px-4 py-2 border">Date</th>
               <th className="px-4 py-2 border">Category</th>
               <th className="px-4 py-2 border">Department</th>
+              <th className="px-4 py-2 border">Average Score</th>
             </tr>
           </thead>
           <tbody>
@@ -174,6 +182,7 @@ function Events() {
                 </td>
                 <td className="border px-4 py-2">{event.category}</td>
                 <td className="border px-4 py-2">{event.department}</td>
+                <td className="border px-4 py-2">{event.averageScore}</td>
               </tr>
             ))}
           </tbody>
