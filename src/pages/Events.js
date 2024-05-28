@@ -18,12 +18,11 @@ const departmentOptions = [
 function Events() {
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const [sortedEvents, setSortedEvents] = useState([]);
   const [department, setDepartment] = useState('');
   const [eventFilter, setEventFilter] = useState('all');
-  const [scoreFilter, setScoreFilter] = useState('none');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [sortOrder, setSortOrder] = useState('asc');
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -37,12 +36,11 @@ function Events() {
         return {
           id: doc.id,
           ...doc.data(),
-          averageScore: parseFloat(averageScore)
+          averageScore: parseFloat(averageScore),
         };
       }));
       setEvents(eventsData);
       setFilteredEvents(eventsData);
-      setSortedEvents(eventsData);
     };
 
     fetchEvents();
@@ -52,40 +50,41 @@ function Events() {
     const selectedDepartment = e.target.value;
     setDepartment(selectedDepartment);
 
-    const updatedFilteredEvents = selectedDepartment === '' 
-      ? events 
-      : events.filter(event => event.department === selectedDepartment);
-
-    setFilteredEvents(updatedFilteredEvents);
-    setSortedEvents(sortEvents(updatedFilteredEvents, scoreFilter));
+    if (selectedDepartment === '') {
+      setFilteredEvents(events);
+    } else {
+      const filtered = events.filter(
+        (event) => event.department === selectedDepartment
+      );
+      setFilteredEvents(filtered);
+    }
   };
 
   const handleEventFilterChange = (e) => {
     const filterValue = e.target.value;
     setEventFilter(filterValue);
 
-    let updatedFilteredEvents;
     if (filterValue === 'all') {
-      updatedFilteredEvents = events;
+      setFilteredEvents(events);
     } else if (filterValue === 'finished') {
-      updatedFilteredEvents = events.filter(
+      const filtered = events.filter(
         (event) => new Date(event.date.split('/').reverse().join('-')) < new Date()
       );
+      setFilteredEvents(filtered);
     } else if (filterValue === 'upcoming') {
-      updatedFilteredEvents = events.filter(
+      const filtered = events.filter(
         (event) => new Date(event.date.split('/').reverse().join('-')) > new Date()
       );
+      setFilteredEvents(filtered);
     } else if (filterValue === 'between') {
       const start = new Date(startDate);
       const end = new Date(endDate);
-      updatedFilteredEvents = events.filter((event) => {
+      const filtered = events.filter((event) => {
         const eventDate = new Date(event.date.split('/').reverse().join('-'));
         return eventDate >= start && eventDate <= end;
       });
+      setFilteredEvents(filtered);
     }
-
-    setFilteredEvents(updatedFilteredEvents);
-    setSortedEvents(sortEvents(updatedFilteredEvents, scoreFilter));
   };
 
   const handleStartDateChange = (e) => {
@@ -98,21 +97,16 @@ function Events() {
     handleEventFilterChange({ target: { value: 'between' } });
   };
 
-  const handleScoreFilterChange = (e) => {
-    const scoreFilterValue = e.target.value;
-    setScoreFilter(scoreFilterValue);
-    setSortedEvents(sortEvents(filteredEvents, scoreFilterValue));
-  };
-
-  const sortEvents = (events, scoreFilterValue) => {
-    if (scoreFilterValue === 'none') {
-      return events;
-    } else if (scoreFilterValue === 'asc') {
-      return [...events].sort((a, b) => a.averageScore - b.averageScore);
-    } else if (scoreFilterValue === 'desc') {
-      return [...events].sort((a, b) => b.averageScore - a.averageScore);
-    }
-    return events;
+  const handleSortByScore = () => {
+    const sortedEvents = [...filteredEvents].sort((a, b) => {
+      if (sortOrder === 'asc') {
+        return a.averageScore - b.averageScore;
+      } else {
+        return b.averageScore - a.averageScore;
+      }
+    });
+    setFilteredEvents(sortedEvents);
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
   };
 
   const componentRef = React.createRef();
@@ -168,17 +162,6 @@ function Events() {
             />
           </div>
         )}
-
-        <label className="mr-2">Sort by Score:</label>
-        <select
-          value={scoreFilter}
-          onChange={handleScoreFilterChange}
-          className="border border-gray-300 rounded px-2 py-1"
-        >
-          <option value="none">None</option>
-          <option value="asc">Lowest to Highest</option>
-          <option value="desc">Highest to Lowest</option>
-        </select>
       </div>
 
       <ReactToPrint
@@ -199,11 +182,14 @@ function Events() {
               <th className="px-4 py-2 border">Date</th>
               <th className="px-4 py-2 border">Category</th>
               <th className="px-4 py-2 border">Department</th>
-              <th className="px-4 py-2 border">Average Score</th>
+              <th className="px-4 py-2 border cursor-pointer" onClick={handleSortByScore}>
+                Average Score
+                {sortOrder === 'asc' ? ' 🔼' : ' 🔽'}
+              </th>
             </tr>
           </thead>
           <tbody>
-            {sortedEvents.map((event) => (
+            {filteredEvents.map((event) => (
               <tr key={event.id}>
                 <td className="border px-4 py-2">{event.name}</td>
                 <td className="border px-4 py-2">{event.description}</td>
