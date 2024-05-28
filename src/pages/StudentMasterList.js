@@ -4,7 +4,7 @@ import { db } from '../firebaseConfig';
 import ReactToPrint from 'react-to-print';
 
 const departmentOptions = [
-  { id: 0, name: 'Select Department', color: '' },
+  { id: 0, name: 'Select Department', color: '', dbl: '' },
   { id: 1, name: 'Computer Studies', color: 'bg-blue-400', dbl: 'CS department' },
   { id: 2, name: 'Education', color: 'bg-green-400', dbl: 'Education Department' },
   { id: 3, name: 'Accountancy', color: 'bg-yellow-400', dbl: 'Accountancy Department' },
@@ -65,7 +65,7 @@ function StudentMasterlist() {
           {departmentOptions.map((option) => (
             <option
               key={option.id}
-              value={option.name}
+              value={option.dbl}
               className={option.color}
             >
               {option.name}

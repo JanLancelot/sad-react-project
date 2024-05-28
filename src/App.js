@@ -26,6 +26,7 @@ import EvaluationStandardsView from "./pages/EvaluationStandardsView";
 import EvaluationStandardsEdit from "./pages/EvaluationStandardsEdit";
 import UserManagement from "./pages/UserManagement";
 import StudentMasterlist from "./pages/StudentMasterList";
+import Events from "./pages/Events";
 import { ProtectedRoute } from "./pages/components/ProtectedRoute";
 import { Protected } from "./pages/components/Protected";
 import { AuthContext } from "./pages/components/AuthContext";
@@ -139,6 +140,10 @@ const router = createBrowserRouter([
   {
     path: "/student-masterlist",
     element: <Protected><StudentMasterlist /></Protected>
+  },
+  {
+    path: "/events",
+    element: <Protected><Events /></Protected>
   }
 ]);
 
