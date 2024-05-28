@@ -69,8 +69,8 @@ function Events() {
       );
       setFilteredEvents(filtered);
     } else if (filterValue === 'between') {
-      const start = new Date(startDate.split('-').reverse().join('-'));
-      const end = new Date(endDate.split('-').reverse().join('-'));
+      const start = new Date(startDate);
+      const end = new Date(endDate);
       const filtered = events.filter((event) => {
         const eventDate = new Date(event.date.split('/').reverse().join('-'));
         return eventDate >= start && eventDate <= end;
