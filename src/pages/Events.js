@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs, where } from 'firebase/firestore';
-import { db } from './firebase';
+import { db } from '../firebaseConfig';
 import ReactToPrint from 'react-to-print';
 
 const departmentOptions = [
