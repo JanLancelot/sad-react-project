@@ -130,20 +130,21 @@ export default function Layout({ children }) {
     }
   };
 
-  const isAdmin = userRole?.toLowerCase() === "admin"; 
-  
+  const isAdmin = userRole?.toLowerCase() === "admin";
+  const isOSAS = userRole?.toLowerCase() === "osas";
+
+  const isReportsVisible = isAdmin || isOSAS;
+
   const userNavigation = [
-    ...(isAdmin ? [
-        { name: "Add New User", href: "/register" },
-        { name: "View Evaluation Forms", href: "/evaluations-view" },
-        { name: "User Management", href: "/user-management" }
-    ] : []),
+    ...(isAdmin
+      ? [
+          { name: "Add New User", href: "/register" },
+          { name: "View Evaluation Forms", href: "/evaluations-view" },
+          { name: "User Management", href: "/user-management" },
+        ]
+      : []),
     { name: "Sign out", href: "#", onClick: handleSignOut },
-];
-
-
-
-  const isReportsVisible = userRole === "admin" || userRole === "osas";
+  ];
 
   return (
     <>
@@ -302,21 +303,61 @@ export default function Layout({ children }) {
                     ))}
                     {isReportsVisible && (
                       <li key="Reports">
-                        <a
-                          href="/reports"
-                          className={classNames(
-                            window.location.pathname === "/reports"
-                              ? "bg-gray-800 text-white"
-                              : "text-gray-400 hover:text-white hover:bg-gray-800",
-                            "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
-                          )}
-                        >
-                          <ChartPieIcon
-                            className="h-6 w-6 shrink-0"
-                            aria-hidden="true"
-                          />
-                          Reports
-                        </a>
+                        <Menu as="div" className="relative">
+                          <Menu.Button className="flex w-full px-3 py-2 text-left text-sm font-semibold text-gray-400 hover:text-white hover:bg-gray-800 rounded-md group">
+                            <ChartPieIcon
+                              className="h-6 w-6 shrink-0"
+                              aria-hidden="true"
+                            />
+                            <span className="ml-2">Reports</span>
+                            <ChevronDownIcon className="ml-auto h-5 w-5 text-gray-400 group-hover:text-white" />
+                          </Menu.Button>
+                          <Transition
+                            as={Fragment}
+                            enter="transition ease-out duration-100"
+                            enterFrom="transform opacity-0 scale-95"
+                            enterTo="transform opacity-100 scale-100"
+                            leave="transition ease-in duration-75"
+                            leaveFrom="transform opacity-100 scale-100"
+                            leaveTo="transform opacity-0 scale-95"
+                          >
+                            <Menu.Items className="absolute left-0 z-10 mt-2 w-48 origin-top-left rounded-md bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                              <div className="py-1">
+                                <Menu.Item>
+                                  {({ active }) => (
+                                    <NavLink
+                                      to="/student-masterlist"
+                                      className={classNames(
+                                        active
+                                          ? "bg-gray-700 text-white"
+                                          : "text-gray-400",
+                                        "block px-4 py-2 text-sm"
+                                      )}
+                                    >
+                                      Student Masterlist
+                                    </NavLink>
+                                  )}
+                                </Menu.Item>
+                                <Menu.Item>
+                                  {({ active }) => (
+                                    <NavLink
+                                      to="/events"
+                                      className={classNames(
+                                        active
+                                          ? "bg-gray-700 text-white"
+                                          : "text-gray-400",
+                                        "block px-4 py-2 text-sm"
+                                      )}
+                                    >
+                                      Events
+                                    </NavLink>
+                                  )}
+                                </Menu.Item>
+                                {/* Add more report items here */}
+                              </div>
+                            </Menu.Items>
+                          </Transition>
+                        </Menu>
                       </li>
                     )}
                   </ul>
