@@ -154,11 +154,18 @@ function Events() {
   };
 
   const handleSortByScore = () => {
+    if (filteredEvents.length === 0) {
+      return;
+    }
+
     const sortedEvents = [...filteredEvents].sort((a, b) => {
+      const aScore = isNaN(a.averageScore) ? -Infinity : a.averageScore;
+      const bScore = isNaN(b.averageScore) ? -Infinity : b.averageScore;
+
       if (sortOrder === "asc") {
-        return a.averageScore - b.averageScore;
+        return aScore - bScore;
       } else {
-        return b.averageScore - a.averageScore;
+        return bScore - aScore;
       }
     });
 
