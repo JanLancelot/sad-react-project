@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, query, where, collection, getDocs } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import Layout from "./Layout";
 
@@ -93,11 +93,15 @@ const EventDetails = () => {
   };
 
   const handleUserClick = async (userId) => {
-    const responseDoc = await getDoc(
-      doc(db, "registrationResponses", `${eventId}_${userId}`)
+    const responsesQuery = query(
+      collection(db, "registrationResponses"),
+      where("eventId", "==", eventId),
+      where("userId", "==", userId)
     );
-    if (responseDoc.exists()) {
-      setSelectedUserResponse(responseDoc.data().responses);
+    const responseSnapshot = await getDocs(responsesQuery);
+    if (!responseSnapshot.empty) {
+      const responseData = responseSnapshot.docs[0].data().responses;
+      setSelectedUserResponse(responseData);
     } else {
       setSelectedUserResponse(null);
     }
