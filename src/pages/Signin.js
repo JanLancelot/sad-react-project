@@ -1,20 +1,37 @@
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { getFirestore, doc, updateDoc, getDoc, query, where, getDocs, setDoc, collection } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  updateDoc,
+  getDoc,
+  query,
+  where,
+  getDocs,
+  setDoc,
+  collection,
+} from "firebase/firestore";
 
 const signInUser = async (email, password, navigate) => {
   const auth = getAuth();
 
   const isAccountLocked = await checkAndLockUserAccount(email);
   if (isAccountLocked) {
-    throw new Error('Your account is currently locked. Please contact support.');
+    throw new Error(
+      "Your account is currently locked. Please contact support."
+    );
   }
 
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
     const user = userCredential.user;
-    console.log('User signed in:', user);
+    console.log("User signed in:", user);
 
     await checkAndLockUserAccount(email, false, 0);
 
@@ -22,14 +39,18 @@ const signInUser = async (email, password, navigate) => {
   } catch (error) {
     const errorCode = error.code;
     const errorMessage = error.message;
-    console.error('Error:', errorCode, errorMessage);
+    console.error("Error:", errorCode, errorMessage);
 
     await checkAndLockUserAccount(email, true);
     throw new Error(errorMessage);
   }
 };
 
-const checkAndLockUserAccount = async (email, incrementFailedAttempts = false, resetFailedAttempts = null) => {
+const checkAndLockUserAccount = async (
+  email,
+  incrementFailedAttempts = false,
+  resetFailedAttempts = null
+) => {
   const db = getFirestore();
   const userRef = doc(db, "users", email);
   const userSnapshot = await getDoc(userRef);
@@ -50,24 +71,37 @@ const checkAndLockUserAccount = async (email, incrementFailedAttempts = false, r
 
       if (incrementFailedAttempts) {
         if (failedAttempts >= 3) {
-          await updateDoc(querySnapshot.docs[0].ref, { locked: true, failedAttempts: 0 });
+          await updateDoc(querySnapshot.docs[0].ref, {
+            locked: true,
+            failedAttempts: 0,
+          });
           console.log(`Account for ${email} has been locked.`);
           return true;
         } else {
-          await updateDoc(querySnapshot.docs[0].ref, { failedAttempts: failedAttempts + 1 });
-          console.log(`Failed login attempt for ${email}. Attempts: ${failedAttempts + 1}`);
+          await updateDoc(querySnapshot.docs[0].ref, {
+            failedAttempts: failedAttempts + 1,
+          });
+          console.log(
+            `Failed login attempt for ${email}. Attempts: ${failedAttempts + 1}`
+          );
           return false;
         }
       } else if (resetFailedAttempts !== null) {
-        await updateDoc(querySnapshot.docs[0].ref, { failedAttempts: resetFailedAttempts });
-        console.log(`Failed login attempts for ${email} have been reset to ${resetFailedAttempts}.`);
+        await updateDoc(querySnapshot.docs[0].ref, {
+          failedAttempts: resetFailedAttempts,
+        });
+        console.log(
+          `Failed login attempts for ${email} have been reset to ${resetFailedAttempts}.`
+        );
         return false;
       } else {
         return false;
       }
     } else {
       await setDoc(userRef, { failedAttempts: 1 });
-      console.log(`Account for ${email} has been created with 1 failed attempt.`);
+      console.log(
+        `Account for ${email} has been created with 1 failed attempt.`
+      );
       return false;
     }
   } else {
@@ -87,12 +121,16 @@ const checkAndLockUserAccount = async (email, incrementFailedAttempts = false, r
         return true;
       } else {
         await updateDoc(userRef, { failedAttempts: failedAttempts + 1 });
-        console.log(`Failed login attempt for ${email}. Attempts: ${failedAttempts + 1}`);
+        console.log(
+          `Failed login attempt for ${email}. Attempts: ${failedAttempts + 1}`
+        );
         return false;
       }
     } else if (resetFailedAttempts !== null) {
       await updateDoc(userRef, { failedAttempts: resetFailedAttempts });
-      console.log(`Failed login attempts for ${email} have been reset to ${resetFailedAttempts}.`);
+      console.log(
+        `Failed login attempts for ${email} have been reset to ${resetFailedAttempts}.`
+      );
       return false;
     } else {
       return false;
@@ -114,7 +152,7 @@ export default function Signin() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log('Submitting form');
+    console.log("Submitting form");
     try {
       await signInUser(email, password, navigate);
     } catch (err) {
@@ -161,7 +199,9 @@ export default function Signin() {
                       autoComplete="email"
                       required
                       className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
-                        error ? 'ring-red-300 focus:ring-red-500' : 'ring-gray-300 focus:ring-indigo-600'
+                        error
+                          ? "ring-red-300 focus:ring-red-500"
+                          : "ring-gray-300 focus:ring-indigo-600"
                       } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -184,7 +224,9 @@ export default function Signin() {
                       autoComplete="current-password"
                       required
                       className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
-                        error ? 'ring-red-300 focus:ring-red-500' : 'ring-gray-300 focus:ring-indigo-600'
+                        error
+                          ? "ring-red-300 focus:ring-red-500"
+                          : "ring-gray-300 focus:ring-indigo-600"
                       } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -200,6 +242,14 @@ export default function Signin() {
                     Sign in
                   </button>
                 </div>
+                <p className="mt-2 text-center text-sm text-gray-600">
+                  <Link
+                    to="/forgot-password"
+                    className="font-medium text-indigo-600 hover:text-indigo-500"
+                  >
+                    Forgot your password?
+                  </Link>
+                </p>
               </form>
             </div>
           </div>
