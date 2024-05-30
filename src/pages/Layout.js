@@ -353,7 +353,6 @@ export default function Layout({ children }) {
                                     </NavLink>
                                   )}
                                 </Menu.Item>
-                                {/* Add more report items here */}
                               </div>
                             </Menu.Items>
                           </Transition>

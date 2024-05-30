@@ -75,7 +75,7 @@ const StudentEventsPage = () => {
           archived: true,
         });
         alert("Student archived successfully.");
-        navigate("/computer-studies"); // Redirect to student list after archiving
+        navigate("/computer-studies");
       } catch (error) {
         console.error("Error archiving student:", error);
         alert("An error occurred while archiving student.");
@@ -89,7 +89,7 @@ const StudentEventsPage = () => {
         const userDocRef = doc(db, "users", id);
         await deleteDoc(userDocRef);
         alert("Student deleted successfully.");
-        navigate("/computer-studies"); // Redirect to student list after deleting
+        navigate("/computer-studies");
       } catch (error) {
         console.error("Error deleting student:", error);
         alert("An error occurred while deleting student.");

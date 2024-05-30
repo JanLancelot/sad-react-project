@@ -31,7 +31,7 @@ import { useAuth } from "./components/AuthContext";
 let meetings = [];
 const months = [
   { name: "January", days: 31 },
-  { name: "February", days: 28 }, // Update for leap years
+  { name: "February", days: 28 },
   { name: "March", days: 31 },
   { name: "April", days: 30 },
   { name: "May", days: 31 },
@@ -468,7 +468,7 @@ export default function Calendar() {
                                     {meeting.pinned ? "Unpin" : "Pin"}
                                     <BookmarkIcon
                                       className={classNames(
-                                        "h-5 w-5 ml-2", // Added ml-2 for spacing
+                                        "h-5 w-5 ml-2",
                                         meeting.pinned
                                           ? "text-yellow-500"
                                           : "text-gray-400"
