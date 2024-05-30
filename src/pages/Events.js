@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import Layout from "./Layout";
@@ -59,9 +59,8 @@ function Events() {
   const [eventFilter, setEventFilter] = useState("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [sortOrder, setSortOrder] = useState("desc"); // Default to descending
+  const [sortOrder, setSortOrder] = useState("asc");
   const navigate = useNavigate();
-  const componentRef = useRef();
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -89,7 +88,7 @@ function Events() {
           return {
             id: doc.id,
             ...doc.data(),
-            averageScore: parseFloat(averageScore), 
+            averageScore: parseFloat(averageScore),
             numberOfAttendees,
           };
         })
@@ -155,19 +154,13 @@ function Events() {
   };
 
   const handleSortByScore = () => {
-    const sortedEvents = [...filteredEvents];
-
-    sortedEvents.sort((a, b) => {
-      const scoreA = a.averageScore === "N/A" ? -Infinity : a.averageScore;
-      const scoreB = b.averageScore === "N/A" ? -Infinity : b.averageScore;
-
+    const sortedEvents = [...filteredEvents].sort((a, b) => {
       if (sortOrder === "asc") {
-        return scoreA - scoreB; 
+        return a.averageScore - b.averageScore;
       } else {
-        return scoreB - scoreA; 
+        return b.averageScore - a.averageScore;
       }
     });
-
     setFilteredEvents(sortedEvents);
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
   };
@@ -175,6 +168,8 @@ function Events() {
   const handleEventClick = (eventId) => {
     navigate(`/event/${eventId}`);
   };
+
+  const componentRef = React.createRef();
 
   return (
     <Layout>
