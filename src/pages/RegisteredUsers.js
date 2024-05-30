@@ -51,7 +51,7 @@ const departmentOptions = [
   },
 ];
 
-const RegisteredUsers = () => {
+const EventDetails = () => {
   const { eventId } = useParams();
   const [registeredUsers, setRegisteredUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -64,12 +64,11 @@ const RegisteredUsers = () => {
       const eventDoc = await getDoc(doc(db, "meetings", eventId));
       if (eventDoc.exists()) {
         setEventName(eventDoc.data().name);
-        const userPromises = eventDoc
-          .data()
-          .registeredUsers.map(async (userId) => {
-            const userDoc = await getDoc(doc(db, "users", userId));
-            return { ...userDoc.data(), uid: userId };
-          });
+        const registeredUsersData = eventDoc.data().registeredUsers || [];
+        const userPromises = registeredUsersData.map(async (userId) => {
+          const userDoc = await getDoc(doc(db, "users", userId));
+          return { ...userDoc.data(), uid: userId };
+        });
         const usersData = await Promise.all(userPromises);
         setRegisteredUsers(usersData);
         setFilteredUsers(usersData);
@@ -169,4 +168,4 @@ const RegisteredUsers = () => {
   );
 };
 
-export default RegisteredUsers;
+export default EventDetails;
