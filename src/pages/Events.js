@@ -161,6 +161,7 @@ function Events() {
         return b.averageScore - a.averageScore;
       }
     });
+
     setFilteredEvents(sortedEvents);
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
   };
