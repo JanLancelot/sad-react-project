@@ -58,8 +58,91 @@ export default function NewEvent({}) {
   const [locationSuggestions, setLocationSuggestions] = useState([]);
   const locationInputRef = useRef(null);
 
+  const [rsvpType, setRsvpType] = useState("default");
+  const [selectedRegistrationForm, setSelectedRegistrationForm] =
+    useState(null);
+  const [registrationForms, setRegistrationForms] = useState([]);
+  const [showRegistrationFormModal, setShowRegistrationFormModal] =
+    useState(false);
+  const [newFormName, setNewFormName] = useState("");
+  const [newFormQuestions, setNewFormQuestions] = useState([
+    { type: "input", question: "" },
+  ]);
+
   const auth = getAuth();
   const db = getFirestore();
+
+  useEffect(() => {
+    const fetchRegistrationForms = async () => {
+      try {
+        const formsSnapshot = await getDocs(
+          collection(db, "registrationForms")
+        );
+        const formsData = formsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setRegistrationForms(formsData);
+      } catch (error) {
+        console.error("Error fetching registration forms:", error);
+      }
+    };
+
+    fetchRegistrationForms();
+  }, []);
+
+  const handleRsvpTypeChange = (e) => {
+    setRsvpType(e.target.value);
+  };
+
+  const handleRegistrationFormChange = (e) => {
+    const selectedFormId = e.target.value;
+    const selectedForm = registrationForms.find(
+      (form) => form.id === selectedFormId
+    );
+    setSelectedRegistrationForm(selectedForm);
+  };
+
+  const handleAddRegistrationForm = async () => {
+    if (newFormName.trim() === "") return;
+
+    try {
+      const newFormRef = await addDoc(collection(db, "registrationForms"), {
+        name: newFormName,
+        questions: newFormQuestions,
+      });
+
+      setNewFormName("");
+      setNewFormQuestions([{ type: "input", question: "" }]);
+      setShowRegistrationFormModal(false);
+
+      // Fetch the updated list of registration forms
+      const formsSnapshot = await getDocs(collection(db, "registrationForms"));
+      const formsData = formsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setRegistrationForms(formsData);
+    } catch (error) {
+      console.error("Error adding registration form:", error);
+    }
+  };
+
+  const handleNewQuestionChange = (index, field, value) => {
+    const updatedQuestions = [...newFormQuestions];
+    updatedQuestions[index][field] = value;
+    setNewFormQuestions(updatedQuestions);
+  };
+
+  const handleAddQuestion = () => {
+    setNewFormQuestions([...newFormQuestions, { type: "input", question: "" }]);
+  };
+
+  const handleRemoveQuestion = (index) => {
+    const updatedQuestions = [...newFormQuestions];
+    updatedQuestions.splice(index, 1);
+    setNewFormQuestions(updatedQuestions);
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -308,6 +391,8 @@ export default function NewEvent({}) {
       cost: cost,
       creatorID: currentUserId,
       evaluationId: selectedEvaluation,
+      rsvpType: rsvpType,
+      registrationFormId: selectedRegistrationForm?.id,
     };
 
     try {
@@ -832,31 +917,64 @@ export default function NewEvent({}) {
 
                     <div className="sm:col-span-3">
                       <label
-                        htmlFor="rsvpLink"
+                        htmlFor="rsvpType"
                         className="block text-sm font-medium leading-6 text-gray-900"
                       >
-                        RSVP/Registration Link
+                        RSVP Type
                       </label>
                       <div className="mt-2">
-                        <input
-                          type="url"
-                          name="rsvpLink"
-                          id="rsvpLink"
-                          value={rsvpLink}
-                          onChange={(e) => setRsvpLink(e.target.value)}
-                          className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
-                            errors.rsvpLink
-                              ? "ring-red-300 focus:ring-red-500"
-                              : "ring-gray-300 focus:ring-indigo-600"
-                          } placeholder:text-gray-400 sm:text-sm sm:leading-6`}
-                        />
-                        {errors.rsvpLink && (
-                          <div className="mt-2 text-sm text-red-600">
-                            {errors.rsvpLink}
-                          </div>
-                        )}
+                        <select
+                          id="rsvpType"
+                          name="rsvpType"
+                          value={rsvpType}
+                          onChange={handleRsvpTypeChange}
+                          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        >
+                          <option value="default">
+                            Default (No Registration)
+                          </option>
+                          <option value="custom">
+                            Custom Registration Form
+                          </option>
+                        </select>
                       </div>
                     </div>
+
+                    {rsvpType === "custom" && (
+                      <div className="sm:col-span-3">
+                        <label
+                          htmlFor="registrationForm"
+                          className="block text-sm font-medium leading-6 text-gray-900"
+                        >
+                          Registration Form
+                        </label>
+                        <div className="mt-2">
+                          <select
+                            id="registrationForm"
+                            name="registrationForm"
+                            value={selectedRegistrationForm?.id || ""}
+                            onChange={handleRegistrationFormChange}
+                            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          >
+                            <option value="">Select a Registration Form</option>
+                            {registrationForms.map((form) => (
+                              <option key={form.id} value={form.id}>
+                                {form.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="mt-2">
+                          <button
+                            type="button"
+                            className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                            onClick={() => setShowRegistrationFormModal(true)}
+                          >
+                            Create New Form
+                          </button>
+                        </div>
+                      </div>
+                    )}
                     <div className="sm:col-span-6">
                       <div>
                         <label
@@ -1044,6 +1162,104 @@ export default function NewEvent({}) {
                           type="button"
                           className="ml-2 inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
                           onClick={() => setShowLocationModal(false)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {showRegistrationFormModal && (
+                <div className="fixed inset-0 z-10 overflow-y-auto">
+                  <div className="flex min-h-screen items-center justify-center px-4 text-center">
+                    <div className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                      <h3 className="text-lg font-medium leading-6 text-gray-900">
+                        Create New Registration Form
+                      </h3>
+                      <div className="mt-2">
+                        <label
+                          htmlFor="formName"
+                          className="block text-sm font-medium leading-6 text-gray-900"
+                        >
+                          Form Name
+                        </label>
+                        <div className="mt-2">
+                          <input
+                            type="text"
+                            id="formName"
+                            value={newFormName}
+                            onChange={(e) => setNewFormName(e.target.value)}
+                            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <h4 className="text-sm font-medium leading-6 text-gray-900">
+                          Questions
+                        </h4>
+                        {newFormQuestions.map((question, index) => (
+                          <div key={index} className="mt-2">
+                            <div className="flex items-center">
+                              <select
+                                value={question.type}
+                                onChange={(e) =>
+                                  handleNewQuestionChange(
+                                    index,
+                                    "type",
+                                    e.target.value
+                                  )
+                                }
+                                className="block w-24 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                              >
+                                <option value="input">Input</option>
+                                <option value="essay">Essay</option>
+                              </select>
+                              <input
+                                type="text"
+                                value={question.question}
+                                onChange={(e) =>
+                                  handleNewQuestionChange(
+                                    index,
+                                    "question",
+                                    e.target.value
+                                  )
+                                }
+                                className="ml-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                placeholder="Enter question"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveQuestion(index)}
+                                className="ml-2 inline-flex items-center rounded-md border border-transparent bg-red-600 px-2 py-1 text-xs font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                        <div className="mt-2">
+                          <button
+                            type="button"
+                            onClick={handleAddQuestion}
+                            className="inline-flex items-center rounded-md border border-transparent bg-gray-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+                          >
+                            Add Question
+                          </button>
+                        </div>
+                      </div>
+                      <div className="mt-4 flex justify-end">
+                        <button
+                          type="button"
+                          className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+                          onClick={handleAddRegistrationForm}
+                        >
+                          Create Form
+                        </button>
+                        <button
+                          type="button"
+                          className="ml-2 inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                          onClick={() => setShowRegistrationFormModal(false)}
                         >
                           Cancel
                         </button>
