@@ -29,6 +29,7 @@ import StudentMasterlist from "./pages/StudentMasterList";
 import Events from "./pages/Events";
 import EventDetails from './pages/EventDetails';
 import ForgotPassword  from './pages/ForgotPassword';
+import RegisteredUsers from "./pages/RegisteredUsers";
 import { ProtectedRoute } from "./pages/components/ProtectedRoute";
 import { Protected } from "./pages/components/Protected";
 import { AuthContext } from "./pages/components/AuthContext";
@@ -154,6 +155,10 @@ const router = createBrowserRouter([
   {
     path: "/forgot-password",
     element: <ForgotPassword/>
+  },
+  {
+    path: "/registered-users",
+    element: <Protected><RegisteredUsers/></Protected>
   }
 ]);
 
