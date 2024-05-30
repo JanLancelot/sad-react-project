@@ -157,7 +157,7 @@ const router = createBrowserRouter([
     element: <ForgotPassword/>
   },
   {
-    path: "/registered-users",
+    path: "/registered-users/:eventId",
     element: <Protected><RegisteredUsers/></Protected>
   }
 ]);

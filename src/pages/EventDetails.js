@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import Layout from "./Layout";
@@ -53,6 +53,7 @@ const departmentOptions = [
 
 const EventDetails = () => {
   const { eventId } = useParams();
+  const navigate = useNavigate();
   const [attendees, setAttendees] = useState([]);
   const [filteredAttendees, setFilteredAttendees] = useState([]);
   const [eventName, setEventName] = useState("");
@@ -92,27 +93,39 @@ const EventDetails = () => {
     }
   };
 
+  const handleButtonClick = () => {
+    navigate(`/registered-users/${eventId}`);
+  };
+
   return (
     <Layout>
       <div className="container mx-auto my-8">
         <h1 className="text-2xl font-bold mb-4">Event: {eventName}</h1>
-        <div className="mb-4">
-          <label className="mr-2">Filter by Department:</label>
-          <select
-            value={selectedDepartment}
-            onChange={handleDepartmentChange}
-            className="border border-gray-300 rounded px-2 py-1"
+        <div className="mb-4 flex justify-between items-center">
+          <div>
+            <label className="mr-2">Filter by Department:</label>
+            <select
+              value={selectedDepartment}
+              onChange={handleDepartmentChange}
+              className="border border-gray-300 rounded px-2 py-1"
+            >
+              {departmentOptions.map((option) => (
+                <option
+                  key={option.id}
+                  value={option.dbl}
+                  className={option.color}
+                >
+                  {option.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            onClick={handleButtonClick}
+            className="bg-blue-500 text-white px-4 py-2 rounded"
           >
-            {departmentOptions.map((option) => (
-              <option
-                key={option.id}
-                value={option.dbl}
-                className={option.color}
-              >
-                {option.name}
-              </option>
-            ))}
-          </select>
+            View Registered Users
+          </button>
         </div>
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
