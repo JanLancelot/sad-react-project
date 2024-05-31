@@ -331,7 +331,7 @@ export default function Dashboard() {
             </section>
           </div>
           {/* Right column */}
-          <aside className="bg-white mt-8 lg:mt-0 lg:col-span-4 lg:fixed lg:bottom-0 lg:right-0 lg:top-16 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-gray-300">
+          <aside className="bg-white lg:mt-0 lg:col-span-4 lg:fixed lg:bottom-0 lg:right-0 lg:top-0 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-gray-300">
             <header className="flex items-center justify-between border-b border-gray-300 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
               <h2 className="text-base font-semibold leading-7 text-gray-800">
                 Activity feed
