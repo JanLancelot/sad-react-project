@@ -78,54 +78,54 @@ export default function Dashboard() {
 
   useEffect(() => {
     const meetingsCollectionRef = collection(db, "meetings");
-  
+
     const calculateNextWeekRange = () => {
       const now = new Date();
       const startOfWeek = new Date(now);
       startOfWeek.setDate(startOfWeek.getDate() + 1);
       startOfWeek.setHours(0, 0, 0, 0);
-  
+
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(endOfWeek.getDate() + 7);
       endOfWeek.setHours(23, 59, 59, 999);
-  
+
       return { startOfWeek, endOfWeek };
     };
-  
+
     const fetchMeetings = async () => {
       const { startOfWeek, endOfWeek } = calculateNextWeekRange();
-  
+
       const nextWeekQuery = query(
         meetingsCollectionRef,
         where("date", ">=", startOfWeek.toISOString()),
         where("date", "<=", endOfWeek.toISOString())
       );
-  
+
       const currentDayQuery = query(
         meetingsCollectionRef,
         where("date", "==", new Date().toISOString().split("T")[0])
       );
-  
+
       const [nextWeekData, currentDayData] = await Promise.all([
         getDocs(nextWeekQuery),
         getDocs(currentDayQuery),
       ]);
-  
+
       const nextWeekMeetings = nextWeekData.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
       }));
-  
+
       const currentDayMeetings = currentDayData.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
       }));
-  
+
       meetings = [...nextWeekMeetings, ...currentDayMeetings];
       setRetrievedMeetings(meetings);
       setTodaysEvents(currentDayMeetings);
     };
-  
+
     fetchActivityFeed();
     fetchMeetings();
   }, []);
@@ -152,26 +152,54 @@ export default function Dashboard() {
           {/* Left column */}
           <div className="lg:col-span-8">
             {/* Events of the Day Section */}
-            <section aria-labelledby="events-of-the-day-title" className="mt-8 xl:mt-10">
+            <section
+              aria-labelledby="events-of-the-day-title"
+              className="mt-8 xl:mt-10"
+            >
               <div className="px-4 sm:px-6 lg:px-8">
-                <h2 id="events-of-the-day-title" className="text-base font-semibold leading-7 text-gray-900">
+                <h2
+                  id="events-of-the-day-title"
+                  className="text-base font-semibold leading-7 text-gray-900"
+                >
                   Events of the Day
                 </h2>
                 {todaysEvents.length === 0 ? (
-                  <p className="mt-4 text-sm text-gray-500">No events scheduled for today.</p>
+                  <p className="mt-4 text-sm text-gray-500">
+                    No events scheduled for today.
+                  </p>
                 ) : (
                   <ul role="list" className="mt-6 grid grid-cols-1 gap-6">
                     {todaysEvents.map((event) => (
-                      <li key={event.id} className="col-span-1 rounded-lg bg-white shadow-sm">
-                        <div className="flex items-center px-4 py-5 space-x-3">
-                          <CalendarIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">{event.name}</p>
-                            <p className="mt-1 text-xs font-medium text-gray-500">
-                              {convertTo12Hour(event.startTime)} - {convertTo12Hour(event.endTime)}
-                            </p>
+                      <li
+                        key={event.id}
+                        className="col-span-1 rounded-lg bg-white shadow-sm"
+                      >
+                        <a href="#" className="block">
+                          {" "}
+                          <img
+                            src={
+                              event.imageUrl ||
+                              "https://via.placeholder.com/320x180"
+                            } 
+                            alt={event.name}
+                            className="w-full h-48 object-cover rounded-t-lg"
+                          />
+                          <div className="flex items-center px-4 py-5 space-x-3">
+                            <CalendarIcon
+                              className="h-6 w-6 text-gray-400"
+                              aria-hidden="true"
+                            />
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">
+                                {event.name}
+                              </p>
+                              <p className="mt-1 text-xs font-medium text-gray-500">
+                                {convertTo12Hour(event.startTime)} -{" "}
+                                {convertTo12Hour(event.endTime)}
+                              </p>
+                            </div>
                           </div>
-                        </div>
+                        </a>
                       </li>
                     ))}
                   </ul>
@@ -180,9 +208,15 @@ export default function Dashboard() {
             </section>
 
             {/* Upcoming Events Section */}
-            <section aria-labelledby="upcoming-events-title" className="mt-8 xl:mt-10">
+            <section
+              aria-labelledby="upcoming-events-title"
+              className="mt-8 xl:mt-10"
+            >
               <div className="px-4 sm:px-6 lg:px-8">
-                <h2 id="upcoming-events-title" className="text-base font-semibold leading-7 text-gray-900">
+                <h2
+                  id="upcoming-events-title"
+                  className="text-base font-semibold leading-7 text-gray-900"
+                >
                   Upcoming Events
                 </h2>
                 <ol className="mt-6 divide-y divide-gray-100 text-sm leading-6 lg:col-span-7 xl:col-span-">
@@ -293,7 +327,6 @@ export default function Dashboard() {
                 </ol>
               </div>
             </section>
-
           </div>
 
           {/* Right column */}
