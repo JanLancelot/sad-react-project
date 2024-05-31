@@ -31,6 +31,7 @@ import EventDetails from './pages/EventDetails';
 import ForgotPassword  from './pages/ForgotPassword';
 import RegisteredUsers from "./pages/RegisteredUsers";
 import PendingMeetings from "./pages/PendingMeetings";
+import StudentPage from "./pages/StudentPage";
 import { ProtectedRoute } from "./pages/components/ProtectedRoute";
 import { Protected } from "./pages/components/Protected";
 import { AuthContext } from "./pages/components/AuthContext";
@@ -164,6 +165,10 @@ const router = createBrowserRouter([
   {
     path: "/pending-meetings",
     element: <Protected><PendingMeetings/></Protected>
+  },
+  {
+    path: "/student-page",
+    element: <Protected><StudentPage/></Protected>
   }
 ]);
 
