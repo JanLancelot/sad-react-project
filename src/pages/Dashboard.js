@@ -148,7 +148,7 @@ export default function Dashboard() {
         </header>
   
         {/* Content area */}
-        <div className="lg:grid lg:grid-cols-12 lg:gap-x-6"> {/* Adjusted gap-x-16 to gap-x-6 */}
+        <div className="lg:grid lg:grid-cols-12"> {/* Adjusted gap-x-16 to gap-x-6 */}
           {/* Left column */}
           <div className="lg:col-span-8">
             {/* Events of the Day Section */}
