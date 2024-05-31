@@ -146,9 +146,9 @@ export default function Dashboard() {
             Dashboard
           </h1>
         </header>
-
+  
         {/* Content area */}
-        <div className="lg:grid lg:grid-cols-12 lg:gap-x-16">
+        <div className="lg:grid lg:grid-cols-12 lg:gap-x-6"> {/* Adjusted gap-x-16 to gap-x-6 */}
           {/* Left column */}
           <div className="lg:col-span-8">
             {/* Events of the Day Section */}
@@ -168,10 +168,7 @@ export default function Dashboard() {
                     No events scheduled for today.
                   </p>
                 ) : (
-                  <ul
-                    role="list"
-                    className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6"
-                  >
+                  <ul role="list" className="mt-6 grid grid-cols-1 gap-6">
                     {todaysEvents.map((event) => (
                       <li
                         key={event.id}
@@ -208,7 +205,7 @@ export default function Dashboard() {
                 )}
               </div>
             </section>
-
+  
             {/* Upcoming Events Section */}
             <section
               aria-labelledby="upcoming-events-title"
@@ -221,9 +218,7 @@ export default function Dashboard() {
                 >
                   Upcoming Events
                 </h2>
-                <ol className="mt-6 divide-y divide-gray-100 text-sm leading-6 lg:col-span-8 xl:col-span-8">
-                  {" "}
-                  {/* Adjusted column spans */}
+                <ol className="mt-6 divide-y divide-gray-100 text-sm leading-6 lg:col-span-8 xl:col-span-8"> {/* Adjusted column spans */}
                   {retrievedMeetings.map((meeting) => (
                     <li
                       key={meeting.id}
@@ -280,7 +275,7 @@ export default function Dashboard() {
                             />
                           </Menu.Button>
                         </div>
-
+  
                         <Transition
                           as={Fragment}
                           enter="transition ease-out duration-100"
@@ -332,7 +327,7 @@ export default function Dashboard() {
               </div>
             </section>
           </div>
-
+  
           {/* Right column */}
           <aside className="bg-white lg:fixed lg:bottom-0 lg:right-0 lg:top-16 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-gray-300">
             <header className="flex items-center justify-between border-b border-gray-300 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
@@ -384,5 +379,5 @@ export default function Dashboard() {
         </div>
       </main>
     </Layout>
-  );
+  );  
 }
