@@ -406,7 +406,7 @@ export default function NewEvent({}) {
       creatorID: currentUserId,
       evaluationId: selectedEvaluation,
       rsvpType: rsvpType,
-      registrationFormId: selectedRegistrationForm?.id,
+      registrationFormId: selectedRegistrationForm?.id || null,
     };
 
     try {
