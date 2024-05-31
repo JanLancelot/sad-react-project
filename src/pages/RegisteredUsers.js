@@ -104,7 +104,7 @@ const EventDetails = () => {
     if (!responseSnapshot.empty) {
       const responseData = responseSnapshot.docs[0].data().responses;
       setSelectedUserResponse(responseData);
-      setIsOpen(true); // Open the modal when a user response is found
+      setIsOpen(true);
     } else {
       setSelectedUserResponse(null);
     }
