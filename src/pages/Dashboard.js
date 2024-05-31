@@ -163,21 +163,33 @@ export default function Dashboard() {
                         key={event.id}
                         className="col-span-1 rounded-lg bg-white shadow-sm"
                       >
-                        <div className="flex items-center px-4 py-5 space-x-3">
-                          <CalendarIcon
-                            className="h-6 w-6 text-gray-400"
-                            aria-hidden="true"
+                        <a href="#" className="block">
+                          {" "}
+                          {/* Wrap with <a> for potential event details link */}
+                          <img
+                            src={
+                              event.imageUrl ||
+                              "https://via.placeholder.com/320x180"
+                            } // Default placeholder if no image
+                            alt={event.name}
+                            className="w-full h-48 object-cover rounded-t-lg"
                           />
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">
-                              {event.name}
-                            </p>
-                            <p className="mt-1 text-xs font-medium text-gray-500">
-                              {convertTo12Hour(event.startTime)} -{" "}
-                              {convertTo12Hour(event.endTime)}
-                            </p>
+                          <div className="flex items-center px-4 py-5 space-x-3">
+                            <CalendarIcon
+                              className="h-6 w-6 text-gray-400"
+                              aria-hidden="true"
+                            />
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">
+                                {event.name}
+                              </p>
+                              <p className="mt-1 text-xs font-medium text-gray-500">
+                                {convertTo12Hour(event.startTime)} -{" "}
+                                {convertTo12Hour(event.endTime)}
+                              </p>
+                            </div>
                           </div>
-                        </div>
+                        </a>
                       </li>
                     ))}
                   </ul>
