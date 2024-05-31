@@ -154,7 +154,7 @@ export default function NewEvent({}) {
           const userDocRef = doc(db, "users", currentUser.uid);
           const userDoc = await getDoc(userDocRef);
           if (userDoc.exists()) {
-            setAdRole(userDoc.data().adRole);
+            setAdRole(userDoc.data().role);
           } else {
             console.log("User document not found");
           }
