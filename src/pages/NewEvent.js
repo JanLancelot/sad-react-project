@@ -13,6 +13,7 @@ import {
   collection,
   doc,
   addDoc,
+  getDoc,
   getDocs,
   setDoc,
   Timestamp,
@@ -71,6 +72,7 @@ export default function NewEvent({}) {
 
   const auth = getAuth();
   const db = getFirestore();
+  const [adRole, setAdRole] = useState(null);
 
   useEffect(() => {
     const fetchRegistrationForms = async () => {
@@ -145,11 +147,23 @@ export default function NewEvent({}) {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setCurrentUserId(currentUser.uid);
+        try {
+          const userDocRef = doc(db, "users", currentUser.uid);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            setAdRole(userDoc.data().adRole);
+          } else {
+            console.log("User document not found");
+          }
+        } catch (error) {
+          console.error("Error fetching user document:", error);
+        }
       } else {
         setCurrentUserId(null);
+        setAdRole(null);
       }
     });
 
@@ -435,20 +449,31 @@ export default function NewEvent({}) {
         return;
       }
 
-      const docRef = await addDoc(collection(db, "meetings"), newMeeting);
+      if (
+        adRole?.toLowerCase() === "admin" ||
+        adRole?.toLowerCase() === "osas"
+      ) {
+        const docRef = await addDoc(collection(db, "meetings"), newMeeting);
 
-      const newActivityEntry = {
-        eventType: "event_created",
-        eventId: docRef.id,
-        timestamp: Date.now(),
-        username: "Admin",
-        eventName: eventName,
-        department: department,
-      };
-      await addDoc(collection(db, "activityFeed"), newActivityEntry);
+        const newActivityEntry = {
+          eventType: "event_created",
+          eventId: docRef.id,
+          timestamp: Date.now(),
+          username: "Admin",
+          eventName: eventName,
+          department: department,
+        };
+        await addDoc(collection(db, "activityFeed"), newActivityEntry);
 
-      console.log("Meeting added with ID:", docRef.id);
-      window.location.href = "/calendar";
+        console.log("Meeting added with ID:", docRef.id);
+        window.location.href = "/calendar";
+      } else {
+        newMeeting.pending = true;
+        await addDoc(collection(db, "pendingMeetings"), newMeeting);
+
+        toast.info("Event submitted for approval.");
+        window.location.href = "/calendar";
+      }
     } catch (error) {
       console.error("Error adding meeting:", error);
     }
