@@ -121,7 +121,7 @@ export default function Calendar() {
             const userDocRef = doc(db, "users", currentUser.uid);
             const userDocSnap = await getDoc(userDocRef);
             if (userDocSnap.exists()) {
-              setUserRole(userDocSnap.data().role.toLowerCase()); 
+              setUserRole(userDocSnap.data().role.toLowerCase());
             } else {
               setUserRole(null);
             }
@@ -359,18 +359,14 @@ export default function Calendar() {
                 </button>
               ))}
             </div>
-            {userRole === "admin" || userRole === "osas" ? (
-              <Link to="/new-event">
-                <button
-                  type="button"
-                  className="mt-8 w-full rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                >
-                  Add event
-                </button>
-              </Link>
-            ) : (
-              <p className="pt-4">You do not have permission to add events.</p>
-            )}
+            <Link to="/new-event">
+              <button
+                type="button"
+                className="mt-8 w-full rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              >
+                Add event
+              </button>
+            </Link>
           </div>
           <ol className="mt-4 divide-y divide-gray-100 text-sm leading-6 lg:col-span-7 xl:col-span-8">
             <div className="flex space-x-2 mb-4 lg:col-span-7 xl:col-span-8">
