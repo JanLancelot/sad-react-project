@@ -141,6 +141,7 @@ export default function Layout({ children }) {
           { name: "Add New User", href: "/register" },
           { name: "View Evaluation Forms", href: "/evaluations-view" },
           { name: "User Management", href: "/user-management" },
+          { name: "Pending Events", href: "/pending-meetings"}
         ]
       : []),
     { name: "Sign out", href: "#", onClick: handleSignOut },
